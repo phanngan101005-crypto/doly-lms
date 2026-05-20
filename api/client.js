@@ -9,34 +9,26 @@
     'use strict';
 
     // ───────── Auto-detect API base URL ─────────
-    var scriptTag = document.currentScript;
-    var scriptSrc = scriptTag ? scriptTag.src : '';
-// ───────── Auto-detect API base URL ─────────
-    // Sửa lại thành logic này để chạy được cả trên Render
     var apiBase;
     
-    // Nếu đang chạy trên Render (có đường dẫn https), hãy dùng đường dẫn tuyệt đối
+    // Ưu tiên dùng origin của trang web nếu chạy trên Render
     if (window.location.hostname.includes('onrender.com')) {
         apiBase = window.location.origin + '/api';
     } else {
-        // Giữ nguyên logic cũ nếu đang chạy trên localhost
-        var scriptTag = document.currentScript;
-        var scriptSrc = scriptTag ? scriptTag.src : '';
-        if (scriptSrc) {
-            apiBase = scriptSrc.substring(0, scriptSrc.lastIndexOf('/'));
-        } else {
-            var scripts = document.getElementsByTagName('script');
-            for (var i = 0; i < scripts.length; i++) {
-                if (scripts[i].src.indexOf('client.js') !== -1) {
-                    apiBase = scripts[i].src.substring(0, scripts[i].src.lastIndexOf('/'));
-                    break;
-                }
+        // Fallback về cách dò tự động cho Localhost (XAMPP)
+        var scripts = document.getElementsByTagName('script');
+        for (var i = 0; i < scripts.length; i++) {
+            if (scripts[i].src.indexOf('client.js') !== -1) {
+                apiBase = scripts[i].src.substring(0, scripts[i].src.lastIndexOf('/'));
+                break;
             }
         }
+        if (!apiBase) apiBase = '/api';
     }
     
-    if (!apiBase) apiBase = '/api';
-    console.log('[DolyAPI] Base URL:', apiBase);
+    console.log('[DolyAPI] Base URL detected:', apiBase);
+
+    // ... (Giữ nguyên toàn bộ phần còn lại từ đoạn // ───────── Session Management ───────── trở xuống)
 
     // ───────── Session Management ─────────
     var STORAGE_KEY = 'doly_user';
