@@ -66,7 +66,7 @@ try {
  */
 function callGeminiAI(string $message, array $history, string $lessonInfo, string $userName): string {
     
-    $apiKey = ""; 
+    $apiKey = getenv('OPENROUTER_API_KEY'); 
     
     // URL của OpenRouter
     $url = "https://openrouter.ai/api/v1/chat/completions";
