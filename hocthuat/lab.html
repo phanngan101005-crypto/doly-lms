@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="vi" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doly Ultimate Learning Engine</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="../api/client.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Quicksand:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'doly-cream': '#F9FAFB', 'doly-blue': '#2563EB', 'doly-dark': '#0f172a',
+                        'doly-yellow': '#FBBF24', 'phys-blue': '#3b82f6', 'chem-green': '#10b981',
+                        'bio-pink': '#ec4899', 'earth-orange': '#f97316', 'ai-purple': '#8b5cf6',
+                        'rank-bronze': '#cd7f32', 'rank-silver': '#c0c0c0', 'rank-gold': '#ffd700'
+                    },
+                    fontFamily: { sans: ['Quicksand', 'sans-serif'], display: ['Montserrat', 'sans-serif'] }
+                }
+            }
+        }
+    </script>
+    <style>
+        .glass-card { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(12px); border: 1px solid rgba(226, 232, 240, 0.8); }
+        .glass-sidebar { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(24px); border-right: 1px solid rgba(226, 232, 240, 0.8); transition: transform 0.4s ease; }
+        .glass-panel { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(24px); border-left: 1px solid rgba(226, 232, 240, 0.8); transition: transform 0.4s ease; }
+        
+        .custom-scroll::-webkit-scrollbar { width: 5px; height: 5px; }
+        .custom-scroll::-webkit-scrollbar-track { background: transparent; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        .custom-scroll::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        body { background-color: #f8fafc; color: #0f172a; overflow-x: hidden; position: relative; transition: background-color 0.5s ease; }
+        
+        /* Tab System Animations */
+        @keyframes fadeInScale { from { opacity: 0; transform: translateY(10px) scale(0.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
+        .tab-content { display: none; animation: fadeInScale 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards; opacity: 0; }
+        .tab-content.active { display: block; }
+        .tab-btn.active { border-bottom: 3px solid #8b5cf6; color: #8b5cf6; background: #f5f3ff; }
+        
+        /* Memory & Gamification UI */
+        .flashcard-inner { transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1); transform-style: preserve-3d; }
+        .flashcard:hover .flashcard-inner { transform: rotateY(180deg); }
+        .flashcard-front, .flashcard-back { backface-visibility: hidden; position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+        .flashcard-back { transform: rotateY(180deg); }
+
+        .match-item { transition: all 0.2s ease; cursor: pointer; }
+        .match-item.selected { border-color: #3b82f6; background-color: #eff6ff; transform: scale(1.05); box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.2); }
+        .match-item.matched { border-color: #10b981; background-color: #ecfdf5; color: #047857; pointer-events: none; opacity: 0.6; }
+        .match-item.error { border-color: #ef4444; background-color: #fef2f2; animation: shakeError 0.4s both; }
+
+        /* General Feedback Animations */
+        .floating-xp { position: fixed; color: #FBBF24; font-weight: 900; font-size: 2rem; text-shadow: 0 4px 15px rgba(251, 191, 36, 0.6); pointer-events: none; z-index: 9999; animation: floatUp 1.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+        @keyframes floatUp { 0% { opacity: 0; transform: translateY(0) scale(0.5); } 20% { opacity: 1; transform: translateY(-40px) scale(1.3); } 100% { opacity: 0; transform: translateY(-120px) scale(1); } }
+        
+        .shake { animation: shakeError 0.4s cubic-bezier(.36,.07,.19,.97) both; }
+        @keyframes shakeError { 10%, 90% { transform: translate3d(-1px, 0, 0); } 20%, 80% { transform: translate3d(2px, 0, 0); } 30%, 50%, 70% { transform: translate3d(-4px, 0, 0); } 40%, 60% { transform: translate3d(4px, 0, 0); } }
+
+        .pulse-glow { animation: pulseGlow 2s infinite; }
+        @keyframes pulseGlow { 0% { box-shadow: 0 0 0 0 rgba(139, 92, 246, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(139, 92, 246, 0); } 100% { box-shadow: 0 0 0 0 rgba(139, 92, 246, 0); } }
+        
+        .success-glow { animation: successGlow 1s ease-out; }
+        @keyframes successGlow { 0% { background-color: #d1fae5; border-color: #10b981; transform: scale(1.02); } 100% { background-color: inherit; border-color: inherit; transform: scale(1); } }
+
+        /* ========================================================= */
+        /* DOLY CHARACTER ANIMATIONS & STYLES                        */
+        /* ========================================================= */
+        #doly-container {
+            position: fixed; bottom: 30px; right: -300px; /* Bắt đầu ngoài màn hình */
+            z-index: 10000;
+            display: flex; align-items: flex-end; gap: 15px;
+            transition: right 0.8s cubic-bezier(0.34, 1.56, 0.64, 1); /* Hiệu ứng nảy khi bơi vào */
+            pointer-events: none;
+        }
+        #doly-container.active { right: 30px; pointer-events: auto; }
+        
+        .doly-float { animation: floatBob 3s ease-in-out infinite; cursor: pointer; filter: drop-shadow(0 10px 15px rgba(0,0,0,0.2)); }
+        @keyframes floatBob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
+        
+        .doly-flip { animation: spinDoly 1s cubic-bezier(0.455, 0.03, 0.515, 0.955); }
+        @keyframes spinDoly { 0% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(-50px) rotate(180deg); } 100% { transform: translateY(0) rotate(360deg); } }
+
+        .doly-bubble {
+            background: rgba(255,255,255,0.95); backdrop-filter: blur(10px);
+            border: 2px solid #8b5cf6; border-radius: 20px 20px 0 20px;
+            padding: 12px 16px; box-shadow: 0 10px 25px rgba(139, 92, 246, 0.2);
+            max-width: 250px; font-size: 13px; font-weight: 700; color: #333;
+            position: relative; margin-bottom: 20px;
+            opacity: 0; transform: scale(0.5) translateY(20px); transform-origin: bottom right;
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .doly-bubble::after {
+            content: ''; position: absolute; bottom: -10px; right: -2px;
+            border-width: 10px 10px 0 0; border-style: solid; border-color: #8b5cf6 transparent transparent transparent;
+        }
+        .doly-bubble::before { /* Inner white triangle to hollow the border */
+            content: ''; position: absolute; bottom: -6px; right: 1px; z-index: 1;
+            border-width: 8px 8px 0 0; border-style: solid; border-color: white transparent transparent transparent;
+        }
+        .doly-bubble.show { opacity: 1; transform: scale(1) translateY(0); }
+
+        /* Multi-media Resource Tabs */
+        .media-btn.active { background: #8b5cf6; color: white; border-color: #8b5cf6; }
+
+        body.focus-mode .glass-sidebar { transform: translateX(-100%); position: absolute; }
+        body.focus-mode .glass-panel { transform: translateX(100%); position: absolute; right: 0; }
+        body.focus-mode #main-content { max-width: 100%; margin: 0 auto; }
+        body.focus-mode { background-color: #ffffff; }
+    </style>
+</head>
+<body class="antialiased text-slate-800 font-sans h-screen overflow-hidden flex flex-col selection:bg-ai-purple selection:text-white relative">
+
+    <!-- ================= I. HEADER ================= -->
+    <header class="h-16 w-full glass-card shadow-sm flex items-center justify-between px-4 md:px-6 z-40 relative shrink-0">
+        <!-- Logo & Navigation -->
+        <div class="flex items-center gap-4">
+            <button class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 hover:bg-gray-200 transition"><i class="fas fa-th-large"></i></button>
+            <div class="hidden lg:block border-l border-gray-200 pl-4">
+                <span class="text-[10px] font-black text-ai-purple uppercase tracking-widest"><i class="fas fa-bolt mr-1"></i> Hệ Sinh Thái Học Tập</span>
+                <h2 class="text-sm font-display font-black text-doly-dark leading-none">Chương VII: Cơ thể người</h2>
+            </div>
+        </div>
+
+        <!-- Global Search -->
+        <div class="flex-1 max-w-md mx-4 relative search-box hidden md:block">
+            <div class="relative flex items-center w-full h-10 rounded-full focus-within:shadow-lg bg-gray-100 overflow-hidden border border-transparent focus-within:border-ai-purple focus-within:bg-white transition-all">
+                <div class="grid place-items-center h-full w-12 text-gray-400"><i class="fas fa-search"></i></div>
+                <input class="peer h-full w-full outline-none text-sm text-gray-700 bg-transparent pr-2" type="text" placeholder="Tìm kiếm bài học, từ khóa, câu hỏi..." />
+            </div>
+        </div>
+        
+        <!-- Gamification Status & Profile -->
+        <div class="flex items-center gap-3 md:gap-4">
+            <button onclick="toggleFocusMode()" id="focus-btn" class="hidden xl:flex items-center gap-2 px-4 py-1.5 rounded-full bg-gray-100 hover:bg-gray-200 text-xs font-bold text-gray-600 transition shadow-inner">
+                <i class="fas fa-compress"></i> Focus
+            </button>
+            <button onclick="resetData()" class="text-[10px] font-bold text-gray-400 hover:text-red-500 underline hidden md:block">Reset Data</button>
+
+            <!-- Level & XP Badge -->
+            <div class="flex items-center bg-white px-3 py-1.5 md:px-4 rounded-full shadow-inner border border-gray-100 gap-2 md:gap-3 relative group cursor-pointer hover:scale-105 transition">
+                <div class="w-6 h-6 md:w-8 md:h-8 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 text-white flex items-center justify-center font-black text-[10px] md:text-xs shadow-md z-10" id="user-level">Lv.1</div>
+                <div class="flex flex-col">
+                    <div class="text-ai-purple font-black text-[10px] md:text-xs flex items-center gap-1 leading-none">
+                        <span id="total-xp-display">0</span> XP
+                    </div>
+                    <div class="w-16 md:w-20 h-1.5 bg-gray-100 rounded-full mt-1 overflow-hidden relative">
+                        <div class="h-full bg-ai-purple rounded-full transition-all duration-500" id="level-progress-bar" style="width: 0%;"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="w-8 h-8 md:w-10 md:h-10 rounded-full overflow-hidden border-2 border-ai-purple shadow-sm cursor-pointer hover:scale-105 transition shrink-0 relative">
+                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=HoangNam" class="w-full h-full object-cover bg-purple-50">
+                <div class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border border-white rounded-full"></div>
+            </div>
+        </div>
+    </header>
+
+    <!-- 3-COLUMN MAIN LAYOUT -->
+    <div class="flex-1 flex overflow-hidden relative w-full mx-auto" id="app-container">
+        
+        <!-- ================= II. SIDEBAR ================= -->
+        <aside class="w-[280px] xl:w-[320px] glass-sidebar h-full overflow-y-auto custom-scroll hidden md:flex shrink-0 relative z-30 flex-col">
+            <div class="p-6 flex-1 space-y-6">
+                <!-- Tiến độ tổng -->
+                <div class="bg-gradient-to-br from-doly-dark to-slate-800 p-5 rounded-2xl text-white shadow-lg relative overflow-hidden">
+                    <i class="fas fa-map-marked-alt absolute -right-2 -bottom-2 text-5xl opacity-10"></i>
+                    <h3 class="font-display font-black text-xs text-purple-300 mb-2 uppercase tracking-tight">Hành trình Sinh Học 8</h3>
+                    <div class="w-full bg-white/20 rounded-full h-2 mb-2 shadow-inner overflow-hidden">
+                        <div class="bg-gradient-to-r from-chem-green to-emerald-400 h-full rounded-full transition-all duration-1000" id="chapter-progress-bar" style="width: 0%;"></div>
+                    </div>
+                    <div class="flex justify-between items-center text-[10px] font-bold">
+                        <span class="text-green-400" id="chapter-progress-text">0% Hoàn thành</span>
+                        <span class="text-gray-400">12 giờ học</span>
+                    </div>
+                </div>
+
+                <!-- Lộ trình Lessons -->
+                <div>
+                    <h3 class="font-display font-black text-sm text-doly-dark uppercase tracking-tight mb-4 flex items-center gap-2"><i class="fas fa-route text-ai-purple"></i> Danh sách bài học</h3>
+                    <div class="space-y-3 relative before:absolute before:inset-y-0 before:left-[19px] before:w-0.5 before:bg-gray-200 before:-z-10" id="sidebar-lessons"></div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- ================= III. MAIN LEARNING ================= -->
+        <main class="flex-1 h-full overflow-y-auto custom-scroll relative z-20 bg-transparent transition-all duration-500" id="main-content">
+            <div class="max-w-4xl mx-auto p-4 md:p-8 lg:p-10 pb-32">
+                
+                <!-- Lesson Header -->
+                <div class="mb-6">
+                    <div class="flex items-center gap-3 mb-2">
+                        <span class="px-3 py-1 bg-ai-purple text-white rounded-lg text-[10px] font-black uppercase tracking-widest shadow-sm">Bài <span id="lesson-number-badge">...</span></span>
+                        <span class="text-xs font-bold text-gray-500 flex items-center"><i class="far fa-clock mr-1"></i> <span id="lesson-duration">...</span></span>
+                    </div>
+                    <h1 class="text-3xl lg:text-4xl font-display font-black text-doly-dark tracking-tight leading-tight" id="lesson-title">Đang tải...</h1>
+                </div>
+
+                <!-- TABS SYSTEM -->
+                <div class="bg-white rounded-[2rem] shadow-md border border-gray-100 overflow-hidden">
+                    <!-- Tab Navigation -->
+                    <div class="flex overflow-x-auto custom-scroll bg-gray-50 border-b border-gray-100 sticky top-0 z-30">
+                        <button onclick="openTab('hoctap')" id="btn-hoctap" class="tab-btn active flex-1 px-4 py-4 text-xs font-black uppercase tracking-widest text-gray-500 hover:text-ai-purple transition whitespace-nowrap"><i class="fas fa-book-open mr-2"></i>1. Kiến Thức</button>
+                        <button onclick="openTab('game')" id="btn-game" class="tab-btn flex-1 px-4 py-4 text-xs font-black uppercase tracking-widest text-gray-500 hover:text-ai-purple transition whitespace-nowrap"><i class="fas fa-gamepad mr-2"></i>2. Ghi Nhớ</button>
+                        <button onclick="openTab('luyentap')" id="btn-luyentap" class="tab-btn flex-1 px-4 py-4 text-xs font-black uppercase tracking-widest text-gray-500 hover:text-ai-purple transition whitespace-nowrap"><i class="fas fa-pencil-alt mr-2"></i>3. Luyện & Test</button>
+                        <button onclick="openTab('qa')" id="btn-qa" class="tab-btn flex-1 px-4 py-4 text-xs font-black uppercase tracking-widest text-gray-500 hover:text-ai-purple transition whitespace-nowrap"><i class="fas fa-comments mr-2"></i>4. Hỏi Đáp (AI)</button>
+                    </div>
+
+                    <!-- Tab Contents Container -->
+                    <div class="p-4 md:p-8 relative min-h-[600px]">
+                        <!-- TAB 1: KIẾN THỨC -->
+                        <div id="tab-hoctap" class="tab-content active space-y-8"></div>
+                        <!-- TAB 2: GHI NHỚ -->
+                        <div id="tab-game" class="tab-content space-y-10"></div>
+                        <!-- TAB 3: LUYỆN TẬP & TEST -->
+                        <div id="tab-luyentap" class="tab-content space-y-8"></div>
+                        <!-- TAB 4: HỎI ĐÁP & AI -->
+                        <div id="tab-qa" class="tab-content h-full">
+                            <div class="grid md:grid-cols-2 gap-6 h-[500px]">
+                                <!-- Community -->
+                                <div class="flex flex-col h-full bg-gray-50 rounded-2xl border border-gray-100 p-4">
+                                    <h4 class="font-black text-gray-800 text-sm mb-4"><i class="fas fa-users text-blue-500 mr-2"></i>Cộng đồng hỏi đáp</h4>
+                                    <div class="flex-1 overflow-y-auto custom-scroll space-y-3" id="qa-community-list"></div>
+                                    <button class="w-full mt-3 py-2 bg-white border border-gray-200 rounded-xl text-xs font-bold text-gray-600 hover:bg-gray-50 transition shadow-sm"><i class="fas fa-plus mr-1"></i> Đặt câu hỏi</button>
+                                </div>
+                                
+                                <!-- AI Tutor Doly -->
+                                <div class="flex flex-col h-full bg-purple-50 rounded-2xl border border-purple-100 p-4 relative overflow-hidden">
+                                    <div class="absolute -right-10 -bottom-10 opacity-10 pointer-events-none w-48 h-48">
+                                        <img src="https://cdn-icons-png.flaticon.com/512/3063/3063004.png" class="w-full h-full grayscale">
+                                    </div>
+                                    <h4 class="font-black text-ai-purple text-sm mb-3 z-10 flex items-center gap-2">
+                                        <img src="https://cdn-icons-png.flaticon.com/512/3063/3063004.png" class="w-6 h-6"> Gia sư Doly AI
+                                    </h4>
+                                    <div class="flex gap-2 mb-3 z-10">
+                                        <button class="flex-1 py-1.5 px-1 bg-white border border-purple-200 rounded-lg text-[10px] font-bold text-purple-700 hover:bg-purple-100 transition shadow-sm text-center" onclick="sendToAI('Doly ơi, giải thích lại toàn bộ bài này thật dễ hiểu giúp tớ')">Giảng lại</button>
+                                        <button class="flex-1 py-1.5 px-1 bg-white border border-blue-200 rounded-lg text-[10px] font-bold text-blue-700 hover:bg-blue-100 transition shadow-sm text-center" onclick="sendToAI('Cho tớ 1 ví dụ thực tế về dạ dày nhé')">Ví dụ</button>
+                                        <button class="flex-1 py-1.5 px-1 bg-white border border-orange-200 rounded-lg text-[10px] font-bold text-orange-700 hover:bg-orange-100 transition shadow-sm text-center" onclick="sendToAI('Hỏi tớ 1 câu để kiểm tra bài đi Doly')">Test tớ</button>
+                                    </div>
+                                    <div id="ai-chat-history" class="flex-1 overflow-y-auto custom-scroll space-y-3 mb-3 pr-1 z-10"></div>
+                                    <div class="flex items-center gap-2 bg-white p-1 rounded-xl shadow-sm border border-gray-200 shrink-0 z-10">
+                                        <input type="text" id="ai-chat-input" placeholder="Hỏi Doly bất cứ điều gì..." class="flex-1 bg-transparent px-3 py-1.5 text-xs outline-none font-medium text-gray-700">
+                                        <button onclick="sendChatMessage(event)" class="w-8 h-8 rounded-lg bg-ai-purple text-white flex items-center justify-center hover:bg-purple-700 transition"><i class="fas fa-paper-plane"></i></button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- ================= IV. RIGHT PANEL (TRACKING) ================= -->
+        <aside class="w-[300px] xl:w-[340px] glass-panel h-full overflow-y-auto custom-scroll hidden lg:flex shrink-0 relative z-30 flex-col">
+            <div class="p-6 space-y-6 flex-1 flex flex-col">
+                <div class="bg-white p-5 rounded-[1.5rem] shadow-sm border border-gray-100 relative overflow-hidden text-center">
+                    <h3 class="font-display font-black text-xs text-gray-500 uppercase tracking-widest mb-4">Trạng thái bài học</h3>
+                    <div class="relative w-24 h-24 mx-auto flex items-center justify-center mb-5">
+                        <svg class="w-full h-full" viewBox="0 0 100 100">
+                            <circle class="text-gray-100 stroke-current" stroke-width="8" cx="50" cy="50" r="40" fill="transparent"></circle>
+                            <circle id="circular-progress" class="text-ai-purple progress-ring__circle stroke-current drop-shadow-md" stroke-width="8" stroke-linecap="round" cx="50" cy="50" r="40" fill="transparent" stroke-dasharray="251.2" stroke-dashoffset="251.2"></circle>
+                        </svg>
+                        <div class="absolute inset-0 flex flex-col items-center justify-center">
+                            <span class="text-xl font-black text-gray-800" id="progress-text">0%</span>
+                        </div>
+                    </div>
+                    <div class="space-y-2 text-left" id="checklist-container"></div>
+                </div>
+
+                <div class="bg-white p-5 rounded-[1.5rem] shadow-sm border border-gray-100">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="font-display font-black text-xs text-gray-500 uppercase tracking-widest">Đánh giá não bộ (AI)</h3>
+                        <i class="fas fa-brain text-gray-300"></i>
+                    </div>
+                    <div class="space-y-3" id="skill-tree-container"></div>
+                    <div class="mt-4 pt-3 border-t border-gray-100 hidden" id="weak-points-suggestion"></div>
+                </div>
+
+                <div>
+                    <h3 class="font-display font-black text-sm text-doly-dark uppercase tracking-tight mb-3 flex items-center gap-2"><i class="fas fa-lightbulb text-doly-yellow"></i> Ghi nhớ cốt lõi</h3>
+                    <div class="bg-yellow-50 p-4 rounded-2xl border border-yellow-100">
+                        <ul class="space-y-2" id="key-points-container"></ul>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <div id="micro-feedback-container" class="fixed top-10 left-1/2 transform -translate-x-1/2 z-[9999] flex flex-col items-center gap-2 pointer-events-none"></div>
+    </div>
+
+    <!-- ================= V. DOLY FLOATING CHARACTER ================= -->
+    <div id="doly-container">
+        <div class="doly-bubble" id="doly-bubble">
+            <span id="doly-msg">Xin chào!</span>
+            <button onclick="Doly.hideBubble()" class="absolute top-1 right-2 text-gray-400 hover:text-red-500 font-bold text-xs"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="w-24 h-24 doly-float" onclick="Doly.poke()" id="doly-avatar-wrapper">
+            <!-- Sử dụng icon cá heo dễ thương từ Flaticon -->
+            <img src="https://cdn-icons-png.flaticon.com/512/3063/3063004.png" alt="Doly AI" class="w-full h-full drop-shadow-2xl">
+        </div>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- SCRIPT LOGIC: CONTENT ENGINE, DOLY AI & SƯ PHẠM                           -->
+    <!-- ========================================================================= -->
+    <script>
+        // --- DOLY AI ENGINE ---
+        const Doly = {
+            container: null, bubble: null, msg: null, wrapper: null, timer: null, isVisible: false,
+            
+            init() {
+                this.container = document.getElementById('doly-container');
+                this.bubble = document.getElementById('doly-bubble');
+                this.msg = document.getElementById('doly-msg');
+                this.wrapper = document.getElementById('doly-avatar-wrapper');
+            },
+            
+            say(text, duration = 6000) {
+                clearTimeout(this.timer);
+                this.msg.innerHTML = text;
+                this.container.classList.add('active');
+                this.isVisible = true;
+                
+                // Pop the bubble slightly after dolphin enters
+                setTimeout(() => { this.bubble.classList.add('show'); }, 300);
+                
+                if(duration) {
+                    this.timer = setTimeout(() => { this.hideBubble(); }, duration);
+                }
+            },
+            
+            hideBubble() { this.bubble.classList.remove('show'); },
+            
+            hide() { 
+                this.hideBubble();
+                setTimeout(() => { this.container.classList.remove('active'); this.isVisible = false; }, 300);
+            },
+            
+            celebrate(text) {
+                this.say(text, 5000);
+                this.wrapper.classList.remove('doly-flip');
+                void this.wrapper.offsetWidth; // trigger reflow
+                this.wrapper.classList.add('doly-flip');
+                triggerConfetti();
+            },
+            
+            poke() {
+                const quotes = [
+                    "Ui da! Cậu cứ học đi, tí mình chơi sau nhé! 🐬",
+                    "Ahihi nhột quá! Cố gắng lấy điểm 10 nha!",
+                    "Mình đang quan sát cậu học đây, đừng lười biếng đó nha 🧐",
+                    "Cần mình giảng lại phần nào cứ mở Tab Hỏi Đáp nha!"
+                ];
+                this.say(quotes[Math.floor(Math.random() * quotes.length)], 3000);
+            }
+        };
+
+        // -----------------------------------------------------------------------
+        // 1. DATA (THÊM MULTIMEDIA HUB VÀO TAB 1)
+        // -----------------------------------------------------------------------
+        const dbLessons = {
+            32: {
+                id: 32, title: "Dinh dưỡng và hệ tiêu hóa", duration: "45 phút", 
+                keyPoints: ["Tiêu hóa: Biến đổi vật lý & hóa học", "Dạ dày: Tiêu hóa Protein", "Ruột non: Hấp thụ chất dinh dưỡng"],
+                
+                // MỚI: TÀI NGUYÊN ĐA PHƯƠNG TIỆN
+                multimedia: {
+                    video: "<div class='w-full aspect-video bg-slate-900 rounded-2xl flex flex-col items-center justify-center text-white relative overflow-hidden group'><img src='https://images.unsplash.com/photo-1576086213369-97a306d36557?auto=format&fit=crop&w=800&q=80' class='absolute inset-0 w-full h-full object-cover opacity-50'><button class='w-16 h-16 bg-ai-purple rounded-full flex items-center justify-center text-2xl shadow-xl hover:scale-110 transition z-10'><i class='fas fa-play ml-1'></i></button><p class='mt-4 font-bold z-10'>Video Bài Giảng Sinh Động (5:20)</p></div>",
+                    model3d: "<div class='w-full aspect-video bg-slate-100 rounded-2xl border-2 border-dashed border-gray-300 flex flex-col items-center justify-center text-gray-500'><i class='fas fa-cube text-5xl text-doly-blue mb-3'></i><p class='font-bold'>Trình xem Mô Hình 3D (Hệ tiêu hóa)</p><button class='mt-3 px-4 py-2 bg-white rounded-lg shadow-sm text-xs font-bold'>Xoay 360°</button></div>",
+                    slide: "<div class='w-full aspect-video bg-yellow-50 rounded-2xl border border-yellow-200 flex flex-col items-center justify-center text-yellow-700'><i class='fas fa-chalkboard text-5xl mb-3'></i><p class='font-bold'>Slide Tóm tắt bài học (12 trang)</p></div>",
+                    pdf: "<div class='p-6 bg-white rounded-2xl border border-gray-200 flex items-center justify-between'><div class='flex items-center gap-4'><i class='fas fa-file-pdf text-4xl text-red-500'></i><div><h4 class='font-bold text-gray-800'>Tài liệu đọc thêm (Bản in)</h4><p class='text-xs text-gray-500'>Kích thước: 2.4 MB</p></div></div><button class='px-6 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-xl transition'><i class='fas fa-download mr-2'></i>Tải xuống</button></div>"
+                },
+
+                hook: {
+                    img: "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?auto=format&fit=crop&w=800&q=80",
+                    q: "Theo bạn, cơ thể cần bao nhiêu lâu để tiêu hóa hoàn toàn dĩa Pizza hấp dẫn này?",
+                    opts: ["Khoảng 1-2 tiếng", "Khoảng 6-8 tiếng", "Khoảng 24-72 tiếng"],
+                    correct: 2, xp: 20, conceptId: "c0",
+                    explain: "Cần tới 24-72 giờ để tiêu hóa hoàn toàn thức ăn đi qua hệ thống ống dài hơn 9 mét trong cơ thể bạn đấy."
+                },
+                concepts: [
+                    {
+                        id: "c1", title: "1. Tiêu hóa là gì?",
+                        text: "Tiêu hóa là quá trình biến đổi thức ăn (vật lý & hóa học) thành các chất dinh dưỡng đơn giản mà tế bào có thể hấp thụ được. Giống như tháo tung Lego để xây lại vậy.",
+                        realWorld: "Khi bạn nhai một miếng bánh mì lâu, bạn sẽ thấy vị ngọt. Đó là do enzyme Amylase trong nước bọt đã bắt đầu biến tinh bột thành đường ngay tại miệng!",
+                        microQuiz: {
+                            q: "Chức năng chính của quá trình tiêu hóa là gì?",
+                            opts: ["Cung cấp oxy cho máu", "Biến đổi thức ăn thành dinh dưỡng", "Bơm máu đi nuôi cơ thể"],
+                            correct: 1, xp: 30, explain: "Tiêu hóa = Phân giải thức ăn."
+                        }
+                    },
+                    {
+                        id: "c2", title: "2. Hệ tiêu hóa: Ống và Tuyến",
+                        text: "Hệ tiêu hóa gồm 2 phần chính: <br><b>- Ống tiêu hóa:</b> Miệng -> Thực quản -> Dạ dày -> Ruột non -> Ruột già.<br><b>- Tuyến tiêu hóa:</b> Tuyến nước bọt, Gan, Tụy (tiết dịch).",
+                        realWorld: "Ống tiêu hóa là băng chuyền trong nhà máy, còn Tuyến tiêu hóa là các robot phun hóa chất (enzyme) vào sản phẩm.",
+                        microQuiz: {
+                            q: "Gan thuộc bộ phận nào của hệ tiêu hóa?",
+                            opts: ["Ống tiêu hóa", "Tuyến tiêu hóa", "Hệ tuần hoàn"],
+                            correct: 1, xp: 30, explain: "Gan không chứa thức ăn, nó tiết dịch mật vào ống tiêu hóa, nên là Tuyến tiêu hóa."
+                        }
+                    }
+                ],
+
+                memory: {
+                    flashcards: [{ q: "Enzyme Pepsin hoạt động ở đâu?", a: "Dạ dày" }, { q: "Cơ quan hấp thụ 90% dinh dưỡng?", a: "Ruột non" }],
+                    matchingGame: { title: "Game 1: Ghép Khái Niệm (+50 XP)", left: [{id:"m1", text:"Dạ dày"}, {id:"m2", text:"Gan"}], right: [{id:"m1", text:"Tiêu hóa Protein"}, {id:"m2", text:"Tiết dịch mật"}], xp: 50 },
+                    speedGame: { title: "Game 2: Đúng/Sai Tốc Độ", questions: [{ q: "Ruột non dài 1.5 mét.", isTrue: false }, { q: "Dạ dày có môi trường Axit.", isTrue: true }], xpPerQ: 20 }
+                },
+                practice: { easy: [{ q: "Cơ quan đầu tiên của ống tiêu hóa?", opts: ["Dạ dày", "Miệng", "Ruột non"], correct: 1 }], hard: [] },
+                finalTest: {
+                    title: "Bài Kiểm Tra Tổng Hợp Bài 32", timeLimit: 120,
+                    questions: [
+                        { q: "Quá trình tiêu hóa hóa học ở dạ dày chủ yếu tác động lên loại chất nào?", opts: ["Tinh bột", "Protein (Thịt)", "Lipit (Mỡ)"], correct: 1, conceptId: "c1" },
+                        { q: "Sự kiện nào KHÔNG xảy ra ở ruột non?", opts: ["Hấp thụ chất dinh dưỡng", "Tiêu hóa hoàn toàn", "Hấp thụ phần lớn nước tạo phân rắn"], correct: 2, conceptId: "c1" }
+                    ]
+                },
+                qaData: []
+            }
+        };
+
+        const STORAGE_KEY = 'doly_ultimate_engine_data_v3';
+        const defaultData = {
+            xp: 0, level: 1, currentLessonId: 32,
+            conceptMastery: { "c0": 0, "c1": 0, "c2": 0 },
+            progress: { 32: { theory: false, game: false, practice: false, testScore: null, unlocked: true } }
+        };
+
+        let userData = loadData();
+        function loadData() { return localStorage.getItem(STORAGE_KEY) ? JSON.parse(localStorage.getItem(STORAGE_KEY)) : JSON.parse(JSON.stringify(defaultData)); }
+        function saveData() { localStorage.setItem(STORAGE_KEY, JSON.stringify(userData)); updateGlobalUI(); }
+        function resetData() { localStorage.removeItem(STORAGE_KEY); location.reload(); }
+
+        window.onload = () => {
+            Doly.init();
+            loadLesson(userData.currentLessonId);
+            updateGlobalUI();
+            
+            // Kịch bản Doly chào mừng
+            setTimeout(() => {
+                Doly.say(`Chào cậu! Chào mừng trở lại Bài ${userData.currentLessonId}. Hôm nay mình sẽ làm trợ lý cho cậu nhé! 🐳`, 7000);
+            }, 1000);
+        };
+
+        function loadLesson(id) {
+            userData.currentLessonId = parseInt(id); saveData();
+            const lesson = dbLessons[id];
+            if(!lesson) return;
+
+            document.getElementById('lesson-title').innerText = lesson.title;
+            document.getElementById('lesson-number-badge').innerText = id;
+            document.getElementById('lesson-duration').innerText = lesson.duration;
+
+            document.getElementById('tab-hoctap').innerHTML = buildHoctapTab(lesson, id);
+            document.getElementById('tab-game').innerHTML = buildGameTab(lesson, id);
+            document.getElementById('tab-luyentap').innerHTML = buildTestTab(lesson, id);
+            
+            openTab('hoctap'); renderSidebar(); renderRightPanel();
+        }
+
+        // --- MỚI: RENDER MULTIMEDIA HUB ---
+        function switchMedia(type) {
+            document.querySelectorAll('.media-btn').forEach(b => { b.classList.remove('active', 'bg-ai-purple', 'text-white'); b.classList.add('bg-white', 'text-gray-600'); });
+            event.currentTarget.classList.remove('bg-white', 'text-gray-600');
+            event.currentTarget.classList.add('active', 'bg-ai-purple', 'text-white');
+            
+            document.querySelectorAll('.media-content').forEach(c => c.classList.add('hidden'));
+            document.getElementById(`media-${type}`).classList.remove('hidden');
+        }
+
+        function buildHoctapTab(lesson, id) {
+            let html = '';
+            
+            // 1. MULTIMEDIA HUB (Học trực quan trước)
+            if(lesson.multimedia) {
+                html += `
+                    <div class="bg-white p-4 md:p-6 rounded-[2rem] border border-gray-200 shadow-sm mb-8">
+                        <div class="flex flex-wrap gap-2 mb-4">
+                            <button onclick="switchMedia('video')" class="media-btn active bg-ai-purple text-white px-5 py-2.5 rounded-xl font-bold text-xs transition shadow-sm"><i class="fas fa-play-circle mr-2"></i>Video Học</button>
+                            <button onclick="switchMedia('model3d')" class="media-btn bg-white text-gray-600 border border-gray-200 px-5 py-2.5 rounded-xl font-bold text-xs hover:border-ai-purple transition"><i class="fas fa-cube mr-2"></i>Mô hình 3D</button>
+                            <button onclick="switchMedia('slide')" class="media-btn bg-white text-gray-600 border border-gray-200 px-5 py-2.5 rounded-xl font-bold text-xs hover:border-ai-purple transition"><i class="fas fa-layer-group mr-2"></i>Slides</button>
+                            <button onclick="switchMedia('pdf')" class="media-btn bg-white text-gray-600 border border-gray-200 px-5 py-2.5 rounded-xl font-bold text-xs hover:border-ai-purple transition"><i class="fas fa-file-pdf mr-2"></i>Tài liệu</button>
+                        </div>
+                        <div id="media-video" class="media-content">${lesson.multimedia.video}</div>
+                        <div id="media-model3d" class="media-content hidden">${lesson.multimedia.model3d}</div>
+                        <div id="media-slide" class="media-content hidden">${lesson.multimedia.slide}</div>
+                        <div id="media-pdf" class="media-content hidden">${lesson.multimedia.pdf}</div>
+                    </div>
+                `;
+            }
+
+            // 2. HOOK
+            if(lesson.hook) {
+                html += `
+                    <div class="bg-gradient-to-r from-orange-50 to-yellow-50 p-5 rounded-[2rem] border border-orange-100 mb-8" id="hook-section">
+                        <div class="flex flex-col md:flex-row gap-6 items-center">
+                            <div class="w-full md:w-1/3 aspect-video rounded-xl overflow-hidden shrink-0"><img src="${lesson.hook.img}" class="w-full h-full object-cover"></div>
+                            <div class="flex-1">
+                                <h3 class="font-black text-orange-600 mb-3 text-sm uppercase"><i class="fas fa-bolt text-yellow-500"></i> Khởi động</h3>
+                                <p class="font-bold text-gray-800 text-base mb-4">${lesson.hook.q}</p>
+                                <div class="space-y-2 mb-2" id="hook-opts">
+                                    ${lesson.hook.opts.map((opt, i) => `<button onclick="checkHook(this, ${i === lesson.hook.correct}, '${lesson.hook.explain}', ${lesson.hook.xp}, '${lesson.hook.conceptId}')" class="w-full p-3 bg-white border border-gray-200 rounded-xl text-xs font-bold text-gray-600 hover:border-orange-400 transition text-left shadow-sm">${opt}</button>`).join('')}
+                                </div>
+                                <div id="hook-result" class="hidden p-4 rounded-xl text-sm font-medium mt-3"></div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // 3. CONCEPTS & MICRO QUIZ
+            if(lesson.concepts) {
+                lesson.concepts.forEach((c, idx) => {
+                    html += `
+                        <div class="bg-white p-5 md:p-8 rounded-[2rem] border border-gray-100 shadow-sm relative mb-8">
+                            <div class="absolute -left-3 top-8 w-8 h-8 bg-ai-purple text-white rounded-full flex items-center justify-center font-black text-sm shadow-md">${idx+1}</div>
+                            <h3 class="font-black text-doly-dark text-xl ml-2 mb-4">${c.title}</h3>
+                            <div class="text-sm text-gray-700 leading-relaxed mb-4">${c.text}</div>
+                            
+                            <div class="bg-purple-50 p-4 rounded-xl border border-purple-100 mb-6">
+                                <p class="text-xs font-black text-ai-purple uppercase tracking-widest mb-1"><i class="fas fa-lightbulb"></i> Ví dụ thực tế</p>
+                                <p class="text-xs font-medium text-gray-700">${c.realWorld}</p>
+                            </div>
+
+                            <div class="bg-gray-50 p-5 rounded-2xl border border-gray-200" data-answered="false">
+                                <p class="text-sm font-bold text-gray-800 mb-3"><i class="fas fa-check-circle text-chem-green"></i> Micro-Quiz (+${c.microQuiz.xp} XP): ${c.microQuiz.q}</p>
+                                <div class="grid sm:grid-cols-2 gap-2">
+                                    ${c.microQuiz.opts.map((opt, i) => `<button onclick="checkMicroQuiz(this, ${i === c.microQuiz.correct}, '${c.microQuiz.explain}', ${c.microQuiz.xp}, '${c.id}')" class="p-3 bg-white border border-gray-200 rounded-xl text-xs font-bold text-gray-600 hover:border-chem-green transition shadow-sm text-left">${opt}</button>`).join('')}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+
+            html += `<div class="text-center mt-8"><button onclick="markTaskDone('theory', 'game')" class="px-8 py-3 bg-doly-dark hover:bg-ai-purple text-white text-sm font-black rounded-full shadow-xl transition">Hoàn thành Lý Thuyết & Đi tiếp <i class="fas fa-arrow-right ml-2"></i></button></div>`;
+            return html;
+        }
+
+        // --- TAB 2, 3: GIỮ NGUYÊN HOẶC RÚT GỌN ĐỂ DEMO ---
+        // (Tái sử dụng logic cũ cho gọn, chỉ tập trung tích hợp Doly)
+        
+        let matchState = { selectedLeft: null, selectedRight: null, matchedCount: 0, total: 0, xp: 0 };
+        function buildGameTab(lesson, id) {
+            if(!lesson.memory) return '';
+            const mg = lesson.memory.matchingGame;
+            matchState.total = mg.left.length; matchState.matchedCount = 0; matchState.xp = mg.xp;
+            
+            let html = `<div><h3 class="font-black text-sm text-doly-dark uppercase tracking-widest mb-4">1. Lật thẻ Ghi nhớ</h3><div class="grid grid-cols-2 gap-4 mb-8">`;
+            lesson.memory.flashcards.forEach(fc => {
+                html += `<div class="h-28 flashcard cursor-pointer perspective-1000"><div class="relative w-full h-full flashcard-inner"><div class="flashcard-front bg-white border border-gray-200 rounded-2xl flex items-center justify-center p-4"><h3 class="font-bold text-sm text-center">${fc.q}</h3></div><div class="flashcard-back bg-ai-purple rounded-2xl flex items-center justify-center p-4 text-white"><p class="text-xs font-bold text-center">${fc.a}</p></div></div></div>`;
+            });
+            html += `</div></div>`;
+            html += `<div class="text-center"><button onclick="markTaskDone('game', 'luyentap')" class="px-8 py-3 bg-doly-dark hover:bg-ai-purple text-white text-sm font-black rounded-full shadow-xl transition">Xong & Đi tiếp</button></div>`;
+            return html;
+        }
+
+        function buildTestTab(lesson, id) {
+            if(!lesson.finalTest) return '';
+            const ft = lesson.finalTest;
+            window.finalTestState = { data: ft, qIndex: 0, score: 0, timer: null, timeLeft: ft.timeLimit };
+
+            return `
+                <div class="bg-slate-800 p-10 rounded-[2rem] shadow-xl text-white text-center" id="final-test-container">
+                    <div id="test-intro">
+                        <i class="fas fa-graduation-cap text-6xl text-ai-purple mb-4"></i><h3 class="font-black text-2xl mb-2">${ft.title}</h3>
+                        <p class="text-sm text-gray-300 mb-6">2 câu hỏi | Sẵn sàng chưa?</p>
+                        <button onclick="startFinalTest()" class="px-10 py-3 bg-ai-purple text-white font-black text-sm rounded-full shadow-lg">VÀO THI</button>
+                    </div>
+                    <div id="test-play" class="hidden text-left">
+                        <div class="flex justify-between items-center mb-6"><span class="font-bold text-purple-200">Câu <span id="test-q-num">1</span>/2</span><span class="font-black text-yellow-400" id="test-timer">00:00</span></div>
+                        <h4 class="text-lg font-bold mb-6" id="test-question">?</h4>
+                        <div class="space-y-3" id="test-options"></div>
+                    </div>
+                    <div id="test-result" class="hidden">
+                        <h3 class="font-black text-2xl mb-2">ĐÃ NỘP BÀI!</h3>
+                        <p class="text-lg font-bold mb-6">Điểm số: <span id="test-final-score" class="text-3xl text-yellow-400">0</span></p>
+                        <div id="test-feedback-msg" class="mb-6"></div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // --- KỊCH BẢN TƯƠNG TÁC SƯ PHẠM VỚI DOLY ---
+        function checkMicroQuiz(btn, isCorrect, explain, xp, conceptId) {
+            const parent = btn.parentNode.parentNode;
+            if(parent.dataset.answered === "true") return;
+            parent.dataset.answered = "true";
+
+            if(isCorrect) {
+                btn.className = "p-3 bg-green-50 border-2 border-green-400 rounded-xl text-xs font-bold text-green-700 shadow-sm text-left";
+                addXP(xp); updateConceptMastery(conceptId, 2);
+                Doly.say("Đúng rồi! Cậu tiếp thu nhanh ghê! ✨", 3000);
+            } else {
+                btn.className = "p-3 bg-red-50 border-2 border-red-400 rounded-xl text-xs font-bold text-red-700 shake text-left";
+                updateConceptMastery(conceptId, 0);
+                // Doly Hint
+                Doly.say(`Gợi ý cho cậu nè: <b>${explain}</b> Thử nghĩ kỹ lại nhé! 🧐`, 8000);
+            }
+        }
+
+        function checkHook(btn, isCorrect, explain, xp, conceptId) {
+            const container = document.getElementById('hook-opts');
+            const res = document.getElementById('hook-result');
+            container.querySelectorAll('button').forEach(b => { b.classList.add('pointer-events-none', 'opacity-50'); });
+            
+            btn.classList.remove('opacity-50');
+            btn.classList.replace('border-gray-200', isCorrect ? 'border-chem-green' : 'border-red-400');
+            btn.classList.add(isCorrect ? 'bg-green-50' : 'bg-red-50', isCorrect ? 'text-green-700' : 'text-red-700');
+
+            res.classList.remove('hidden'); res.classList.add(isCorrect ? 'bg-green-50' : 'bg-yellow-50');
+            res.innerHTML = `<b>💡 ${isCorrect ? 'Chính xác!' : 'Bất ngờ chưa:'}</b> ${explain}`;
+
+            if(isCorrect) {
+                addXP(xp); updateConceptMastery(conceptId, 1);
+                Doly.say("Cậu phán đoán giỏi quá! Cùng vào bài thôi!", 4000);
+            } else {
+                Doly.say("Không sao! Đọc kỹ giải thích phía trên để hiểu hơn nha!", 5000);
+            }
+        }
+
+        function startFinalTest() {
+            document.getElementById('test-intro').style.display = 'none';
+            document.getElementById('test-play').classList.remove('hidden');
+            renderFinalTestQuestion();
+            Doly.say("Tập trung cao độ nhé! Cậu có 2 phút để chứng tỏ bản thân! ⏳", 4000);
+        }
+
+        function renderFinalTestQuestion() {
+            const ft = window.finalTestState; const q = ft.data.questions[ft.qIndex];
+            document.getElementById('test-q-num').innerText = ft.qIndex + 1;
+            document.getElementById('test-question').innerText = q.q;
+            document.getElementById('test-options').innerHTML = q.opts.map((opt, i) => `<button onclick="answerFinalTest(${i})" class="w-full p-4 bg-white/10 hover:bg-white/20 border border-white/20 rounded-xl text-sm font-bold text-left">${opt}</button>`).join('');
+        }
+
+        function answerFinalTest(ansIdx) {
+            const ft = window.finalTestState; const q = ft.data.questions[ft.qIndex];
+            if(ansIdx === q.correct) { ft.score++; updateConceptMastery(q.conceptId, 2); } else { updateConceptMastery(q.conceptId, 0); }
+            ft.qIndex++;
+            if(ft.qIndex < ft.data.questions.length) renderFinalTestQuestion(); else submitFinalTest();
+        }
+
+        function submitFinalTest() {
+            document.getElementById('test-play').style.display = 'none';
+            document.getElementById('test-result').classList.remove('hidden');
+            const ft = window.finalTestState;
+            const score10 = Math.round((ft.score / ft.data.questions.length) * 10);
+            document.getElementById('test-final-score').innerText = score10;
+            
+            if(score10 >= 8) {
+                document.getElementById('test-feedback-msg').innerHTML = "<span class='text-green-400'>Xuất sắc!</span>";
+                addXP(100); 
+                Doly.celebrate("WOW! Cậu là thiên tài Sinh học đúng không? Giỏi quá đi mất! 🎉🐬"); // REWARD DOLY
+            } else {
+                document.getElementById('test-feedback-msg').innerHTML = "<span class='text-yellow-400'>Khá tốt, xem lại cây kỹ năng nhé.</span>";
+                Doly.say("Cậu làm tốt rồi, nhưng vẫn cần xem lại một xíu lý thuyết nha. Đừng nản lòng!", 6000);
+            }
+            markTaskDone('practice', null);
+        }
+
+        // --- DOLY LÀM GIA SƯ AI (TAB 4) ---
+        function sendToAI(text) {
+            openTab('qa');
+            document.getElementById('ai-chat-input').value = text;
+            sendChatMessage({type: 'click'}); 
+        }
+
+        function sendChatMessage(e) {
+            if(e.type === 'keydown' && e.key !== 'Enter') return;
+            const inputEl = document.getElementById('ai-chat-input');
+            const text = inputEl.value.trim();
+            if(!text) return;
+
+            const chatHistory = document.getElementById('ai-chat-history');
+            chatHistory.innerHTML += `<div class="flex gap-2 w-5/6 ml-auto justify-end mb-3"><div class="bg-doly-dark p-2.5 rounded-xl rounded-tr-none text-xs text-white font-medium shadow-sm">${text}</div></div>`;
+            chatHistory.scrollTop = chatHistory.scrollHeight;
+            inputEl.value = ''; 
+
+            // Gửi câu hỏi đến API chatbot thật
+            DolyAPI.chat(text)
+                .then(function(result) {
+                    var reply = result && (result.reply || result.answer || result.message || result.text) || 'Cảm ơn bạn!';
+                    chatHistory.innerHTML += `
+                        <div class="flex gap-2 w-5/6 mb-3">
+                            <div class="w-7 h-7 rounded-full bg-purple-100 flex items-center justify-center shrink-0 shadow-sm border border-purple-200">
+                                <img src="https://cdn-icons-png.flaticon.com/512/3063/3063004.png" class="w-5 h-5">
+                            </div>
+                            <div class="bg-white border border-purple-100 p-2.5 rounded-xl rounded-tl-none text-xs text-gray-700 font-medium leading-relaxed shadow-sm">` + DolyAPI.esc(reply) + `</div>
+                        </div>
+                    `;
+                    chatHistory.scrollTop = chatHistory.scrollHeight;
+                    Doly.say("Mình vừa gửi tin nhắn cho cậu trong Tab Hỏi Đáp đó!", 4000);
+                })
+                .catch(function(err) {
+                    chatHistory.innerHTML += `
+                        <div class="flex gap-2 w-5/6 mb-3">
+                            <div class="w-7 h-7 rounded-full bg-red-100 flex items-center justify-center shrink-0 shadow-sm border border-red-200">
+                                <i class="fas fa-exclamation-triangle text-red-500 text-xs"></i>
+                            </div>
+                            <div class="bg-red-50 border border-red-100 p-2.5 rounded-xl rounded-tl-none text-xs text-red-700 font-medium">⚠️ Lỗi: ` + DolyAPI.esc(err.message || 'Mất kết nối') + `</div>
+                        </div>
+                    `;
+                    chatHistory.scrollTop = chatHistory.scrollHeight;
+                });
+        }
+
+        // --- UTILS (Rút gọn) ---
+        function addXP(amount) { userData.xp += amount; saveData(); }
+        function updateGlobalUI() { document.getElementById('total-xp-display').innerText = userData.xp; document.getElementById('user-level').innerText = `Lv.${userData.level}`; }
+        function openTab(t) { document.querySelectorAll('.tab-content').forEach(e=>e.classList.remove('active')); document.querySelectorAll('.tab-btn').forEach(e=>e.classList.remove('active')); document.getElementById('tab-'+t).classList.add('active'); document.getElementById('btn-'+t).classList.add('active'); window.scrollTo(0,0); }
+        function markTaskDone(t,n) { userData.progress[32][t] = true; saveData(); renderRightPanel(); if(n) openTab(n); }
+        function updateConceptMastery(c,l) { if(l>userData.conceptMastery[c]) userData.conceptMastery[c]=l; saveData(); renderRightPanel(); }
+        function renderRightPanel() { /* Logic tracking cũ - đã tối giản phần render để code ngắn gọn */ }
+        function renderSidebar() { /* Logic sidebar cũ */ }
+        function triggerConfetti() { if(typeof confetti !== 'undefined') confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } }); }
+    </script>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var user = DolyAPI.loadSession();
+        if (user && user.full_name) {
+            var avatarEl = document.querySelector('[data-avatar]');
+            if (avatarEl) {
+                avatarEl.textContent = user.full_name.split(' ').map(function(w){return w[0];}).join('').substring(0,2).toUpperCase();
+            }
+        }
+    });
+    function handleLogout() {
+        DolyAPI.logout().catch(function(){}).finally(function(){
+            DolyAPI.clearSession();
+            window.location.href = '../login.html';
+        });
+    }
+    </script>
+</body>
+</html>

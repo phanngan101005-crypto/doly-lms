@@ -1,0 +1,928 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DOLY LMS - Database Schema</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #f0f2f5; color: #1a1a2e; line-height: 1.6; padding: 40px 20px;
+  }
+  .container { max-width: 1280px; margin: 0 auto; }
+
+  /* Header */
+  .header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: #fff; border-radius: 16px; padding: 36px 40px; margin-bottom: 32px;
+  }
+  .header h1 { font-size: 28px; margin-bottom: 8px; }
+  .header p { opacity: 0.9; font-size: 15px; }
+
+  /* Stats */
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 16px; margin-bottom: 32px; }
+  .stat-card {
+    background: #fff; border-radius: 12px; padding: 20px; text-align: center;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  }
+  .stat-value { font-size: 28px; font-weight: 700; color: #667eea; }
+  .stat-label { font-size: 13px; color: #666; margin-top: 4px; }
+
+  /* Alert */
+  .alert {
+    background: #e8f4fd; border-left: 4px solid #2196f3; border-radius: 8px;
+    padding: 16px 20px; margin-bottom: 32px; font-size: 14px; color: #1a5276;
+  }
+  .alert strong { font-weight: 600; }
+
+  /* Group */
+  .group { margin-bottom: 20px; }
+  .group-header {
+    background: #fff; border-radius: 12px; padding: 16px 24px; cursor: pointer;
+    display: flex; justify-content: space-between; align-items: center;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08); user-select: none;
+  }
+  .group-header:hover { background: #f8f9ff; }
+  .group-header h2 { font-size: 16px; font-weight: 600; }
+  .group-header .count { font-size: 13px; color: #667eea; font-weight: 600; }
+  .group-header .arrow { transition: transform 0.2s; font-size: 14px; color: #999; }
+  .group-header.open .arrow { transform: rotate(180deg); }
+  .group-body { display: none; margin-top: 12px; }
+  .group-body.open { display: block; }
+
+  /* Table card */
+  .table-card {
+    background: #fff; border-radius: 10px; margin-bottom: 12px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.06); overflow: hidden;
+  }
+  .table-card-header {
+    background: #f7f8fc; padding: 14px 20px;
+    display: flex; justify-content: space-between; align-items: center;
+    border-bottom: 1px solid #eee;
+  }
+  .table-card-header .name { font-weight: 600; font-size: 15px; color: #333; }
+  .table-card-header .desc { font-size: 12px; color: #888; margin-top: 2px; }
+  .table-card-header .badge {
+    background: #667eea; color: #fff; font-size: 11px; padding: 3px 10px;
+    border-radius: 20px; font-weight: 500; white-space: nowrap;
+  }
+
+  /* Columns table */
+  .cols-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .cols-table th {
+    background: #fafbfc; padding: 10px 16px; text-align: left;
+    font-weight: 600; color: #555; font-size: 12px; text-transform: uppercase;
+    border-bottom: 2px solid #e8e8e8;
+  }
+  .cols-table td { padding: 9px 16px; border-bottom: 1px solid #f0f0f0; vertical-align: top; }
+  .cols-table tr:last-child td { border-bottom: none; }
+  .cols-table .col-name { font-weight: 500; color: #2c3e50; font-family: 'SF Mono', 'Consolas', monospace; font-size: 12.5px; }
+  .cols-table .col-type { color: #e74c3c; font-family: 'SF Mono', 'Consolas', monospace; font-size: 12px; }
+  .cols-table .col-null { color: #27ae60; font-size: 11.5px; }
+  .cols-table .col-null.nullable { color: #e67e22; }
+  .cols-table .col-default { color: #8e44ad; font-family: 'SF Mono', 'Consolas', monospace; font-size: 12px; }
+  .cols-table .col-comment { color: #7f8c8d; font-size: 12px; }
+  .tag { display: inline-block; font-size: 10px; padding: 2px 7px; border-radius: 4px; font-weight: 600; margin-right: 3px; }
+  .tag-pk { background: #fff3cd; color: #856404; }
+  .tag-fk { background: #d4edda; color: #155724; }
+  .tag-uq { background: #d1ecf1; color: #0c5460; }
+  .tag-idx { background: #e2e3e5; color: #383d41; }
+
+  /* FK section */
+  .fk-section { background: #fafbfc; padding: 14px 20px; border-top: 1px solid #eee; }
+  .fk-section h4 { font-size: 12px; text-transform: uppercase; color: #888; margin-bottom: 6px; }
+  .fk-item { font-size: 12.5px; color: #555; margin: 4px 0; font-family: 'SF Mono', 'Consolas', monospace; }
+  .fk-arrow { color: #667eea; margin: 0 6px; }
+
+  /* Relationships */
+  .rel-section { background: #fff; border-radius: 12px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); margin-bottom: 40px; }
+  .rel-section h2 { font-size: 18px; margin-bottom: 16px; }
+  .rel-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  .rel-table th { background: #f7f8fc; padding: 10px 14px; text-align: left; font-weight: 600; color: #555; font-size: 12px; border-bottom: 2px solid #e0e0e0; }
+  .rel-table td { padding: 8px 14px; border-bottom: 1px solid #f0f0f0; }
+  .rel-table .rel-group { color: #667eea; font-weight: 500; }
+
+  /* Seed data */
+  .seed-section { background: #fff; border-radius: 12px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); margin-bottom: 40px; }
+  .seed-section h2 { font-size: 18px; margin-bottom: 16px; }
+  .seed-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+  .seed-item { background: #f7f8fc; border-radius: 8px; padding: 14px; }
+  .seed-item h4 { font-size: 13px; color: #333; margin-bottom: 4px; }
+  .seed-item p { font-size: 12px; color: #666; }
+
+  /* Footer */
+  .footer { text-align: center; font-size: 12px; color: #999; padding: 24px 0; border-top: 1px solid #e0e0e0; margin-top: 40px; }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- HEADER -->
+  <div class="header">
+    <h1> DOLY LMS — Cơ sở Dữ liệu</h1>
+    <p>36 bảng &middot; 10 nhóm chức năng &middot; MySQL 8.x &middot; InnoDB &middot; utf8mb4</p>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats">
+    <div class="stat-card"><div class="stat-value">36</div><div class="stat-label">Tổng số bảng</div></div>
+    <div class="stat-card"><div class="stat-value">40+</div><div class="stat-label">Khoá ngoại (FK)</div></div>
+    <div class="stat-card"><div class="stat-value">10</div><div class="stat-label">Cột lớn nhất</div></div>
+    <div class="stat-card"><div class="stat-value">10</div><div class="stat-label">Nhóm chức năng</div></div>
+    <div class="stat-card"><div class="stat-value">4</div><div class="stat-label">Vai trò người dùng</div></div>
+  </div>
+
+  <!-- NB: Nhom 1 -->
+  <div class="alert">
+     File <strong>database_schema.sql</strong> đi kèm hỗ trợ seed data mẫu
+     (3 môn học, 4 chủ đề diễn đàn, 4 FAQ, 4 huy hiệu). Chạy script để khởi tạo CSDL hoàn chỉnh.
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- GROUP 1 -->
+  <!-- ============================================================ -->
+  <div class="group">
+    <div class="group-header open" onclick="toggle(this)">
+      <div><h2> Nhóm 1: Auth & Người Dùng</h2><span class="count">3 bảng</span></div>
+      <span class="arrow">▼</span>
+    </div>
+    <div class="group-body open">
+
+      <div class="table-card">
+        <div class="table-card-header">
+          <div>
+            <div class="name">users</div>
+            <div class="desc">Tài khoản trung tâm, hỗ trợ 4 vai trò (admin, student, teacher, parent)</div>
+          </div>
+          <span class="badge">10 cột</span>
+        </div>
+        <table class="cols-table">
+          <tr><th>Cột</th><th>Kiểu</th><th>Ràng buộc</th><th>Default</th><th>Ghi chú</th></tr>
+          <tr><td class="col-name">id</td><td class="col-type">INT</td><td><span class="tag tag-pk">PK</span><span class="tag tag-idx">INDEX</span></td><td class="col-default">AUTO_INCREMENT</td><td class="col-comment"></td></tr>
+          <tr><td class="col-name">full_name</td><td class="col-type">VARCHAR(100)</td><td>NOT NULL</td><td class="col-null">—</td><td class="col-comment"></td></tr>
+          <tr><td class="col-name">email</td><td class="col-type">VARCHAR(100)</td><td>NOT NULL <span class="tag tag-uq">UNIQUE</span></td><td class="col-null">—</td><td class="col-comment"></td></tr>
+          <tr><td class="col-name">password_hash</td><td class="col-type">VARCHAR(255)</td><td>NOT NULL</td><td class="col-null">—</td><td class="col-comment">Mã hoá bcrypt</td></tr>
+          <tr><td class="col-name">role</td><td class="col-type">ENUM</td><td>NOT NULL</td><td class="col-null">—</td><td class="col-comment">admin | student | teacher | parent</td></tr>
+          <tr><td class="col-name">avatar_url</td><td class="col-type">VARCHAR(255)</td><td class="col-null nullable">NULL</td><td class="col-default">NULL</td><td class="col-comment"></td></tr>
+          <tr><td class="col-name">status</td><td class="col-type">ENUM</td><td>NOT NULL</td><td class="col-default">'active'</td><td class="col-comment">active | inactive | banned</td></tr>
+          <tr><td class="col-name">created_at</td><td class="col-type">DATETIME</td><td>NOT NULL</td><td class="col-default">CURRENT_TIMESTAMP</td><td class="col-comment"></td></tr>
+          <tr><td class="col-name">updated_at</td><td class="col-type">DATETIME</td><td>NOT NULL</td><td class="col-default">ON UPDATE</td><td class="col-comment">Tự động cập nhật</td></tr>
+          <tr><td class="col-name">last_login</td><td class="col-type">DATETIME</td><td class="col-null nullable">NULL</td><td class="col-default">NULL</td><td class="col-comment"></td></tr>
+        </table>
+        <div class="fk-section">
+          <h4>INDEX</h4>
+          <div class="fk-item">idx_users_role (role) · idx_users_status (status)</div>
+        </div>
+      </div>
+
+      <div class="table-card">
+        <div class="table-card-header">
+          <div>
+            <div class="name">user_verifications</div>
+            <div class="desc">Mã OTP gửi qua EmailJS khi đăng ký</div>
+          </div>
+          <span class="badge">6 cột</span>
+        </div>
+        <table class="cols-table">
+          <tr><th>Cột</th><th>Kiểu</th><th>Ràng buộc</th><th>Default</th><th>Ghi chú</th></tr>
+          <tr><td class="col-name">id</td><td class="col-type">INT</td><td><span class="tag tag-pk">PK</span></td><td class="col-default">AUTO_INCREMENT</td><td></td></tr>
+          <tr><td class="col-name">email</td><td class="col-type">VARCHAR(100)</td><td>NOT NULL</td><td>—</td><td></td></tr>
+          <tr><td class="col-name">otp_code</td><td class="col-type">VARCHAR(6)</td><td>NOT NULL</td><td>—</td><td>Mã OTP 6 số</td></tr>
+          <tr><td class="col-name">expires_at</td><td class="col-type">DATETIME</td><td>NOT NULL</td><td>—</td><td>Thời hạn OTP</td></tr>
+          <tr><td class="col-name">is_verified</td><td class="col-type">BOOLEAN</td><td>NOT NULL</td><td class="col-default">FALSE</td><td></td></tr>
+          <tr><td class="col-name">created_at</td><td class="col-type">DATETIME</td><td>NOT NULL</td><td class="col-default">CURRENT_TIMESTAMP</td><td></td></tr>
+        </table>
+        <div class="fk-section"><h4>INDEX</h4><div class="fk-item">idx_uv_email (email)</div></div>
+      </div>
+
+      <div class="table-card">
+        <div class="table-card-header">
+          <div>
+            <div class="name">user_sessions</div>
+            <div class="desc">Token phiên đăng nhập</div>
+          </div>
+          <span class="badge">5 cột</span>
+        </div>
+        <table class="cols-table">
+          <tr><th>Cột</th><th>Kiểu</th><th>Ràng buộc</th><th>Default</th><th>Ghi chú</th></tr>
+          <tr><td class="col-name">id</td><td class="col-type">INT</td><td><span class="tag tag-pk">PK</span></td><td class="col-default">AUTO_INCREMENT</td><td></td></tr>
+          <tr><td class="col-name">user_id</td><td class="col-type">INT</td><td>NOT NULL <span class="tag tag-fk">FK</span></td><td>—</td><td>→ users(id) ON DELETE CASCADE</td></tr>
+          <tr><td class="col-name">auth_token</td><td class="col-type">VARCHAR(255)</td><td>NOT NULL <span class="tag tag-uq">UNIQUE</span></td><td>—</td><td>Token ngẫu nhiên</td></tr>
+          <tr><td class="col-name">expires_at</td><td class="col-type">DATETIME</td><td>NOT NULL</td><td>—</td><td></td></tr>
+          <tr><td class="col-name">created_at</td><td class="col-type">DATETIME</td><td>NOT NULL</td><td class="col-default">CURRENT_TIMESTAMP</td><td></td></tr>
+        </table>
+        <div class="fk-section"><h4>INDEX</h4><div class="fk-item">idx_us_token (auth_token)</div></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- GROUP 2: LOP HOC -->
+  <!-- ============================================================ -->
+  <div class="group">
+    <div class="group-header open" onclick="toggle(this)">
+      <div><h2> Nhóm 2: Lớp Học</h2><span class="count">2 bảng</span></div>
+      <span class="arrow">▼</span>
+    </div>
+    <div class="group-body open">
+
+      <div class="table-card">
+        <div class="table-card-header">
+          <div>
+            <div class="name">classes</div>
+            <div class="desc">Lớp học do giáo viên tạo (kèm mã mời học sinh)</div>
+          </div>
+          <span class="badge">8 cột</span>
+        </div>
+        <table class="cols-table">
+          <tr><th>Cột</th><th>Kiểu</th><th>Ràng buộc</th><th>Default</th><th>Ghi chú</th></tr>
+          <tr><td class="col-name">id</td><td class="col-type">INT</td><td><span class="tag tag-pk">PK</span></td><td class="col-default">AUTO_INCREMENT</td><td></td></tr>
+          <tr><td class="col-name">name</td><td class="col-type">VARCHAR(100)</td><td>NOT NULL</td><td>—</td><td>VD: 8A1, 9B2</td></tr>
+          <tr><td class="col-name">subject</td><td class="col-type">VARCHAR(50)</td><td class="col-null nullable">NULL</td><td class="col-default">NULL</td><td>Môn học chính</td></tr>
+          <tr><td class="col-name">grade_level</td><td class="col-type">VARCHAR(20)</td><td class="col-null nullable">NULL</td><td class="col-default">NULL</td><td>VD: Lớp 8, Lớp 9</td></tr>
+          <tr><td class="col-name">teacher_id</td><td class="col-type">INT</td><td>NOT NULL <span class="tag tag-fk">FK</span></td><td>—</td><td>→ users(id) ON DELETE CASCADE</td></tr>
+          <tr><td class="col-name">class_code</td><td class="col-type">VARCHAR(20)</td><td>NOT NULL <span class="tag tag-uq">UNIQUE</span></td><td>—</td><td>Mã mời học sinh</td></tr>
+          <tr><td class="col-name">status</td><td class="col-type">ENUM</td><td>NOT NULL</td><td class="col-default">'active'</td><td>active | closed</td></tr>
+          <tr><td class="col-name">created_at</td><td class="col-type">DATETIME</td><td>NOT NULL</td><td class="col-default">CURRENT_TIMESTAMP</td><td></td></tr>
+        </table>
+        <div class="fk-section"><h4>INDEX</h4><div class="fk-item">idx_classes_teacher (teacher_id)</div></div>
+      </div>
+
+      <div class="table-card">
+        <div class="table-card-header">
+          <div>
+            <div class="name">class_members</div>
+            <div class="desc">Học sinh trong lớp</div>
+          </div>
+          <span class="badge">5 cột</span>
+        </div>
+        <table class="cols-table">
+          <tr><th>Cột</th><th>Kiểu</th><th>Ràng buộc</th><th>Default</th><th>Ghi chú</th></tr>
+          <tr><td class="col-name">id</td><td class="col-type">INT</td><td><span class="tag tag-pk">PK</span></td><td class="col-default">AUTO_INCREMENT</td><td></td></tr>
+          <tr><td class="col-name">class_id</td><td class="col-type">INT</td><td>NOT NULL <span class="tag tag-fk">FK</span></td><td>—</td><td>→ classes(id) ON DELETE CASCADE</td></tr>
+          <tr><td class="col-name">student_id</td><td class="col-type">INT</td><td>NOT NULL <span class="tag tag-fk">FK</span></td><td>—</td><td>→ users(id) ON DELETE CASCADE</td></tr>
+          <tr><td class="col-name">joined_at</td><td class="col-type">DATETIME</td><td>NOT NULL</td><td class="col-default">CURRENT_TIMESTAMP</td><td></td></tr>
+          <tr><td class="col-name">status</td><td class="col-type">ENUM</td><td>NOT NULL</td><td class="col-default">'active'</td><td>active | left</td></tr>
+          <tr style="display:none;"><td colspan="5"><span class="tag tag-uq">UNIQUE(class_id, student_id)</span></td></tr>
+        </table>
+        <div class="fk-section"><h4>RÀNG BUỘC & INDEX</h4><div class="fk-item"><span class="tag tag-uq">UNIQUE</span> (class_id, student_id)</div><div class="fk-item"><span class="tag tag-idx">INDEX</span> idx_cm_student (student_id)</div></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- GROUP 3: BAI GIANG & HOC LIEU -->
+  <!-- ============================================================ -->
+  <div class="group">
+    <div class="group-header open" onclick="toggle(this)">
+      <div><h2> Nhóm 3: Bài Giảng & Học Liệu</h2><span class="count">5 bảng</span></div>
+      <span class="arrow">▼</span>
+    </div>
+    <div class="group-body open">
+
+      <div class="table-card">
+        <div class="table-card-header"><div><div class="name">subjects</div><div class="desc">Danh mục môn học (Vật Lý, Hoá Học, Sinh Học)</div></div><span class="badge">3 cột</span></div>
+        <table class="cols-table">
+          <tr><th>Cột</th><th>Kiểu</th><th>Ràng buộc</th></tr>
+          <tr><td class="col-name">id</td><td class="col-type">INT</td><td><span class="tag tag-pk">PK</span> AUTO_INCREMENT</td></tr>
+          <tr><td class="col-name">name</td><td class="col-type">VARCHAR(100)</td><td>NOT NULL</td></tr>
+          <tr><td class="col-name">slug</td><td class="col-type">VARCHAR(50)</td><td>NOT NULL <span class="tag tag-uq">UNIQUE</span></td></tr>
+        </table>
+      </div>
+
+      <div class="table-card">
+        <div class="table-card-header"><div><div class="name">lessons</div><div class="desc">Bài giảng lý thuyết (nội dung HTML)</div></div><span class="badge">6 cột</span></div>
+        <table class="cols-table">
+          <tr><th>Cột</th><th>Kiểu</th><th>Ràng buộc</th><th>Default</th></tr>
+          <tr><td class="col-name">id</td><td class="col-type">INT</td><td><span class="tag tag-pk">PK</span></td><td class="col-default">AUTO_INCREMENT</td></tr>
+          <tr><td class="col-name">subject_id</td><td class="col-type">INT</td><td>NOT NULL <span class="tag tag-fk">FK</span> → subjects(id)</td><td>—</td></tr>
+          <tr><td class="col-name">title</td><td class="col-type">VARCHAR(200)</td><td>NOT NULL</td><td>—</td></tr>
+          <tr><td class="col-name">content</td><td class="col-type">LONGTEXT</td><td class="col-null nullable">NULL</td><td class="col-default">NULL</td></tr>
+          <tr><td class="col-name">order_index</td><td class="col-type">INT</td><td>NOT NULL</td><td class="col-default">0</td></tr>
+          <tr><td class="col-name">created_at</td><td class="col-type">DATETIME</td><td>NOT NULL</td><td class="col-default">CURRENT_TIMESTAMP</td></tr>
+        </table>
+        <div class="fk-section"><h4>INDEX</h4><div class="fk-item">idx_lessons_subject (subject_id)</div></div>
+      </div>
+
+      <div class="table-card">
+        <div class="table-card-header"><div><div class="name">videos</div><div class="desc">Video bài giảng</div></div><span class="badge">6 cột</span></div>
+        <table class="cols-table">
+          <tr><th>Cột</th><th>Kiểu</th><th>Ràng buộc</th><th>Default</th></tr>
+          <tr><td class="col-name">id</td><td class="col-type">INT</td><td><span class="tag tag-pk">PK</span></td><td class="col-default">AUTO_INCREMENT</td></tr>
+          <tr><td class="col-name">lesson_id</td><td class="col-type">INT</td><td class="col-null nullable">NULL <span class="tag tag-fk">FK</span> → lessons(id)</td><td class="col-default">NULL</td></tr>
+          <tr><td class="col-name">title</td><td class="col-type">VARCHAR(200)</td><td>NOT NULL</td><td>—</td></tr>
+          <tr><td class="col-name">url</td><td class="col-type">VARCHAR(500)</td><td>NOT NULL</td><td>—</td></tr>
+          <tr><td class="col-name">duration</td><td class="col-type">VARCHAR(20)</td><td class="col-null nullable">NULL</td><td class="col-default">NULL</td></tr>
+          <tr><td class="col-name">thumbnail</td><td class="col-type">VARCHAR(500)</td><td class="col-null nullable">NULL</td><td class="col-default">NULL</td></tr>
+        </table>
+        <div class="fk-section"><h4>INDEX</h4><div class="fk-item">idx_videos_lesson (lesson_id)</div></div>
+      </div>
+
+      <div class="table-card">
+        <div class="table-card-header"><div><div class="name">documents</div><div class="desc">Tài liệu PDF, Mindmap, Phiếu bài tập</div></div><span class="badge">7 cột</span></div>
+        <table class="cols-table">
+          <tr><th>Cột</th><th>Kiểu</th><th>Ràng buộc</th><th>Default</th></tr>
+          <tr><td class="col-name">id</td><td class="col-type">INT</td><td><span class="tag tag-pk">PK</span></td><td class="col-default">AUTO_INCREMENT</td></tr>
+          <tr><td class="col-name">lesson_id</td><td class="col-type">INT</td><td class="col-null nullable">NULL <span class="tag tag-fk">FK</span> → lessons(id)</td><td class="col-default">NULL</td></tr>
+          <tr><td class="col-name">title</td><td class="col-type">VARCHAR(200)</td><td>NOT NULL</td><td>—</td></tr>
+          <tr><td class="col-name">file_url</td><td class="col-type">VARCHAR(500)</td><td>NOT NULL</td><td>—</td></tr>
+          <tr><td class="col-name">type</td><td class="col-type">ENUM</td><td>NOT NULL</td><td class="col-default">'pdf'</td></tr>
+          <tr><td class="col-name">download_count</td><td class="col-type">INT</td><td>NOT NULL</td><td class="col-default">0</td></tr>
+          <tr><td class="col-name">created_at</td><td class="col-type">DATETIME</td><td>NOT NULL</td><td class="col-default">CURRENT_TIMESTAMP</td></tr>
+        </table>
+        <div class="fk-section"><h4>INDEX</h4><div class="fk-item">idx_docs_lesson (lesson_id)</div></div>
+      </div>
+
+      <div class="table-card">
+        <div class="table-card-header"><div><div class="name">lab_models</div><div class="desc">Mô hình 3D Lab (file .glb)</div></div><span class="badge">9 cột</span></div>
+        <table class="cols-table">
+          <tr><th>Cột</th><th>Kiểu</th><th>Ràng buộc</th><th>Default</th></tr>
+          <tr><td class="col-name">id</td><td class="col-type">INT</td><td><span class="tag tag-pk">PK</span></td><td class="col-default">AUTO_INCREMENT</td></tr>
+          <tr><td class="col-name">title</td><td class="col-type">VARCHAR(200)</td><td>NOT NULL</td><td>—</td></tr>
+          <tr><td class="col-name">description</td><td class="col-type">TEXT</td><td class="col-null nullable">NULL</td><td class="col-default">NULL</td></tr>
+          <tr><td class="col-name">thumbnail_url</td><td class="col-type">VARCHAR(500)</td><td class="col-null nullable">NULL</td><td class="col-default">NULL</td></tr>
+          <tr><td class="col-name">model_url</td><td class="col-type">VARCHAR(500)</td><td class="col-null nullable">NULL</td><td class="col-default">NULL</td></tr>
+          <tr><td class="col-name">lesson_id</td><td class="col-type">INT</td><td class="col-null nullable">NULL <span class="tag tag-fk">FK</span> → lessons(id)</td><td class="col-default">NULL</td></tr>
+          <tr><td class="col-name">subject_id</td><td class="col-type">INT</td><td class="col-null nullable">NULL <span class="tag tag-fk">FK</span> → subjects(id)</td><td class="col-default">NULL</td></tr>
+          <tr><td class="col-name">is_premium</td><td class="col-type">BOOLEAN</td><td>NOT NULL</td><td class="col-default">FALSE</td></tr>
+          <tr><td class="col-name">view_count</td><td class="col-type">INT</td><td>NOT NULL</td><td class="col-default">0</td></tr>
+          <tr><td class="col-name">created_at</td><td class="col-type">DATETIME</td><td>NOT NULL</td><td class="col-default">CURRENT_TIMESTAMP</td></tr>
+        </table>
+        <div class="fk-section"><h4>INDEX</h4><div class="fk-item">idx_lab_subject (subject_id)</div></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- GROUP 4: CAU HOI & KIEM TRA -->
+  <!-- ============================================================ -->
+  <div class="group">
+    <div class="group-header open" onclick="toggle(this)">
+      <div><h2> Nhóm 4: Câu Hỏi & Kiểm Tra</h2><span class="count">6 bảng</span></div>
+      <span class="arrow">▼</span>
+    </div>
+    <div class="group-body open">
+
+      <div class="table-card">
+        <div class="table-card-header"><div><div class="name">question_bank</div><div class="desc">Ngân hàng câu hỏi tập trung (4 loại: TN, Đ/S, Điền khuyết, Ghép)</div></div><span class="badge">11 cột</span></div>
+        <table class="cols-table">
+          <tr><th>Cột</th><th>Kiểu</th><th>Ràng buộc</th></tr>
+          <tr><td class="col-name">id</td><td class="col-type">INT</td><td><span class="tag tag-pk">PK</span> AUTO_INCREMENT</td></tr>
+          <tr><td class="col-name">subject_id</td><td class="col-type">INT</td><td>NOT NULL <span class="tag tag-fk">FK</span> → subjects(id)</td></tr>
+          <tr><td class="col-name">lesson_id</td><td class="col-type">INT</td><td class="col-null nullable">NULL <span class="tag tag-fk">FK</span> → lessons(id)</td></tr>
+          <tr><td class="col-name">question_text</td><td class="col-type">TEXT</td><td>NOT NULL</td></tr>
+          <tr><td class="col-name">question_type</td><td class="col-type">ENUM</td><td>NOT NULL — multiple_choice | true_false | fill_blank | matching</td></tr>
+          <tr><td class="col-name">difficulty</td><td class="col-type">ENUM</td><td>NOT NULL DEFAULT 'medium'</td></tr>
+          <tr><td class="col-name">xp_reward</td><td class="col-type">INT</td><td>NOT NULL DEFAULT 10</td></tr>
+          <tr><td class="col-name">explanation</td><td class="col-type">TEXT</td><td class="col-null nullable">NULL</td></tr>
+          <tr><td class="col-name">created_by</td><td class="col-type">INT</td><td class="col-null nullable">NULL <span class="tag tag-fk">FK</span> → users(id)</td></tr>
+          <tr><td class="col-name">status</td><td class="col-type">ENUM</td><td>NOT NULL DEFAULT 'active'</td></tr>
+          <tr><td class="col-name">created_at</td><td class="col-type">DATETIME</td><td>NOT NULL DEFAULT CURRENT_TIMESTAMP</td></tr>
+        </table>
+        <div class="fk-section"><h4>INDEX</h4><div class="fk-item">idx_qb_subject · idx_qb_lesson · idx_qb_type</div></div>
+      </div>
+
+      <div class="table-card">
+        <div class="table-card-header"><div><div class="name">question_options</div><div class="desc">Đáp án cho câu trắc nghiệm / đúng-sai</div></div><span class="badge">5 cột</span></div>
+        <table class="cols-table">
+          <tr><th>Cột</th><th>Kiểu</th><th>Ràng buộc</th></tr>
+          <tr><td class="col-name">id</td><td class="col-type">INT</td><td><span class="tag tag-pk">PK</span> AUTO_INCREMENT</td></tr>
+          <tr><td class="col-name">question_id</td><td class="col-type">INT</td><td>NOT NULL <span class="tag tag-fk">FK</span> → question_bank(id) CASCADE</td></tr>
+          <tr><td class="col-name">option_text</td><td class="col-type">TEXT</td><td>NOT NULL</td></tr>
+          <tr><td class="col-name">is_correct</td><td class="col-type">BOOLEAN</td><td>NOT NULL DEFAULT FALSE</td></tr>
+          <tr><td class="col-name">order_index</td><td class="col-type">INT</td><td>NOT NULL DEFAULT 0</td></tr>
+        </table>
+        <div class="fk-section"><h4>INDEX</h4><div class="fk-item">idx_qo_question (question_id)</div></div>
+      </div>
+
+      <div class="table-card">
+        <div class="table-card-header"><div><div class="name">fill_blank_answers</div><div class="desc">Đáp án cho câu điền khuyết</div></div><span class="badge">5 cột</span></div>
+        <table class="cols-table">
+          <tr><th>Cột</th><th>Kiểu</th><th>Ràng buộc</th></tr>
+          <tr><td class="col-name">id</td><td class="col-type">INT</td><td><span class="tag tag-pk">PK</span> AUTO_INCREMENT</td></tr>
+          <tr><td class="col-name">question_id</td><td class="col-type">INT</td><td>NOT NULL <span class="tag tag-fk">FK</span> → question_bank(id) CASCADE</td></tr>
+          <tr><td class="col-name">correct_answer</td><td class="col-type">VARCHAR(255)</td><td>NOT NULL</td></tr>
+          <tr><td class="col-name">position</td><td class="col-type">INT</td><td>NOT NULL DEFAULT 1</td></tr>
+        </table>
+        <div class="fk-section"><h4>INDEX</h4><div class="fk-item">idx_fba_question (question_id)</div></div>
+      </div>
+
+      <div class="table-card">
+        <div class="table-card-header"><div><div class="name">matching_pairs</div><div class="desc">Cặp ghép cho câu hỏi Matching</div></div><span class="badge">4 cột</span></div>
+        <table class="cols-table">
+          <tr><th>Cột</th><th>Kiểu</th><th>Ràng buộc</th></tr>
+          <tr><td class="col-name">id</td><td class="col-type">INT</td><td><span class="tag tag-pk">PK</span> AUTO_INCREMENT</td></tr>
+          <tr><td class="col-name">question_id</td><td class="col-type">INT</td><td>NOT NULL <span class="tag tag-fk">FK</span> → question_bank(id) CASCADE</td></tr>
+          <tr><td class="col-name">left_text</td><td class="col-type">TEXT</td><td>NOT NULL — Vế trái (cần ghép)</td></tr>
+          <tr><td class="col-name">right_text</td><td class="col-type">TEXT</td><td>NOT NULL — Vế phải (đáp án)</td></tr>
+        </table>
+        <div class="fk-section"><h4>INDEX</h4><div class="fk-item">idx_mp_question (question_id)</div></div>
+      </div>
+
+      <div class="table-card">
+        <div class="table-card-header"><div><div class="name">exams</div><div class="desc">Bài kiểm tra / đề thi (quiz, midterm, final, practice)</div></div><span class="badge">10 cột</span></div>
+        <table class="cols-table">
+          <tr><th>Cột</th><th>Kiểu</th><th>Ràng buộc</th></tr>
+          <tr><td class="col-name">id</td><td class="col-type">INT</td><td><span class="tag tag-pk">PK</span> AUTO_INCREMENT</td></tr>
+          <tr><td class="col-name">title</td><td class="col-type">VARCHAR(200)</td><td>NOT NULL</td></tr>
+          <tr><td class="col-name">subject_id</td><td class="col-type">INT</td><td>NOT NULL <span class="tag tag-fk">FK</span> → subjects(id)</td></tr>
+          <tr><td class="col-name">created_by</td><td class="col-type">INT</td><td>NOT NULL <span class="tag tag-fk">FK</span> → users(id)</td></tr>
+          <tr><td class="col-name">time_limit</td><td class="col-type">INT</td><td class="col-null nullable">NULL — Thời gian làm bài (phút)</td></tr>
+          <tr><td class="col-name">max_score</td><td class="col-type">DECIMAL(5,2)</td><td>NOT NULL DEFAULT 10.00</td></tr>
+          <tr><td class="col-name">type</td><td class="col-type">ENUM</td><td>NOT NULL DEFAULT 'quiz'</td></tr>
+          <tr><td class="col-name">is_public</td><td class="col-type">BOOLEAN</td><td>NOT NULL DEFAULT FALSE</td></tr>
+          <tr><td class="col-name">pass_count</td><td class="col-type">INT</td><td>NOT NULL DEFAULT 0</td></tr>
+          <tr><td class="col-name">created_at</td><td class="col-type">DATETIME</td><td>NOT NULL DEFAULT CURRENT_TIMESTAMP</td></tr>
+        </table>
+        <div class="fk-section"><h4>INDEX</h4><div class="fk-item">idx_exams_subject (subject_id) · idx_exams_type (type)</div></div>
+      </div>
+
+      <div class="table-card">
+        <div class="table-card-header"><div><div class="name">exam_questions</div><div class="desc">Câu hỏi trong đề thi (bảng trung gian)</div></div><span class="badge">5 cột</span></div>
+        <table class="cols-table">
+          <tr><th>Cột</th><th>Kiểu</th><th>Ràng buộc</th></tr>
+          <tr><td class="col-name">id</td><td class="col-type">INT</td><td><span class="tag tag-pk">PK</span> AUTO_INCREMENT</td></tr>
+          <tr><td class="col-name">exam_id</td><td class="col-type">INT</td><td>NOT NULL <span class="tag tag-fk">FK</span> → exams(id) CASCADE</td></tr>
+          <tr><td class="col-name">question_id</td><td class="col-type">INT</td><td>NOT NULL <span class="tag tag-fk">FK</span> → question_bank(id) CASCADE</td></tr>
+          <tr><td class="col-name">order_index</td><td class="col-type">INT</td><td>NOT NULL DEFAULT 0</td></tr>
+          <tr><td class="col-name">score</td><td class="col-type">DECIMAL(5,2)</td><td>NOT NULL DEFAULT 1.00</td></tr>
+        </table>
+        <div class="fk-section"><h4>INDEX</h4><div class="fk-item">idx_eq_exam (exam_id)</div></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- GROUP 5: GIAO BAI & CHAM DIEM -->
+  <!-- ============================================================ -->
+  <div class="group">
+    <div class="group-header open" onclick="toggle(this)">
+      <div><h2> Nhóm 5: Giao Bài & Chấm Điểm</h2><span class="count">4 bảng</span></div>
+      <span class="arrow">▼</span>
+    </div>
+    <div class="group-body open">
+
+      <div class="table-card">
+        <div class="table-card-header"><div><div class="name">assignments</div><div class="desc">Bài tập giáo viên giao cho lớp</div></div><span class="badge">8 cột</span></div>
+        <table class="cols-table">
+          <tr><th>Cột</th><th>Kiểu</th><th>Ràng buộc</th></tr>
+          <tr><td class="col-name">id</td><td class="col-type">INT</td><td><span class="tag tag-pk">PK</span> AUTO_INCREMENT</td></tr>
+          <tr><td class="col-name">class_id</td><td class="col-type">INT</td><td>NOT NULL <span class="tag tag-fk">FK</span> → classes(id) CASCADE</td></tr>
+          <tr><td class="col-name">exam_id</td><td class="col-type">INT</td><td class="col-null nullable">NULL <span class="tag tag-fk">FK</span> → exams(id) SET NULL</td></tr>
+          <tr><td class="col-name">title</td><td class="col-type">VARCHAR(200)</td><td>NOT NULL</td></tr>
+          <tr><td class="col-name">assigned_by</td><td class="col-type">INT</td><td>NOT NULL <span class="tag tag-fk">FK</span> → users(id) CASCADE</td></tr>
+          <tr><td class="col-name">due_date</td><td class="col-type">DATETIME</td><td class="col-null nullable">NULL</td></tr>
+          <tr><td class="col-name">status</td><td class="col-type">ENUM</td><td>NOT NULL DEFAULT 'draft'</td></tr>
+          <tr><td class="col-name">created_at</td><td class="col-type">DATETIME</td><td>NOT NULL DEFAULT CURRENT_TIMESTAMP</td></tr>
+        </table>
+        <div class="fk-section"><h4>INDEX</h4><div class="fk-item">idx_assign_class (class_id)</div></div>
+      </div>
+
+      <div class="table-card">
+        <div class="table-card-header"><div><div class="name">student_assignments</div><div class="desc">Bài nộp của từng học sinh</div></div><span class="badge">8 cột</span></div>
+        <table class="cols-table">
+          <tr><th>Cột</th><th>Kiểu</th><th>Ràng buộc</th></tr>
+          <tr><td class="col-name">id</td><td class="col-type">INT</td><td><span class="tag tag-pk">PK</span> AUTO_INCREMENT</td></tr>
+          <tr><td class="col-name">assignment_id</td><td class="col-type">INT</td><td>NOT NULL <span class="tag tag-fk">FK</span> → assignments(id) CASCADE</td></tr>
+          <tr><td class="col-name">student_id</td><td class="col-type">INT</td><td>NOT NULL <span class="tag tag-fk">FK</span> → users(id) CASCADE</td></tr>
+          <tr><td class="col-name">submitted_at</td><td class="col-type">DATETIME</td><td class="col-null nullable">NULL</td></tr>
+          <tr><td class="col-name">score</td><td class="col-type">DECIMAL(5,2)</td><td class="col-null nullable">NULL</td></tr>
+          <tr><td class="col-name">status</td><td class="col-type">ENUM</td><td>NOT NULL DEFAULT 'pending'</td></tr>
+          <tr><td class="col-name">graded_by</td><td class="col-type">INT</td><td class="col-null nullable">NULL <span class="tag tag-fk">FK</span> → users(id) SET NULL</td></tr>
+          <tr><td class="col-name">graded_at</td><td class="col-type">DATETIME</td><td class="col-null nullable">NULL</td></tr>
+        </table>
+        <div class="fk-section"><h4>RÀNG BUỘC</h4><div class="fk-item"><span class="tag tag-uq">UNIQUE</span> (assignment_id, student_id)</div></div>
+      </div>
+
+      <div class="table-card">
+        <div class="table-card-header"><div><div class="name">student_answers</div><div class="desc">Chi tiết câu trả lời của học sinh</div></div><span class="badge">8 cột</span></div>
+        <table class="cols-table">
+          <tr><th>Cột</th><th>Kiểu</th><th>Ràng buộc</th></tr>
+          <tr><td class="col-name">id</td><td class="col-type">INT</td><td><span class="tag tag-pk">PK</span> AUTO_INCREMENT</td></tr>
+          <tr><td class="col-name">student_assignment_id</td><td class="col-type">INT</td><td>NOT NULL <span class="tag tag-fk">FK</span> → student_assignments(id) CASCADE</td></tr>
+          <tr><td class="col-name">question_id</td><td class="col-type">INT</td><td>NOT NULL <span class="tag tag-fk">FK</span> → question_bank(id) CASCADE</td></tr>
+          <tr><td class="col-name">answer_text</td><td class="col-type">TEXT</td><td class="col-null nullable">NULL</td></tr>
+          <tr><td class="col-name">selected_option_id</td><td class="col-type">INT</td><td class="col-null nullable">NULL <span class="tag tag-fk">FK</span> → question_options(id) SET NULL</td></tr>
+          <tr><td class="col-name">fill_blank_answers</td><td class="col-type">TEXT</td><td class="col-null nullable">NULL (JSON)</td></tr>
+          <tr><td class="col-name">is_correct</td><td class="col-type">BOOLEAN</td><td class="col-null nullable">NULL</td></tr>
+          <tr><td class="col-name">score_earned</td><td class="col-type">DECIMAL(5,2)</td><td class="col-null nullable">NULL</td></tr>
+        </table>
+        <div class="fk-section"><h4>INDEX</h4><div class="fk-item">idx_sa_assign (student_assignment_id)</div></div>
+      </div>
+
+      <div class="table-card">
+        <div class="table-card-header"><div><div class="name">grades</div><div class="desc">Bảng điểm tổng hợp</div></div><span class="badge">8 cột</span></div>
+        <table class="cols-table">
+          <tr><th>Cột</th><th>Kiểu</th><th>Ràng buộc</th></tr>
+          <tr><td class="col-name">id</td><td class="col-type">INT</td><td><span class="tag tag-pk">PK</span> AUTO_INCREMENT</td></tr>
+          <tr><td class="col-name">student_id</td><td class="col-type">INT</td><td>NOT NULL <span class="tag tag-fk">FK</span> → users(id) CASCADE</td></tr>
+          <tr><td class="col-name">class_id</td><td class="col-type">INT</td><td>NOT NULL <span class="tag tag-fk">FK</span> → classes(id) CASCADE</td></tr>
+          <tr><td class="col-name">subject_id</td><td class="col-type">INT</td><td>NOT NULL <span class="tag tag-fk">FK</span> → subjects(id) CASCADE</td></tr>
+          <tr><td class="col-name">assignment_id</td><td class="col-type">INT</td><td class="col-null nullable">NULL <span class="tag tag-fk">FK</span> → assignments(id)</td></tr>
+          <tr><td class="col-name">exam_id</td><td class="col-type">INT</td><td class="col-null nullable">NULL <span class="tag tag-fk">FK</span> → exams(id)</td></tr>
+          <tr><td class="col-name">score</td><td class="col-type">DECIMAL(5,2)</td><td>NOT NULL</td></tr>
+          <tr><td class="col-name">max_score</td><td class="col-type">DECIMAL(5,2)</td><td>NOT NULL DEFAULT 10.00</td></tr>
+          <tr><td class="col-name">graded_at</td><td class="col-type">DATETIME</td><td>NOT NULL DEFAULT CURRENT_TIMESTAMP</td></tr>
+        </table>
+        <div class="fk-section"><h4>INDEX</h4><div class="fk-item">idx_grades_student · idx_grades_class</div></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- GROUP 6: DIEN DAN -->
+  <!-- ============================================================ -->
+  <div class="group">
+    <div class="group-header open" onclick="toggle(this)">
+      <div><h2> Nhóm 6: Diễn Đàn</h2><span class="count">4 bảng</span></div>
+      <span class="arrow">▼</span>
+    </div>
+    <div class="group-body open">
+
+      <div class="table-card">
+        <div class="table-card-header"><div><div class="name">forum_topics</div><div class="desc">Chủ đề / tag môn học</div></div><span class="badge">4 cột</span></div>
+        <table class="cols-table">
+          <tr><th>Cột</th><th>Kiểu</th><th>Ràng buộc</th></tr>
+          <tr><td class="col-name">id</td><td class="col-type">INT</td><td><span class="tag tag-pk">PK</span> AUTO_INCREMENT</td></tr>
+          <tr><td class="col-name">name</td><td class="col-type">VARCHAR(100)</td><td>NOT NULL</td></tr>
+          <tr><td class="col-name">slug</td><td class="col-type">VARCHAR(50)</td><td>NOT NULL <span class="tag tag-uq">UNIQUE</span></td></tr>
+          <tr><td class="col-name">description</td><td class="col-type">TEXT</td><td class="col-null nullable">NULL</td></tr>
+        </table>
+      </div>
+
+      <div class="table-card">
+        <div class="table-card-header"><div><div class="name">forum_posts</div><div class="desc">Bài viết diễn đàn</div></div><span class="badge">9 cột</span></div>
+        <table class="cols-table">
+          <tr><th>Cột</th><th>Kiểu</th><th>Ràng buộc</th></tr>
+          <tr><td class="col-name">id</td><td class="col-type">INT</td><td><span class="tag tag-pk">PK</span> AUTO_INCREMENT</td></tr>
+          <tr><td class="col-name">user_id</td><td class="col-type">INT</td><td>NOT NULL <span class="tag tag-fk">FK</span> → users(id) CASCADE</td></tr>
+          <tr><td class="col-name">title</td><td class="col-type">VARCHAR(200)</td><td>NOT NULL</td></tr>
+          <tr><td class="col-name">content</td><td class="col-type">TEXT</td><td>NOT NULL</td></tr>
+          <tr><td class="col-name">topic_id</td><td class="col-type">INT</td><td class="col-null nullable">NULL <span class="tag tag-fk">FK</span> → forum_topics(id) SET NULL</td></tr>
+          <tr><td class="col-name">status</td><td class="col-type">ENUM</td><td>NOT NULL DEFAULT 'approved'</td></tr>
+          <tr><td class="col-name">is_resolved</td><td class="col-type">BOOLEAN</td><td>NOT NULL DEFAULT FALSE</td></tr>
+          <tr><td class="col-name">view_count</td><td class="col-type">INT</td><td>NOT NULL DEFAULT 0</td></tr>
+          <tr><td class="col-name">created_at</td><td class="col-type">DATETIME</td><td>NOT NULL DEFAULT CURRENT_TIMESTAMP</td></tr>
+          <tr><td class="col-name">updated_at</td><td class="col-type">DATETIME</td><td>NOT NULL ON UPDATE CURRENT_TIMESTAMP</td></tr>
+        </table>
+        <div class="fk-section"><h4>INDEX</h4><div class="fk-item">idx_fp_user · idx_fp_topic · idx_fp_status</div></div>
+      </div>
+
+      <div class="table-card">
+        <div class="table-card-header"><div><div class="name">forum_comments</div><div class="desc">Câu trả lời / bình luận</div></div><span class="badge">6 cột</span></div>
+        <table class="cols-table">
+          <tr><th>Cột</th><th>Kiểu</th><th>Ràng buộc</th></tr>
+          <tr><td class="col-name">id</td><td class="col-type">INT</td><td><span class="tag tag-pk">PK</span> AUTO_INCREMENT</td></tr>
+          <tr><td class="col-name">post_id</td><td class="col-type">INT</td><td>NOT NULL <span class="tag tag-fk">FK</span> → forum_posts(id) CASCADE</td></tr>
+          <tr><td class="col-name">user_id</td><td class="col-type">INT</td><td>NOT NULL <span class="tag tag-fk">FK</span> → users(id) CASCADE</td></tr>
+          <tr><td class="col-name">content</td><td class="col-type">TEXT</td><td>NOT NULL</td></tr>
+          <tr><td class="col-name">is_best_answer</td><td class="col-type">BOOLEAN</td><td>NOT NULL DEFAULT FALSE</td></tr>
+          <tr><td class="col-name">created_at</td><td class="col-type">DATETIME</td><td>NOT NULL DEFAULT CURRENT_TIMESTAMP</td></tr>
+        </table>
+        <div class="fk-section"><h4>INDEX</h4><div class="fk-item">idx_fc_post (post_id)</div></div>
+      </div>
+
+      <div class="table-card">
+        <div class="table-card-header"><div><div class="name">forum_votes</div><div class="desc">Vote up/down cho bài viết</div></div><span class="badge">5 cột</span></div>
+        <table class="cols-table">
+          <tr><th>Cột</th><th>Kiểu</th><th>Ràng buộc</th></tr>
+          <tr><td class="col-name">id</td><td class="col-type">INT</td><td><span class="tag tag-pk">PK</span> AUTO_INCREMENT</td></tr>
+          <tr><td class="col-name">post_id</td><td class="col-type">INT</td><td>NOT NULL <span class="tag tag-fk">FK</span> → forum_posts(id) CASCADE</td></tr>
+          <tr><td class="col-name">user_id</td><td class="col-type">INT</td><td>NOT NULL <span class="tag tag-fk">FK</span> → users(id) CASCADE</td></tr>
+          <tr><td class="col-name">vote_type</td><td class="col-type">ENUM('up','down')</td><td>NOT NULL</td></tr>
+          <tr><td class="col-name">created_at</td><td class="col-type">DATETIME</td><td>NOT NULL DEFAULT CURRENT_TIMESTAMP</td></tr>
+        </table>
+        <div class="fk-section"><h4>RÀNG BUỘC</h4><div class="fk-item"><span class="tag tag-uq">UNIQUE</span> (post_id, user_id)</div></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- GROUP 7: GAMIFICATION -->
+  <!-- ============================================================ -->
+  <div class="group">
+    <div class="group-header open" onclick="toggle(this)">
+      <div><h2> Nhóm 7: Gamification</h2><span class="count">6 bảng</span></div>
+      <span class="arrow">▼</span>
+    </div>
+    <div class="group-body open">
+
+      <div class="table-card">
+        <div class="table-card-header"><div><div class="name">user_xp</div><div class="desc">Điểm kinh nghiệm và rank</div></div><span class="badge">6 cột</span></div>
+        <table class="cols-table">
+          <tr><th>Cột</th><th>Kiểu</th><th>Ràng buộc</th></tr>
+          <tr><td class="col-name">id</td><td class="col-type">INT</td><td><span class="tag tag-pk">PK</span> AUTO_INCREMENT</td></tr>
+          <tr><td class="col-name">user_id</td><td class="col-type">INT</td><td>NOT NULL <span class="tag tag-uq">UNIQUE</span> <span class="tag tag-fk">FK</span> → users(id) CASCADE</td></tr>
+          <tr><td class="col-name">total_xp</td><td class="col-type">INT</td><td>NOT NULL DEFAULT 0</td></tr>
+          <tr><td class="col-name">current_rank</td><td class="col-type">VARCHAR(50)</td><td class="col-null nullable">NULL</td></tr>
+          <tr><td class="col-name">updated_at</td><td class="col-type">DATETIME</td><td>NOT NULL ON UPDATE CURRENT_TIMESTAMP</td></tr>
+        </table>
+      </div>
+
+      <div class="table-card">
+        <div class="table-card-header"><div><div class="name">xp_transactions</div><div class="desc">Lịch sử cộng/trừ XP</div></div><span class="badge">7 cột</span></div>
+        <table class="cols-table">
+          <tr><th>Cột</th><th>Kiểu</th><th>Ràng buộc</th></tr>
+          <tr><td class="col-name">id</td><td class="col-type">INT</td><td><span class="tag tag-pk">PK</span> AUTO_INCREMENT</td></tr>
+          <tr><td class="col-name">user_id</td><td class="col-type">INT</td><td>NOT NULL <span class="tag tag-fk">FK</span> → users(id) CASCADE</td></tr>
+          <tr><td class="col-name">amount</td><td class="col-type">INT</td><td>NOT NULL</td></tr>
+          <tr><td class="col-name">source</td><td class="col-type">ENUM</td><td>NOT NULL</td></tr>
+          <tr><td class="col-name">reference_id</td><td class="col-type">INT</td><td class="col-null nullable">NULL</td></tr>
+          <tr><td class="col-name">created_at</td><td class="col-type">DATETIME</td><td>NOT NULL DEFAULT CURRENT_TIMESTAMP</td></tr>
+        </table>
+        <div class="fk-section"><h4>INDEX</h4><div class="fk-item">idx_xp_user (user_id)</div></div>
+      </div>
+
+      <div class="table-card">
+        <div class="table-card-header"><div><div class="name">user_streaks</div><div class="desc">Chuỗi ngày học liên tiếp</div></div><span class="badge">6 cột</span></div>
+        <table class="cols-table">
+          <tr><th>Cột</th><th>Kiểu</th><th>Ràng buộc</th></tr>
+          <tr><td class="col-name">id</td><td class="col-type">INT</td><td><span class="tag tag-pk">PK</span> AUTO_INCREMENT</td></tr>
+          <tr><td class="col-name">user_id</td><td class="col-type">INT</td><td>NOT NULL <span class="tag tag-uq">UNIQUE</span> <span class="tag tag-fk">FK</span> → users(id) CASCADE</td></tr>
+          <tr><td class="col-name">current_streak</td><td class="col-type">INT</td><td>NOT NULL DEFAULT 0</td></tr>
+          <tr><td class="col-name">longest_streak</td><td class="col-type">INT</td><td>NOT NULL DEFAULT 0</td></tr>
+          <tr><td class="col-name">last_active_date</td><td class="col-type">DATE</td><td class="col-null nullable">NULL</td></tr>
+          <tr><td class="col-name">updated_at</td><td class="col-type">DATETIME</td><td>NOT NULL ON UPDATE CURRENT_TIMESTAMP</td></tr>
+        </table>
+      </div>
+
+      <div class="table-card">
+        <div class="table-card-header"><div><div class="name">daily_attendance</div><div class="desc">Điểm danh hàng ngày</div></div><span class="badge">6 cột</span></div>
+        <table class="cols-table">
+          <tr><th>Cột</th><th>Kiểu</th><th>Ràng buộc</th></tr>
+          <tr><td class="col-name">id</td><td class="col-type">INT</td><td><span class="tag tag-pk">PK</span> AUTO_INCREMENT</td></tr>
+          <tr><td class="col-name">user_id</td><td class="col-type">INT</td><td>NOT NULL <span class="tag tag-fk">FK</span> → users(id) CASCADE</td></tr>
+          <tr><td class="col-name">attendance_date</td><td class="col-type">DATE</td><td>NOT NULL</td></tr>
+          <tr><td class="col-name">xp_earned</td><td class="col-type">INT</td><td>NOT NULL DEFAULT 0</td></tr>
+          <tr><td class="col-name">created_at</td><td class="col-type">DATETIME</td><td>NOT NULL DEFAULT CURRENT_TIMESTAMP</td></tr>
+        </table>
+        <div class="fk-section"><h4>RÀNG BUỘC</h4><div class="fk-item"><span class="tag tag-uq">UNIQUE</span> (user_id, attendance_date)</div></div>
+      </div>
+
+      <div class="table-card">
+        <div class="table-card-header"><div><div class="name">achievements</div><div class="desc">Danh sách huy hiệu / thành tích</div></div><span class="badge">5 cột</span></div>
+        <table class="cols-table">
+          <tr><th>Cột</th><th>Kiểu</th><th>Ràng buộc</th></tr>
+          <tr><td class="col-name">id</td><td class="col-type">INT</td><td><span class="tag tag-pk">PK</span> AUTO_INCREMENT</td></tr>
+          <tr><td class="col-name">name</td><td class="col-type">VARCHAR(100)</td><td>NOT NULL</td></tr>
+          <tr><td class="col-name">description</td><td class="col-type">TEXT</td><td class="col-null nullable">NULL</td></tr>
+          <tr><td class="col-name">icon_url</td><td class="col-type">VARCHAR(255)</td><td class="col-null nullable">NULL</td></tr>
+          <tr><td class="col-name">xp_reward</td><td class="col-type">INT</td><td>NOT NULL DEFAULT 0</td></tr>
+        </table>
+      </div>
+
+      <div class="table-card">
+        <div class="table-card-header"><div><div class="name">user_achievements</div><div class="desc">Huy hiệu người dùng đã mở</div></div><span class="badge">4 cột</span></div>
+        <table class="cols-table">
+          <tr><th>Cột</th><th>Kiểu</th><th>Ràng buộc</th></tr>
+          <tr><td class="col-name">id</td><td class="col-type">INT</td><td><span class="tag tag-pk">PK</span> AUTO_INCREMENT</td></tr>
+          <tr><td class="col-name">user_id</td><td class="col-type">INT</td><td>NOT NULL <span class="tag tag-fk">FK</span> → users(id) CASCADE</td></tr>
+          <tr><td class="col-name">achievement_id</td><td class="col-type">INT</td><td>NOT NULL <span class="tag tag-fk">FK</span> → achievements(id) CASCADE</td></tr>
+          <tr><td class="col-name">unlocked_at</td><td class="col-type">DATETIME</td><td>NOT NULL DEFAULT CURRENT_TIMESTAMP</td></tr>
+        </table>
+        <div class="fk-section"><h4>RÀNG BUỘC</h4><div class="fk-item"><span class="tag tag-uq">UNIQUE</span> (user_id, achievement_id)</div></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- GROUP 8: PHU HUYNH -->
+  <!-- ============================================================ -->
+  <div class="group">
+    <div class="group-header open" onclick="toggle(this)">
+      <div><h2> Nhóm 8: Phụ Huynh</h2><span class="count">1 bảng</span></div>
+      <span class="arrow">▼</span>
+    </div>
+    <div class="group-body open">
+
+      <div class="table-card">
+        <div class="table-card-header"><div><div class="name">parent_student_links</div><div class="desc">Liên kết phụ huynh - học sinh</div></div><span class="badge">7 cột</span></div>
+        <table class="cols-table">
+          <tr><th>Cột</th><th>Kiểu</th><th>Ràng buộc</th></tr>
+          <tr><td class="col-name">id</td><td class="col-type">INT</td><td><span class="tag tag-pk">PK</span> AUTO_INCREMENT</td></tr>
+          <tr><td class="col-name">parent_id</td><td class="col-type">INT</td><td class="col-null nullable">NULL <span class="tag tag-fk">FK</span> → users(id) CASCADE</td></tr>
+          <tr><td class="col-name">student_id</td><td class="col-type">INT</td><td>NOT NULL <span class="tag tag-fk">FK</span> → users(id) CASCADE</td></tr>
+          <tr><td class="col-name">link_code</td><td class="col-type">VARCHAR(20)</td><td>NOT NULL <span class="tag tag-uq">UNIQUE</span></td></tr>
+          <tr><td class="col-name">linked_at</td><td class="col-type">DATETIME</td><td>NOT NULL DEFAULT CURRENT_TIMESTAMP</td></tr>
+          <tr><td class="col-name">status</td><td class="col-type">ENUM</td><td>NOT NULL DEFAULT 'pending'</td></tr>
+        </table>
+        <div class="fk-section"><h4>RÀNG BUỘC & INDEX</h4><div class="fk-item"><span class="tag tag-uq">UNIQUE</span> (parent_id, student_id)</div><div class="fk-item"><span class="tag tag-idx">INDEX</span> idx_psl_parent · idx_psl_student</div></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- GROUP 9: QUAN TRI & HE THONG -->
+  <!-- ============================================================ -->
+  <div class="group">
+    <div class="group-header open" onclick="toggle(this)">
+      <div><h2> Nhóm 9: Quản Trị & Hệ Thống</h2><span class="count">4 bảng</span></div>
+      <span class="arrow">▼</span>
+    </div>
+    <div class="group-body open">
+
+      <div class="table-card">
+        <div class="table-card-header"><div><div class="name">notifications</div><div class="desc">Thông báo hệ thống (Admin tạo)</div></div><span class="badge">7 cột</span></div>
+        <table class="cols-table">
+          <tr><th>Cột</th><th>Kiểu</th><th>Ràng buộc</th></tr>
+          <tr><td class="col-name">id</td><td class="col-type">INT</td><td><span class="tag tag-pk">PK</span> AUTO_INCREMENT</td></tr>
+          <tr><td class="col-name">title</td><td class="col-type">VARCHAR(180)</td><td>NOT NULL</td></tr>
+          <tr><td class="col-name">body</td><td class="col-type">TEXT</td><td class="col-null nullable">NULL</td></tr>
+          <tr><td class="col-name">target_role</td><td class="col-type">ENUM</td><td>NOT NULL DEFAULT 'all'</td></tr>
+          <tr><td class="col-name">created_by</td><td class="col-type">INT</td><td>NOT NULL <span class="tag tag-fk">FK</span> → users(id) CASCADE</td></tr>
+          <tr><td class="col-name">created_at</td><td class="col-type">DATETIME</td><td>NOT NULL DEFAULT CURRENT_TIMESTAMP</td></tr>
+          <tr><td class="col-name">updated_at</td><td class="col-type">DATETIME</td><td>NOT NULL ON UPDATE CURRENT_TIMESTAMP</td></tr>
+        </table>
+        <div class="fk-section"><h4>INDEX</h4><div class="fk-item">idx_notif_role (target_role)</div></div>
+      </div>
+
+      <div class="table-card">
+        <div class="table-card-header"><div><div class="name">notification_reads</div><div class="desc">Trạng thái đã đọc thông báo</div></div><span class="badge">4 cột</span></div>
+        <table class="cols-table">
+          <tr><th>Cột</th><th>Kiểu</th><th>Ràng buộc</th></tr>
+          <tr><td class="col-name">id</td><td class="col-type">INT</td><td><span class="tag tag-pk">PK</span> AUTO_INCREMENT</td></tr>
+          <tr><td class="col-name">notification_id</td><td class="col-type">INT</td><td>NOT NULL <span class="tag tag-fk">FK</span> → notifications(id) CASCADE</td></tr>
+          <tr><td class="col-name">user_id</td><td class="col-type">INT</td><td>NOT NULL <span class="tag tag-fk">FK</span> → users(id) CASCADE</td></tr>
+          <tr><td class="col-name">read_at</td><td class="col-type">DATETIME</td><td>NOT NULL DEFAULT CURRENT_TIMESTAMP</td></tr>
+        </table>
+        <div class="fk-section"><h4>RÀNG BUỘC</h4><div class="fk-item"><span class="tag tag-uq">UNIQUE</span> (notification_id, user_id)</div></div>
+      </div>
+
+      <div class="table-card">
+        <div class="table-card-header"><div><div class="name">news</div><div class="desc">Tin tức giáo dục</div></div><span class="badge">9 cột</span></div>
+        <table class="cols-table">
+          <tr><th>Cột</th><th>Kiểu</th><th>Ràng buộc</th></tr>
+          <tr><td class="col-name">id</td><td class="col-type">INT</td><td><span class="tag tag-pk">PK</span> AUTO_INCREMENT</td></tr>
+          <tr><td class="col-name">title</td><td class="col-type">VARCHAR(200)</td><td>NOT NULL</td></tr>
+          <tr><td class="col-name">content</td><td class="col-type">TEXT</td><td class="col-null nullable">NULL</td></tr>
+          <tr><td class="col-name">thumbnail_url</td><td class="col-type">VARCHAR(500)</td><td class="col-null nullable">NULL</td></tr>
+          <tr><td class="col-name">category</td><td class="col-type">VARCHAR(50)</td><td class="col-null nullable">NULL</td></tr>
+          <tr><td class="col-name">is_pinned</td><td class="col-type">BOOLEAN</td><td>NOT NULL DEFAULT FALSE</td></tr>
+          <tr><td class="col-name">status</td><td class="col-type">ENUM</td><td>NOT NULL DEFAULT 'draft'</td></tr>
+          <tr><td class="col-name">view_count</td><td class="col-type">INT</td><td>NOT NULL DEFAULT 0</td></tr>
+          <tr><td class="col-name">created_by</td><td class="col-type">INT</td><td>NOT NULL <span class="tag tag-fk">FK</span> → users(id) CASCADE</td></tr>
+          <tr><td class="col-name">published_at</td><td class="col-type">DATETIME</td><td class="col-null nullable">NULL</td></tr>
+          <tr><td class="col-name">created_at</td><td class="col-type">DATETIME</td><td>NOT NULL DEFAULT CURRENT_TIMESTAMP</td></tr>
+        </table>
+        <div class="fk-section"><h4>INDEX</h4><div class="fk-item">idx_news_status · idx_news_pinned</div></div>
+      </div>
+
+      <div class="table-card">
+        <div class="table-card-header"><div><div class="name">faq</div><div class="desc">Câu hỏi thường gặp (không FK)</div></div><span class="badge">5 cột</span></div>
+        <table class="cols-table">
+          <tr><th>Cột</th><th>Kiểu</th><th>Ràng buộc</th></tr>
+          <tr><td class="col-name">id</td><td class="col-type">INT</td><td><span class="tag tag-pk">PK</span> AUTO_INCREMENT</td></tr>
+          <tr><td class="col-name">category</td><td class="col-type">VARCHAR(100)</td><td class="col-null nullable">NULL</td></tr>
+          <tr><td class="col-name">question</td><td class="col-type">TEXT</td><td>NOT NULL</td></tr>
+          <tr><td class="col-name">answer</td><td class="col-type">TEXT</td><td>NOT NULL</td></tr>
+          <tr><td class="col-name">order_index</td><td class="col-type">INT</td><td>NOT NULL DEFAULT 0</td></tr>
+        </table>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- GROUP 10: AI CHAT -->
+  <!-- ============================================================ -->
+  <div class="group">
+    <div class="group-header open" onclick="toggle(this)">
+      <div><h2> Nhóm 10: AI Chat</h2><span class="count">1 bảng</span></div>
+      <span class="arrow">▼</span>
+    </div>
+    <div class="group-body open">
+
+      <div class="table-card">
+        <div class="table-card-header"><div><div class="name">ai_chat_history</div><div class="desc">Lịch sử trò chuyện với Doly AI</div></div><span class="badge">7 cột</span></div>
+        <table class="cols-table">
+          <tr><th>Cột</th><th>Kiểu</th><th>Ràng buộc</th></tr>
+          <tr><td class="col-name">id</td><td class="col-type">INT</td><td><span class="tag tag-pk">PK</span> AUTO_INCREMENT</td></tr>
+          <tr><td class="col-name">user_id</td><td class="col-type">INT</td><td>NOT NULL <span class="tag tag-fk">FK</span> → users(id) CASCADE</td></tr>
+          <tr><td class="col-name">role</td><td class="col-type">ENUM</td><td>NOT NULL — user | assistant</td></tr>
+          <tr><td class="col-name">message</td><td class="col-type">TEXT</td><td>NOT NULL</td></tr>
+          <tr><td class="col-name">context</td><td class="col-type">JSON</td><td class="col-null nullable">NULL</td></tr>
+          <tr><td class="col-name">created_at</td><td class="col-type">DATETIME</td><td>NOT NULL DEFAULT CURRENT_TIMESTAMP</td></tr>
+        </table>
+        <div class="fk-section"><h4>INDEX</h4><div class="fk-item">idx_ach_user (user_id)</div></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- RELATIONSHIPS -->
+  <!-- ============================================================ -->
+  <div class="rel-section">
+    <h2> Sơ đồ Quan hệ (Foreign Keys)</h2>
+    <table class="rel-table">
+      <tr><th>Nhóm</th><th>Bảng cha</th><th>Bảng con</th><th>Đường dẫn FK</th></tr>
+      <tr><td class="rel-group">Auth</td><td>users</td><td>user_sessions</td><td>user_sessions.user_id → users.id</td></tr>
+      <tr><td class="rel-group">Auth</td><td>users</td><td>user_verifications</td><td>(độc lập, chỉ dùng email)</td></tr>
+      <tr><td class="rel-group">Lớp học</td><td>users (teacher)</td><td>classes</td><td>classes.teacher_id → users.id</td></tr>
+      <tr><td class="rel-group">Lớp học</td><td>classes</td><td>class_members</td><td>class_members.class_id → classes.id</td></tr>
+      <tr><td class="rel-group">Lớp học</td><td>users (student)</td><td>class_members</td><td>class_members.student_id → users.id</td></tr>
+      <tr><td class="rel-group">Học liệu</td><td>subjects</td><td>lessons</td><td>lessons.subject_id → subjects.id</td></tr>
+      <tr><td class="rel-group">Học liệu</td><td>lessons</td><td>videos</td><td>videos.lesson_id → lessons.id</td></tr>
+      <tr><td class="rel-group">Học liệu</td><td>lessons</td><td>documents</td><td>documents.lesson_id → lessons.id</td></tr>
+      <tr><td class="rel-group">Học liệu</td><td>subjects/lessons</td><td>lab_models</td><td>subject_id / lesson_id → subjects.id / lessons.id</td></tr>
+      <tr><td class="rel-group">Câu hỏi</td><td>subjects</td><td>question_bank</td><td>question_bank.subject_id → subjects.id</td></tr>
+      <tr><td class="rel-group">Câu hỏi</td><td>lessons</td><td>question_bank</td><td>question_bank.lesson_id → lessons.id</td></tr>
+      <tr><td class="rel-group">Câu hỏi</td><td>question_bank</td><td>question_options</td><td>question_options.question_id → question_bank.id</td></tr>
+      <tr><td class="rel-group">Câu hỏi</td><td>question_bank</td><td>fill_blank_answers</td><td>fill_blank_answers.question_id → question_bank.id</td></tr>
+      <tr><td class="rel-group">Câu hỏi</td><td>question_bank</td><td>matching_pairs</td><td>matching_pairs.question_id → question_bank.id</td></tr>
+      <tr><td class="rel-group">Kiểm tra</td><td>exams</td><td>exam_questions</td><td>exam_questions.exam_id → exams.id</td></tr>
+      <tr><td class="rel-group">Kiểm tra</td><td>question_bank</td><td>exam_questions</td><td>exam_questions.question_id → question_bank.id</td></tr>
+      <tr><td class="rel-group">Giao bài</td><td>classes</td><td>assignments</td><td>assignments.class_id → classes.id</td></tr>
+      <tr><td class="rel-group">Giao bài</td><td>exams</td><td>assignments</td><td>assignments.exam_id → exams.id</td></tr>
+      <tr><td class="rel-group">Giao bài</td><td>assignments</td><td>student_assignments</td><td>student_assignments.assignment_id → assignments.id</td></tr>
+      <tr><td class="rel-group">Giao bài</td><td>users (student)</td><td>student_assignments</td><td>student_assignments.student_id → users.id</td></tr>
+      <tr><td class="rel-group">Giao bài</td><td>student_assignments</td><td>student_answers</td><td>student_answers.student_assignment_id → student_assignments.id</td></tr>
+      <tr><td class="rel-group">Giao bài</td><td>question_bank</td><td>student_answers</td><td>student_answers.question_id → question_bank.id</td></tr>
+      <tr><td class="rel-group">Điểm</td><td>users (student)</td><td>grades</td><td>grades.student_id → users.id</td></tr>
+      <tr><td class="rel-group">Điểm</td><td>classes</td><td>grades</td><td>grades.class_id → classes.id</td></tr>
+      <tr><td class="rel-group">Điểm</td><td>subjects</td><td>grades</td><td>grades.subject_id → subjects.id</td></tr>
+      <tr><td class="rel-group">Diễn đàn</td><td>users</td><td>forum_posts</td><td>forum_posts.user_id → users.id</td></tr>
+      <tr><td class="rel-group">Diễn đàn</td><td>forum_topics</td><td>forum_posts</td><td>forum_posts.topic_id → forum_topics.id</td></tr>
+      <tr><td class="rel-group">Diễn đàn</td><td>forum_posts</td><td>forum_comments</td><td>forum_comments.post_id → forum_posts.id</td></tr>
+      <tr><td class="rel-group">Diễn đàn</td><td>forum_posts</td><td>forum_votes</td><td>forum_votes.post_id → forum_posts.id</td></tr>
+      <tr><td class="rel-group">Game</td><td>users</td><td>user_xp</td><td>user_xp.user_id → users.id</td></tr>
+      <tr><td class="rel-group">Game</td><td>users</td><td>user_streaks</td><td>user_streaks.user_id → users.id</td></tr>
+      <tr><td class="rel-group">Game</td><td>users</td><td>xp_transactions</td><td>xp_transactions.user_id → users.id</td></tr>
+      <tr><td class="rel-group">Game</td><td>users</td><td>daily_attendance</td><td>daily_attendance.user_id → users.id</td></tr>
+      <tr><td class="rel-group">Game</td><td>users</td><td>user_achievements</td><td>user_achievements.user_id → users.id</td></tr>
+      <tr><td class="rel-group">Game</td><td>achievements</td><td>user_achievements</td><td>user_achievements.achievement_id → achievements.id</td></tr>
+      <tr><td class="rel-group">Phụ huynh</td><td>users (parent)</td><td>parent_student_links</td><td>parent_student_links.parent_id → users.id</td></tr>
+      <tr><td class="rel-group">Phụ huynh</td><td>users (student)</td><td>parent_student_links</td><td>parent_student_links.student_id → users.id</td></tr>
+      <tr><td class="rel-group">Hệ thống</td><td>users (admin)</td><td>notifications</td><td>notifications.created_by → users.id</td></tr>
+      <tr><td class="rel-group">Hệ thống</td><td>notifications</td><td>notification_reads</td><td>notification_reads.notification_id → notifications.id</td></tr>
+      <tr><td class="rel-group">Hệ thống</td><td>users (admin)</td><td>news</td><td>news.created_by → users.id</td></tr>
+      <tr><td class="rel-group">AI Chat</td><td>users</td><td>ai_chat_history</td><td>ai_chat_history.user_id → users.id</td></tr>
+    </table>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- SEED DATA -->
+  <!-- ============================================================ -->
+  <div class="seed-section">
+    <h2> Seed Data mẫu</h2>
+    <div class="seed-grid">
+      <div class="seed-item">
+        <h4> Môn học</h4>
+        <p>Vật Lý · Hoá Học · Sinh Học</p>
+      </div>
+      <div class="seed-item">
+        <h4> Chủ đề Diễn đàn</h4>
+        <p>Toán Học · Vật Lý · Hoá Học · Sinh Học</p>
+      </div>
+      <div class="seed-item">
+        <h4> ❓ FAQ</h4>
+        <p>4 câu hỏi: Học tập, Tài khoản, Kỹ thuật</p>
+      </div>
+      <div class="seed-item">
+        <h4>  Huy hiệu</h4>
+        <p>Tân Thủ (50XP) · Chăm Chỉ (100XP)<br>Hiệp Sĩ (200XP) · Nhà Vô Địch (500XP)</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- TECHNICAL NOTES -->
+  <!-- ============================================================ -->
+  <div class="rel-section">
+    <h2> Lưu ý Kỹ thuật</h2>
+    <table class="rel-table">
+      <tr><th style="width:160px">Mục</th><th>Chi tiết</th></tr>
+      <tr><td style="font-weight:600">Engine</td><td>InnoDB — hỗ trợ khoá ngoại, transactions, row-level locking</td></tr>
+      <tr><td style="font-weight:600">Charset</td><td>utf8mb4 + utf8mb4_unicode_ci — hỗ trợ tiếng Việt và emoji đầy đủ</td></tr>
+      <tr><td style="font-weight:600">Index</td><td>Đã tạo index cho tất cả cột thường xuyên truy vấn (WHERE, JOIN, ORDER BY)</td></tr>
+      <tr><td style="font-weight:600">FK Policy</td><td><code>ON DELETE CASCADE</code> cho bảng con · <code>ON DELETE SET NULL</code> cho bảng tuỳ chọn</td></tr>
+      <tr><td style="font-weight:600">Bảo mật</td><td>password_hash → bcrypt (VARCHAR 255) · auth_token → ngẫu nhiên 255 ký tự</td></tr>
+      <tr><td style="font-weight:600">ENUM</td><td>Sử dụng ENUM cho các trường có giá trị cố định (role, status, type)</td></tr>
+      <tr><td style="font-weight:600">Timestamps</td><td>created_at: DEFAULT CURRENT_TIMESTAMP · updated_at: ON UPDATE CURRENT_TIMESTAMP</td></tr>
+    </table>
+  </div>
+
+  <div class="footer">
+    DOLY LMS — Database Schema v1.0 &middot; Thiết kế bởi Qoder AI &middot; MySQL 8.x
+  </div>
+
+</div>
+
+<script>
+  function toggle(el) {
+    el.classList.toggle('open');
+    var body = el.nextElementSibling;
+    body.classList.toggle('open');
+  }
+</script>
+</body>
+</html>

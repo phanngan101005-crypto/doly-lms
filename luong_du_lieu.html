@@ -1,0 +1,966 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DOLY LMS - Luong Du Lieu</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #0f0f23; color: #e0e0e0; padding: 40px 20px;
+  }
+  .container { max-width: 1100px; margin: 0 auto; }
+
+  .header {
+    background: linear-gradient(135deg, #1a1a4e 0%, #2d1b69 100%);
+    border: 1px solid #4a3f8a; border-radius: 16px; padding: 32px 36px; margin-bottom: 32px;
+  }
+  .header h1 { font-size: 26px; color: #c4b5fd; }
+  .header p { color: #9ca3af; font-size: 14px; margin-top: 6px; }
+  .header .badge-row { margin-top: 12px; display: flex; gap: 8px; flex-wrap: wrap; }
+  .h-badge {
+    background: #2d1b69; color: #a78bfa; border: 1px solid #4a3f8a;
+    font-size: 11px; padding: 4px 12px; border-radius: 20px;
+  }
+
+  /* Overview Architecture */
+  .arch-section {
+    background: #1a1a2e; border: 1px solid #2a2a4a; border-radius: 12px;
+    padding: 28px; margin-bottom: 32px;
+  }
+  .arch-section h2 { font-size: 18px; color: #c4b5fd; margin-bottom: 20px; }
+  .arch-flow {
+    display: flex; align-items: center; justify-content: center; gap: 12px;
+    flex-wrap: wrap; padding: 20px 0;
+  }
+  .arch-box {
+    background: #252545; border: 1px solid #3a3a6a; border-radius: 10px;
+    padding: 18px 24px; text-align: center; min-width: 130px;
+  }
+  .arch-box .icon { font-size: 24px; margin-bottom: 6px; }
+  .arch-box .label { font-size: 13px; font-weight: 600; color: #e0e0e0; }
+  .arch-box .sub { font-size: 11px; color: #9ca3af; margin-top: 2px; }
+  .arch-arrow { font-size: 20px; color: #667eea; font-weight: 300; padding: 0 4px; }
+  .arch-desc { font-size: 12px; color: #9ca3af; text-align: center; margin-top: 16px; line-height: 1.7; }
+
+  /* Flow Card */
+  .flow-card {
+    background: #1a1a2e; border: 1px solid #2a2a4a; border-radius: 12px;
+    margin-bottom: 20px; overflow: hidden;
+  }
+  .flow-header {
+    background: #222244; padding: 16px 24px;
+    display: flex; justify-content: space-between; align-items: center;
+    border-bottom: 1px solid #2a2a4a; cursor: pointer; user-select: none;
+  }
+  .flow-header:hover { background: #2a2a50; }
+  .flow-header .left { display: flex; align-items: center; gap: 12px; }
+  .flow-header .icon-circle {
+    width: 32px; height: 32px; border-radius: 50%; display: flex;
+    align-items: center; justify-content: center; font-size: 15px; color: #fff;
+  }
+  .flow-header h3 { font-size: 15px; color: #e0e0e0; }
+  .flow-header .count { font-size: 11px; color: #9ca3af; }
+  .flow-header .arrow { color: #666; transition: transform 0.2s; font-size: 12px; }
+  .flow-header.open .arrow { transform: rotate(180deg); }
+  .flow-body { display: none; padding: 20px 24px; }
+  .flow-body.open { display: block; }
+
+  /* Step Diagram */
+  .flow-diagram { margin-bottom: 16px; }
+  .step-row {
+    display: flex; align-items: stretch; gap: 0; margin-bottom: 0;
+  }
+  .step-num {
+    width: 32px; min-width: 32px; display: flex; flex-direction: column;
+    align-items: center; padding: 6px 0;
+  }
+  .step-num .dot {
+    width: 24px; height: 24px; border-radius: 50%; display: flex;
+    align-items: center; justify-content: center; font-size: 11px;
+    font-weight: 700; color: #fff; flex-shrink: 0;
+  }
+  .step-num .line {
+    width: 2px; flex: 1; min-height: 20px; margin: 3px 0;
+  }
+  .step-content {
+    flex: 1; background: #222240; border-radius: 8px; padding: 12px 16px;
+    margin-left: 12px; margin-bottom: 8px;
+  }
+  .step-content .step-title { font-size: 13px; font-weight: 600; color: #e0e0e0; }
+  .step-content .step-desc { font-size: 12px; color: #9ca3af; margin-top: 3px; }
+  .step-content .step-db { font-size: 11px; color: #6ee7b7; margin-top: 4px; font-family: 'Consolas', monospace; }
+
+  .color-purple .dot { background: #7c3aed; } .color-purple .line { background: #4a3f8a; }
+  .color-pink .dot { background: #ec4899; } .color-pink .line { background: #8a3a5a; }
+  .color-blue .dot { background: #3b82f6; } .color-blue .line { background: #3a5a8a; }
+  .color-green .dot { background: #10b981; } .color-green .line { background: #3a6a5a; }
+  .color-orange .dot { background: #f59e0b; } .color-orange .line { background: #6a5a3a; }
+  .color-red .dot { background: #ef4444; } .color-red .line { background: #6a3a3a; }
+  .color-teal .dot { background: #14b8a6; } .color-teal .line { background: #3a6a5a; }
+
+  /* Table info */
+  .flow-tables { margin-top: 12px; }
+  .flow-tables h4 { font-size: 11px; text-transform: uppercase; color: #6b7280; margin-bottom: 6px; letter-spacing: 0.5px; }
+  .tb-row { display: flex; gap: 6px; flex-wrap: wrap; }
+  .tb-tag {
+    background: #1e293b; color: #93c5fd; border: 1px solid #3b5a7a;
+    font-size: 11px; padding: 3px 10px; border-radius: 4px; font-family: 'Consolas', monospace;
+  }
+  .tb-tag-fk { background: #1e3a2e; color: #6ee7b7; border-color: #3a6a5a; }
+  .tb-tag-pk { background: #3a2a1e; color: #fbbf24; border-color: #6a5a3a; }
+
+  .flow-desc-text { font-size: 12.5px; color: #9ca3af; line-height: 1.7; padding: 8px 0; }
+
+  /* Overall flow highlight */
+  .flow-summary {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 12px; margin-bottom: 28px;
+  }
+  .f-card {
+    background: #1a1a2e; border: 1px solid #2a2a4a; border-radius: 10px;
+    padding: 16px; display: flex; align-items: center; gap: 12px;
+  }
+  .f-card .fi { font-size: 22px; width: 36px; text-align: center; }
+  .f-card .fl { font-size: 12px; color: #9ca3af; }
+  .f-card .fv { font-size: 14px; font-weight: 600; color: #c4b5fd; }
+
+  .footer { text-align: center; font-size: 12px; color: #4b5563; padding: 24px 0; border-top: 1px solid #1f2937; margin-top: 40px; }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- HEADER -->
+  <div class="header">
+    <h1> DOLY LMS — Luồng Dữ Liệu</h1>
+    <p>Tổng quan kiến trúc luồng dữ liệu và quy trình xử lý cho toàn bộ 10 nhóm chức năng</p>
+    <div class="badge-row">
+      <span class="h-badge"> Frontend → API → Database</span>
+      <span class="h-badge"> 10 luồng chính</span>
+      <span class="h-badge"> 36 bảng</span>
+      <span class="h-badge"> RESTful</span>
+    </div>
+  </div>
+
+  <!-- SUMMARY -->
+  <div class="flow-summary">
+    <div class="f-card"><div class="fi">🔐</div><div><div class="fv">Luồng 1</div><div class="fl">Auth & Đăng nhập</div></div></div>
+    <div class="f-card"><div class="fi">📚</div><div><div class="fv">Luồng 2</div><div class="fl">Lớp học</div></div></div>
+    <div class="f-card"><div class="fi">📖</div><div><div class="fv">Luồng 3</div><div class="fl">Bài giảng & Học liệu</div></div></div>
+    <div class="f-card"><div class="fi">❓</div><div><div class="fv">Luồng 4</div><div class="fl">Câu hỏi & Kiểm tra</div></div></div>
+    <div class="f-card"><div class="fi">📝</div><div><div class="fv">Luồng 5</div><div class="fl">Giao bài & Chấm điểm</div></div></div>
+    <div class="f-card"><div class="fi">💬</div><div><div class="fv">Luồng 6</div><div class="fl">Diễn đàn</div></div></div>
+    <div class="f-card"><div class="fi">🏆</div><div><div class="fv">Luồng 7</div><div class="fl">Gamification</div></div></div>
+    <div class="f-card"><div class="fi">👪</div><div><div class="fv">Luồng 8</div><div class="fl">Phụ huynh</div></div></div>
+    <div class="f-card"><div class="fi">⚙️</div><div><div class="fv">Luồng 9</div><div class="fl">Quản trị hệ thống</div></div></div>
+    <div class="f-card"><div class="fi">🤖</div><div><div class="fv">Luồng 10</div><div class="fl">AI Chat</div></div></div>
+  </div>
+
+  <!-- ============================================= -->
+  <!-- ARCHITECTURE OVERVIEW -->
+  <!-- ============================================= -->
+  <div class="arch-section">
+    <h2> Kiến trúc Tổng quan</h2>
+    <div class="arch-flow">
+      <div class="arch-box"><div class="icon">🌐</div><div class="label">Trình duyệt</div><div class="sub">HTML/CSS/JS</div></div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-box"><div class="icon">📡</div><div class="label">API Endpoint</div><div class="sub">/doly/api/*.php</div></div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-box"><div class="icon">🛡️</div><div class="label">Auth Middleware</div><div class="sub">token + role check</div></div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-box"><div class="icon">📦</div><div class="label">Controller</div><div class="sub">Xử lý nghiệp vụ</div></div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-box"><div class="icon">🗄️</div><div class="label">Database</div><div class="sub">MySQL (InnoDB)</div></div>
+    </div>
+    <div class="arch-desc">
+      <strong>Luồng dữ liệu cơ bản:</strong> Browser gửi request → API endpoint nhận → Auth middleware xác thực → Controller xử lý logic → Database query → JSON response → Browser render lại giao diện
+    </div>
+  </div>
+
+  <!-- ============================================= -->
+  <!-- FLOW 1: AUTH -->
+  <!-- ============================================= -->
+  <div class="flow-card">
+    <div class="flow-header open" onclick="toggle(this)">
+      <div class="left">
+        <div class="icon-circle" style="background:#7c3aed;">🔐</div>
+        <div><h3>Luồng 1: Xác thực & Đăng nhập</h3><span class="count">3 bảng · 4 vai trò</span></div>
+      </div>
+      <span class="arrow">▼</span>
+    </div>
+    <div class="flow-body open">
+
+      <div class="flow-desc-text">
+        Hệ thống hỗ trợ <strong>4 vai trò</strong>: Admin, Student, Teacher, Parent.
+        Xác thực qua <strong>email + password</strong> (bcrypt), hỗ trợ <strong>Google Sign-In</strong> và
+        <strong>EmailJS OTP</strong> cho đăng ký. Phiên làm việc quản lý bằng <strong>auth_token</strong>.
+      </div>
+
+      <!-- DANG KY -->
+      <div class="flow-diagram color-purple">
+        <h4 style="color:#a78bfa;font-size:13px;margin-bottom:10px;">  Quy trình Đăng ký</h4>
+
+        <div class="step-row">
+          <div class="step-num"><div class="dot">1</div><div class="line"></div></div>
+          <div class="step-content">
+            <div class="step-title">Người dùng nhập thông tin đăng ký</div>
+            <div class="step-desc">Họ tên, email, mật khẩu, chọn vai trò (student/teacher/parent)</div>
+          </div>
+        </div>
+        <div class="step-row">
+          <div class="step-num"><div class="dot">2</div><div class="line"></div></div>
+          <div class="step-content">
+            <div class="step-title">Gọi API gửi OTP qua EmailJS</div>
+            <div class="step-desc">Frontend gọi EmailJS SDK với service_id, template_id, public_key</div>
+            <div class="step-db">→ EmailJS (bên thứ ba) → Hộp thư người dùng</div>
+          </div>
+        </div>
+        <div class="step-row">
+          <div class="step-num"><div class="dot">3</div><div class="line"></div></div>
+          <div class="step-content">
+            <div class="step-title">Lưu mã OTP vào database</div>
+            <div class="step-desc">Tạo bản ghi trong user_verifications với thời hạn 5 phút</div>
+            <div class="step-db">→ INSERT INTO user_verifications (email, otp_code, expires_at)</div>
+          </div>
+        </div>
+        <div class="step-row">
+          <div class="step-num"><div class="dot">4</div><div class="line"></div></div>
+          <div class="step-content">
+            <div class="step-title">Người dùng nhập mã OTP → Xác thực</div>
+            <div class="step-desc">Kiểm tra OTP còn hạn, đánh dấu is_verified = TRUE</div>
+            <div class="step-db">→ UPDATE user_verifications SET is_verified = TRUE WHERE email = ?</div>
+          </div>
+        </div>
+        <div class="step-row">
+          <div class="step-num"><div class="dot">5</div><div class="line"></div></div>
+          <div class="step-content">
+            <div class="step-title">Tạo tài khoản users</div>
+            <div class="step-desc">Mật khẩu được băm bằng bcrypt trước khi lưu</div>
+            <div class="step-db">→ INSERT INTO users (full_name, email, password_hash, role, status) VALUES (?, ?, bcrypt(?), ?, 'active')</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- DANG NHAP -->
+      <div class="flow-diagram color-pink" style="margin-top:20px;">
+        <h4 style="color:#f472b6;font-size:13px;margin-bottom:10px;">  Quy trình Đăng nhập</h4>
+
+        <div class="step-row">
+          <div class="step-num"><div class="dot">1</div><div class="line"></div></div>
+          <div class="step-content">
+            <div class="step-title">Gửi email + password + role lên API</div>
+            <div class="step-desc">POST /doly/api/auth_login.php — JSON body</div>
+          </div>
+        </div>
+        <div class="step-row">
+          <div class="step-num"><div class="dot">2</div><div class="line"></div></div>
+          <div class="step-content">
+            <div class="step-title">Backend kiểm tra thông tin</div>
+            <div class="step-desc">Tìm user theo email, kiểm tra status='active' + role khớp, so sánh bcrypt</div>
+            <div class="step-db">→ SELECT * FROM users WHERE email = ? AND role = ?</div>
+          </div>
+        </div>
+        <div class="step-row">
+          <div class="step-num"><div class="dot">3</div><div class="line"></div></div>
+          <div class="step-content">
+            <div class="step-title">Tạo session token</div>
+            <div class="step-desc">Sinh auth_token ngẫu nhiên (bin2hex(random_bytes(64))) và lưu vào user_sessions</div>
+            <div class="step-db">→ INSERT INTO user_sessions (user_id, auth_token, expires_at) VALUES (?, ?, ?)</div>
+          </div>
+        </div>
+        <div class="step-row">
+          <div class="step-num"><div class="dot">4</div><div class="line"></div></div>
+          <div class="step-content">
+            <div class="step-title">Trả về token + thông tin user</div>
+            <div class="step-desc">Frontend lưu vào localStorage/sessionStorage, chuyển hướng theo role</div>
+            <div class="step-db">→ Response JSON: { user_id, full_name, email, role, auth_token, expires_at }</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="flow-tables">
+        <h4>Bảng liên quan</h4>
+        <div class="tb-row">
+          <span class="tb-tag tb-tag-pk">users (PK)</span>
+          <span class="tb-tag">user_verifications</span>
+          <span class="tb-tag tb-tag-fk">user_sessions (FK→users)</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================= -->
+  <!-- FLOW 2: LOP HOC -->
+  <!-- ============================================= -->
+  <div class="flow-card">
+    <div class="flow-header open" onclick="toggle(this)">
+      <div class="left">
+        <div class="icon-circle" style="background:#3b82f6;">📚</div>
+        <div><h3>Luồng 2: Quản lý Lớp học</h3><span class="count">2 bảng · 2 vai trò</span></div>
+      </div>
+      <span class="arrow">▼</span>
+    </div>
+    <div class="flow-body open">
+
+      <div class="flow-diagram color-blue">
+        <h4 style="color:#93c5fd;font-size:13px;margin-bottom:10px;">  Quy trình tạo & tham gia lớp</h4>
+
+        <div class="step-row">
+          <div class="step-num"><div class="dot">1</div><div class="line"></div></div>
+          <div class="step-content">
+            <div class="step-title">Giáo viên tạo lớp học</div>
+            <div class="step-desc">Nhập tên lớp, môn, cấp lớp. Hệ thống tự sinh class_code (mã mời ngẫu nhiên)</div>
+            <div class="step-db">→ INSERT INTO classes (name, subject, grade_level, teacher_id, class_code) VALUES (?, ?, ?, ?, ?)</div>
+          </div>
+        </div>
+        <div class="step-row">
+          <div class="step-num"><div class="dot">2</div><div class="line"></div></div>
+          <div class="step-content">
+            <div class="step-title">Giáo viên chia sẻ mã mời cho học sinh</div>
+            <div class="step-desc">class_code được hiển thị trong giao diện lớp học, có thể copy</div>
+          </div>
+        </div>
+        <div class="step-row">
+          <div class="step-num"><div class="dot">3</div><div class="line"></div></div>
+          <div class="step-content">
+            <div class="step-title">Học sinh nhập mã mời → tham gia lớp</div>
+            <div class="step-desc">Kiểm tra class_code tồn tại, thêm bản ghi vào class_members</div>
+            <div class="step-db">→ SELECT * FROM classes WHERE class_code = ? AND status = 'active'</div>
+            <div class="step-db">→ INSERT INTO class_members (class_id, student_id) VALUES (?, ?)</div>
+          </div>
+        </div>
+        <div class="step-row">
+          <div class="step-num"><div class="dot">4</div><div class="line"></div></div>
+          <div class="step-content">
+            <div class="step-title">Xem danh sách lớp + quản lý</div>
+            <div class="step-desc">Giáo viên xem/xoá học sinh. Học sinh xem danh sách lớp của mình</div>
+            <div class="step-db">→ SELECT u.* FROM class_members cm JOIN users u ON cm.student_id = u.id WHERE cm.class_id = ?</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="flow-tables">
+        <h4>Bảng liên quan</h4>
+        <div class="tb-row">
+          <span class="tb-tag tb-tag-pk">classes (PK)</span>
+          <span class="tb-tag tb-tag-fk">class_members (FK→classes, FK→users)</span>
+          <span class="tb-tag tb-tag-fk">users (FK→teacher_id)</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================= -->
+  <!-- FLOW 3: BAI GIANG & HOC LIEU -->
+  <!-- ============================================= -->
+  <div class="flow-card">
+    <div class="flow-header open" onclick="toggle(this)">
+      <div class="left">
+        <div class="icon-circle" style="background:#10b981;">📖</div>
+        <div><h3>Luồng 3: Bài giảng & Học liệu</h3><span class="count">5 bảng</span></div>
+      </div>
+      <span class="arrow">▼</span>
+    </div>
+    <div class="flow-body open">
+
+      <div class="flow-diagram color-green">
+        <h4 style="color:#6ee7b7;font-size:13px;margin-bottom:10px;">  Quy trình xem bài giảng</h4>
+
+        <div class="step-row">
+          <div class="step-num"><div class="dot">1</div><div class="line"></div></div>
+          <div class="step-content">
+            <div class="step-title">Chọn môn học → danh sách bài giảng</div>
+            <div class="step-db">→ SELECT * FROM lessons WHERE subject_id = ? ORDER BY order_index</div>
+          </div>
+        </div>
+        <div class="step-row">
+          <div class="step-num"><div class="dot">2</div><div class="line"></div></div>
+          <div class="step-content">
+            <div class="step-title">Xem nội dung bài giảng</div>
+            <div class="step-desc">Hiển thị HTML content. Lấy danh sách video, tài liệu, mô hình 3D liên quan</div>
+            <div class="step-db">→ SELECT * FROM lessons WHERE id = ?</div>
+            <div class="step-db">→ SELECT * FROM videos WHERE lesson_id = ?</div>
+            <div class="step-db">→ SELECT * FROM documents WHERE lesson_id = ?</div>
+          </div>
+        </div>
+        <div class="step-row">
+          <div class="step-num"><div class="dot">3</div><div class="line"></div></div>
+          <div class="step-content">
+            <div class="step-title">Tương tác với học liệu</div>
+            <div class="step-desc">Xem video (nhúng URL), tải PDF, mở Lab 3D (file .glb), tăng download_count</div>
+            <div class="step-db">→ UPDATE documents SET download_count = download_count + 1 WHERE id = ?</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="flow-tables">
+        <h4>Bảng liên quan</h4>
+        <div class="tb-row">
+          <span class="tb-tag tb-tag-pk">subjects (PK)</span>
+          <span class="tb-tag tb-tag-fk">lessons (FK→subjects)</span>
+          <span class="tb-tag tb-tag-fk">videos (FK→lessons)</span>
+          <span class="tb-tag tb-tag-fk">documents (FK→lessons)</span>
+          <span class="tb-tag tb-tag-fk">lab_models (FK→lessons, FK→subjects)</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================= -->
+  <!-- FLOW 4: CAU HOI & KIEM TRA -->
+  <!-- ============================================= -->
+  <div class="flow-card">
+    <div class="flow-header open" onclick="toggle(this)">
+      <div class="left">
+        <div class="icon-circle" style="background:#f59e0b;">❓</div>
+        <div><h3>Luồng 4: Câu hỏi & Kiểm tra</h3><span class="count">6 bảng · 4 loại câu hỏi</span></div>
+      </div>
+      <span class="arrow">▼</span>
+    </div>
+    <div class="flow-body open">
+
+      <div class="flow-desc-text">
+        Hệ thống hỗ trợ <strong>4 loại câu hỏi</strong>: Trắc nghiệm (multiple_choice), Đúng/Sai (true_false),
+        Điền khuyết (fill_blank), Ghép cặp (matching). Mỗi loại lưu ở bảng con riêng.
+      </div>
+
+      <div class="flow-diagram color-orange">
+        <h4 style="color:#fcd34d;font-size:13px;margin-bottom:10px;">  Quy trình tạo đề kiểm tra</h4>
+
+        <div class="step-row">
+          <div class="step-num"><div class="dot">1</div><div class="line"></div></div>
+          <div class="step-content">
+            <div class="step-title">Giáo viên tạo câu hỏi trong ngân hàng</div>
+            <div class="step-desc">Chọn loại câu hỏi, nhập nội dung, đáp án, độ khó, điểm XP</div>
+            <div class="step-db">→ INSERT INTO question_bank (subject_id, lesson_id, question_text, question_type, difficulty, ...)</div>
+            <div class="step-db">→ INSERT INTO question_options (question_id, option_text, is_correct, order_index) [nếu là trắc nghiệm]</div>
+            <div class="step-db">→ INSERT INTO fill_blank_answers (question_id, correct_answer, position) [nếu là điền khuyết]</div>
+            <div class="step-db">→ INSERT INTO matching_pairs (question_id, left_text, right_text) [nếu là ghép cặp]</div>
+          </div>
+        </div>
+        <div class="step-row">
+          <div class="step-num"><div class="dot">2</div><div class="line"></div></div>
+          <div class="step-content">
+            <div class="step-title">Giáo viên tạo đề thi từ ngân hàng</div>
+            <div class="step-desc">Tạo exams, thêm câu hỏi vào exam_questions với điểm số từng câu</div>
+            <div class="step-db">→ INSERT INTO exams (title, subject_id, created_by, time_limit, max_score, type) VALUES (?, ?, ?, ?, ?, ?)</div>
+            <div class="step-db">→ INSERT INTO exam_questions (exam_id, question_id, order_index, score) VALUES (?, ?, ?, ?)</div>
+          </div>
+        </div>
+        <div class="step-row">
+          <div class="step-num"><div class="dot">3</div><div class="line"></div></div>
+          <div class="step-content">
+            <div class="step-title">Học sinh làm bài kiểm tra</div>
+            <div class="step-desc">Hiển thị câu hỏi theo order_index, theo dõi thời gian (time_limit)</div>
+            <div class="step-db">→ SELECT eq.*, qb.* FROM exam_questions eq JOIN question_bank qb ON eq.question_id = qb.id WHERE eq.exam_id = ? ORDER BY eq.order_index</div>
+          </div>
+        </div>
+        <div class="step-row">
+          <div class="step-num"><div class="dot">4</div><div class="line"></div></div>
+          <div class="step-content">
+            <div class="step-title">Nộp bài → tự động chấm điểm</div>
+            <div class="step-desc">So sánh đáp án, tính điểm, cập nhật pass_count cho exams</div>
+            <div class="step-db">→ UPDATE exams SET pass_count = pass_count + 1 WHERE id = ?</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="flow-tables">
+        <h4>Bảng liên quan</h4>
+        <div class="tb-row">
+          <span class="tb-tag tb-tag-pk">question_bank (PK)</span>
+          <span class="tb-tag tb-tag-fk">question_options (FK→question_bank)</span>
+          <span class="tb-tag tb-tag-fk">fill_blank_answers (FK→question_bank)</span>
+          <span class="tb-tag tb-tag-fk">matching_pairs (FK→question_bank)</span>
+          <span class="tb-tag tb-tag-pk">exams (PK)</span>
+          <span class="tb-tag tb-tag-fk">exam_questions (FK→exams, FK→question_bank)</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================= -->
+  <!-- FLOW 5: GIAO BAI & CHAM DIEM -->
+  <!-- ============================================= -->
+  <div class="flow-card">
+    <div class="flow-header open" onclick="toggle(this)">
+      <div class="left">
+        <div class="icon-circle" style="background:#ef4444;">📝</div>
+        <div><h3>Luồng 5: Giao bài & Chấm điểm</h3><span class="count">4 bảng · 3 vai trò</span></div>
+      </div>
+      <span class="arrow">▼</span>
+    </div>
+    <div class="flow-body open">
+
+      <div class="flow-diagram color-red">
+        <h4 style="color:#fca5a5;font-size:13px;margin-bottom:10px;">  Quy trình giao bài → làm bài → chấm điểm</h4>
+
+        <div class="step-row">
+          <div class="step-num"><div class="dot">1</div><div class="line"></div></div>
+          <div class="step-content">
+            <div class="step-title">Giáo viên giao bài tập cho lớp</div>
+            <div class="step-desc">Chọn lớp, chọn đề thi (hoặc tạo mới), đặt hạn nộp. Trạng thái 'draft' hoặc 'published'</div>
+            <div class="step-db">→ INSERT INTO assignments (class_id, exam_id, title, assigned_by, due_date, status) VALUES (?, ?, ?, ?, ?, 'published')</div>
+          </div>
+        </div>
+        <div class="step-row">
+          <div class="step-num"><div class="dot">2</div><div class="line"></div></div>
+          <div class="step-content">
+            <div class="step-title">Học sinh nhận bài và làm bài</div>
+            <div class="step-desc">Xem danh sách bài tập cần làm, bấm "Làm bài" → vào giao diện làm bài</div>
+            <div class="step-db">→ SELECT a.*, e.* FROM assignments a JOIN exams e ON a.exam_id = e.id WHERE a.class_id IN (SELECT class_id FROM class_members WHERE student_id = ?)</div>
+          </div>
+        </div>
+        <div class="step-row">
+          <div class="step-num"><div class="dot">3</div><div class="line"></div></div>
+          <div class="step-content">
+            <div class="step-title">Học sinh nộp bài</div>
+            <div class="step-desc">Tạo bản ghi student_assignments, lưu từng câu trả lời vào student_answers. Nếu quá hạn → status='late'</div>
+            <div class="step-db">→ INSERT INTO student_assignments (assignment_id, student_id, status, submitted_at)</div>
+            <div class="step-db">→ INSERT INTO student_answers (student_assignment_id, question_id, answer_text, selected_option_id, ...)</div>
+          </div>
+        </div>
+        <div class="step-row">
+          <div class="step-num"><div class="dot">4</div><div class="line"></div></div>
+          <div class="step-content">
+            <div class="step-title">Chấm điểm (tự động + thủ công)</div>
+            <div class="step-desc">Câu trắc nghiệm tự động chấm. Giáo viên vào bảng điểm, xem bài, nhập điểm tay cho câu tự luận</div>
+            <div class="step-db">→ UPDATE student_answers SET is_correct = ?, score_earned = ? WHERE id = ?</div>
+            <div class="step-db">→ UPDATE student_assignments SET score = ?, status = 'graded', graded_by = ?, graded_at = NOW() WHERE id = ?</div>
+            <div class="step-db">→ INSERT INTO grades (student_id, class_id, subject_id, assignment_id, score, max_score)</div>
+          </div>
+        </div>
+        <div class="step-row">
+          <div class="step-num"><div class="dot">5</div><div class="line"></div></div>
+          <div class="step-content">
+            <div class="step-title">Xem bảng điểm tổng hợp</div>
+            <div class="step-desc">Giáo viên xem điểm tất cả học sinh. Học sinh xem điểm cá nhân. Phụ huynh theo dõi qua link</div>
+            <div class="step-db">→ SELECT g.*, a.title, u.full_name FROM grades g JOIN assignments a ON g.assignment_id = a.id JOIN users u ON g.student_id = u.id WHERE g.class_id = ? ORDER BY g.student_id</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="flow-tables">
+        <h4>Bảng liên quan</h4>
+        <div class="tb-row">
+          <span class="tb-tag tb-tag-pk">assignments (PK)</span>
+          <span class="tb-tag tb-tag-fk">student_assignments (FK→assignments, FK→users)</span>
+          <span class="tb-tag tb-tag-fk">student_answers (FK→student_assignments, FK→question_bank)</span>
+          <span class="tb-tag tb-tag-fk">grades (FK→users, FK→classes, FK→subjects)</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================= -->
+  <!-- FLOW 6: DIEN DAN -->
+  <!-- ============================================= -->
+  <div class="flow-card">
+    <div class="flow-header open" onclick="toggle(this)">
+      <div class="left">
+        <div class="icon-circle" style="background:#14b8a6;">💬</div>
+        <div><h3>Luồng 6: Diễn đàn</h3><span class="count">4 bảng · 4 chủ đề</span></div>
+      </div>
+      <span class="arrow">▼</span>
+    </div>
+    <div class="flow-body open">
+
+      <div class="flow-diagram color-teal">
+        <h4 style="color:#5eead4;font-size:13px;margin-bottom:10px;">  Quy trình đặt câu hỏi & tương tác</h4>
+
+        <div class="step-row">
+          <div class="step-num"><div class="dot">1</div><div class="line"></div></div>
+          <div class="step-content">
+            <div class="step-title">Tạo bài viết mới</div>
+            <div class="step-desc">Chọn chủ đề (topic), nhập tiêu đề + nội dung. Admin duyệt nếu status = 'pending'</div>
+            <div class="step-db">→ INSERT INTO forum_posts (user_id, title, content, topic_id, status) VALUES (?, ?, ?, ?, 'approved')</div>
+          </div>
+        </div>
+        <div class="step-row">
+          <div class="step-num"><div class="dot">2</div><div class="line"></div></div>
+          <div class="step-content">
+            <div class="step-title">Người dùng khác bình luận</div>
+            <div class="step-desc">Viết câu trả lời, có thể đánh dấu is_best_answer</div>
+            <div class="step-db">→ INSERT INTO forum_comments (post_id, user_id, content) VALUES (?, ?, ?)</div>
+          </div>
+        </div>
+        <div class="step-row">
+          <div class="step-num"><div class="dot">3</div><div class="line"></div></div>
+          <div class="step-content">
+            <div class="step-title">Vote bài viết</div>
+            <div class="step-desc">Upvote hoặc downvote. Mỗi user chỉ vote 1 lần (UNIQUE constraint)</div>
+            <div class="step-db">→ INSERT INTO forum_votes (post_id, user_id, vote_type) VALUES (?, ?, 'up') ON DUPLICATE KEY UPDATE vote_type = ?</div>
+          </div>
+        </div>
+        <div class="step-row">
+          <div class="step-num"><div class="dot">4</div><div class="line"></div></div>
+          <div class="step-content">
+            <div class="step-title">Đánh dấu đã giải quyết</div>
+            <div class="step-desc">Chủ bài viết hoặc admin đánh dấu is_resolved = TRUE, chọn câu trả lời đúng nhất</div>
+            <div class="step-db">→ UPDATE forum_posts SET is_resolved = TRUE WHERE id = ?</div>
+            <div class="step-db">→ UPDATE forum_comments SET is_best_answer = TRUE WHERE id = ?</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="flow-desc-text" style="margin-top:8px;">
+        <strong>Kiểm duyệt:</strong> Admin có thể duyệt bài (pending → approved), gắn cờ (flagged), hoặc xoá (deleted).
+        <strong>Thống kê:</strong> Mỗi lần xem bài viết tăng view_count.
+      </div>
+
+      <div class="flow-tables">
+        <h4>Bảng liên quan</h4>
+        <div class="tb-row">
+          <span class="tb-tag tb-tag-pk">forum_topics (PK)</span>
+          <span class="tb-tag tb-tag-fk">forum_posts (FK→users, FK→forum_topics)</span>
+          <span class="tb-tag tb-tag-fk">forum_comments (FK→forum_posts, FK→users)</span>
+          <span class="tb-tag tb-tag-fk">forum_votes (FK→forum_posts, FK→users)</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================= -->
+  <!-- FLOW 7: GAMIFICATION -->
+  <!-- ============================================= -->
+  <div class="flow-card">
+    <div class="flow-header open" onclick="toggle(this)">
+      <div class="left">
+        <div class="icon-circle" style="background:#f59e0b;">🏆</div>
+        <div><h3>Luồng 7: Gamification</h3><span class="count">6 bảng · XP + Streak + Achievements</span></div>
+      </div>
+      <span class="arrow">▼</span>
+    </div>
+    <div class="flow-body open">
+
+      <div class="flow-diagram color-orange">
+        <h4 style="color:#fcd34d;font-size:13px;margin-bottom:10px;">  Quy trình kiếm XP và mở huy hiệu</h4>
+
+        <div class="step-row">
+          <div class="step-num"><div class="dot">1</div><div class="line"></div></div>
+          <div class="step-content">
+            <div class="step-title">Học sinh thực hiện hành động kiếm XP</div>
+            <div class="step-desc">Làm quiz (+XP), nộp bài tập (+XP), điểm danh hàng ngày (+XP), đặt câu hỏi diễn đàn (+XP)</div>
+          </div>
+        </div>
+        <div class="step-row">
+          <div class="step-num"><div class="dot">2</div><div class="line"></div></div>
+          <div class="step-content">
+            <div class="step-title">Ghi nhận XP và lịch sử giao dịch</div>
+            <div class="step-desc">Cập nhật total_xp trong user_xp. Ghi log vào xp_transactions</div>
+            <div class="step-db">→ INSERT INTO xp_transactions (user_id, amount, source, reference_id) VALUES (?, +?, ?, ?)</div>
+            <div class="step-db">→ UPDATE user_xp SET total_xp = total_xp + ? WHERE user_id = ?</div>
+          </div>
+        </div>
+        <div class="step-row">
+          <div class="step-num"><div class="dot">3</div><div class="line"></div></div>
+          <div class="step-content">
+            <div class="step-title">Cập nhật streak và điểm danh</div>
+            <div class="step-desc">Kiểm tra lần hoạt động cuối, nếu liên tiếp → tăng streak</div>
+            <div class="step-db">→ INSERT INTO daily_attendance (user_id, attendance_date, xp_earned) VALUES (?, CURDATE(), ?) ON DUPLICATE KEY ...</div>
+            <div class="step-db">→ UPDATE user_streaks SET current_streak = IF(last_active_date = CURDATE() - 1, current_streak + 1, 1), last_active_date = CURDATE() WHERE user_id = ?</div>
+          </div>
+        </div>
+        <div class="step-row">
+          <div class="step-num"><div class="dot">4</div><div class="line"></div></div>
+          <div class="step-content">
+            <div class="step-title">Kiểm tra và trao huy hiệu</div>
+            <div class="step-desc">Sau mỗi hành động, kiểm tra xem user có đủ điều kiện mở huy hiệu mới không</div>
+            <div class="step-db">→ SELECT * FROM achievements WHERE id NOT IN (SELECT achievement_id FROM user_achievements WHERE user_id = ?)</div>
+            <div class="step-db">→ [Nếu đủ điều kiện] INSERT INTO user_achievements (user_id, achievement_id) VALUES (?, ?)</div>
+          </div>
+        </div>
+        <div class="step-row">
+          <div class="step-num"><div class="dot">5</div><div class="line"></div></div>
+          <div class="step-content">
+            <div class="step-title">Cập nhật rank</div>
+            <div class="step-desc">Tính rank dựa trên total_xp: Đồng, Bạc, Vàng, Kim Cương</div>
+            <div class="step-db">→ UPDATE user_xp SET current_rank = CASE WHEN total_xp >= 1000 THEN 'Kim Cuong' WHEN total_xp >= 500 THEN 'Vang' WHEN total_xp >= 200 THEN 'Bac' ELSE 'Dong' END WHERE user_id = ?</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="flow-tables">
+        <h4>Bảng liên quan</h4>
+        <div class="tb-row">
+          <span class="tb-tag tb-tag-fk">user_xp (FK→users, UNIQUE)</span>
+          <span class="tb-tag tb-tag-fk">xp_transactions (FK→users)</span>
+          <span class="tb-tag tb-tag-fk">user_streaks (FK→users, UNIQUE)</span>
+          <span class="tb-tag tb-tag-fk">daily_attendance (FK→users)</span>
+          <span class="tb-tag tb-tag-pk">achievements (PK)</span>
+          <span class="tb-tag tb-tag-fk">user_achievements (FK→users, FK→achievements)</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================= -->
+  <!-- FLOW 8: PHU HUYNH -->
+  <!-- ============================================= -->
+  <div class="flow-card">
+    <div class="flow-header open" onclick="toggle(this)">
+      <div class="left">
+        <div class="icon-circle" style="background:#ec4899;">👪</div>
+        <div><h3>Luồng 8: Phụ huynh</h3><span class="count">1 bảng trung gian</span></div>
+      </div>
+      <span class="arrow">▼</span>
+    </div>
+    <div class="flow-body open">
+
+      <div class="flow-diagram color-pink">
+        <h4 style="color:#f472b6;font-size:13px;margin-bottom:10px;">  Quy trình liên kết phụ huynh - học sinh</h4>
+
+        <div class="step-row">
+          <div class="step-num"><div class="dot">1</div><div class="line"></div></div>
+          <div class="step-content">
+            <div class="step-title">Học sinh tạo mã liên kết</div>
+            <div class="step-desc">Trong trang cài đặt cá nhân, học sinh tạo link_code để gửi cho phụ huynh</div>
+            <div class="step-db">→ INSERT INTO parent_student_links (parent_id, student_id, link_code, status) VALUES (NULL, ?, ?, 'pending')</div>
+          </div>
+        </div>
+        <div class="step-row">
+          <div class="step-num"><div class="dot">2</div><div class="line"></div></div>
+          <div class="step-content">
+            <div class="step-title">Phụ huynh nhập mã liên kết</div>
+            <div class="step-desc">Đăng nhập tài khoản parent → nhập link_code → xác nhận liên kết</div>
+            <div class="step-db">→ SELECT * FROM parent_student_links WHERE link_code = ? AND status = 'pending'</div>
+            <div class="step-db">→ UPDATE parent_student_links SET parent_id = ?, status = 'active' WHERE link_code = ?</div>
+          </div>
+        </div>
+        <div class="step-row">
+          <div class="step-num"><div class="dot">3</div><div class="line"></div></div>
+          <div class="step-content">
+            <div class="step-title">Phụ huynh theo dõi tiến độ</div>
+            <div class="step-desc">Xem điểm số, tiến trình học, lịch sử hoạt động của con qua dashboard phụ huynh</div>
+            <div class="step-db">→ SELECT g.*, a.title, u.full_name FROM grades g JOIN assignments a ON ... JOIN users u ... WHERE g.student_id IN (SELECT student_id FROM parent_student_links WHERE parent_id = ? AND status = 'active')</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="flow-tables">
+        <h4>Bảng liên quan</h4>
+        <div class="tb-row">
+          <span class="tb-tag tb-tag-fk">parent_student_links (FK→users parent, FK→users student)</span>
+          <span class="tb-tag">grades (đọc)</span>
+          <span class="tb-tag">user_xp (đọc)</span>
+          <span class="tb-tag">user_streaks (đọc)</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================= -->
+  <!-- FLOW 9: ADMIN -->
+  <!-- ============================================= -->
+  <div class="flow-card">
+    <div class="flow-header open" onclick="toggle(this)">
+      <div class="left">
+        <div class="icon-circle" style="background:#3b82f6;">⚙️</div>
+        <div><h3>Luồng 9: Quản trị Hệ thống</h3><span class="count">4 bảng · Admin</span></div>
+      </div>
+      <span class="arrow">▼</span>
+    </div>
+    <div class="flow-body open">
+
+      <div class="flow-diagram color-blue">
+        <h4 style="color:#93c5fd;font-size:13px;margin-bottom:10px;">  Quy trình quản trị</h4>
+
+        <div class="step-row">
+          <div class="step-num"><div class="dot">1</div><div class="line"></div></div>
+          <div class="step-content">
+            <div class="step-title">Quản lý người dùng</div>
+            <div class="step-desc">Xem danh sách, phân quyền, khoá/mở tài khoản (status). CRUD users</div>
+            <div class="step-db">→ SELECT * FROM users WHERE role = ? ORDER BY created_at DESC</div>
+            <div class="step-db">→ UPDATE users SET status = 'banned' WHERE id = ?</div>
+          </div>
+        </div>
+        <div class="step-row">
+          <div class="step-num"><div class="dot">2</div><div class="line"></div></div>
+          <div class="step-content">
+            <div class="step-title">Tạo thông báo hệ thống</div>
+            <div class="step-desc">Chọn đối tượng (all/student/teacher/parent), nhập tiêu đề + nội dung</div>
+            <div class="step-db">→ INSERT INTO notifications (title, body, target_role, created_by) VALUES (?, ?, ?, ?)</div>
+          </div>
+        </div>
+        <div class="step-row">
+          <div class="step-num"><div class="dot">3</div><div class="line"></div></div>
+          <div class="step-content">
+            <div class="step-title">Người dùng đọc thông báo</div>
+            <div class="step-desc">Khi user mở thông báo, ghi nhận notification_reads</div>
+            <div class="step-db">→ INSERT INTO notification_reads (notification_id, user_id) VALUES (?, ?) ON DUPLICATE KEY ...</div>
+          </div>
+        </div>
+        <div class="step-row">
+          <div class="step-num"><div class="dot">4</div><div class="line"></div></div>
+          <div class="step-content">
+            <div class="step-title">Quản lý tin tức và FAQ</div>
+            <div class="step-desc">Đăng bài tin tức (news), sửa FAQ. Tin tức có thể ghim (is_pinned) và xếp lịch xuất bản</div>
+            <div class="step-db">→ INSERT INTO news (title, content, thumbnail_url, category, status, created_by, published_at)</div>
+            <div class="step-db">→ UPDATE faq SET question = ?, answer = ? WHERE id = ?</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="flow-tables">
+        <h4>Bảng liên quan</h4>
+        <div class="tb-row">
+          <span class="tb-tag tb-tag-pk">notifications (PK)</span>
+          <span class="tb-tag tb-tag-fk">notification_reads (FK→notifications, FK→users)</span>
+          <span class="tb-tag tb-tag-pk">news (PK)</span>
+          <span class="tb-tag">faq</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================= -->
+  <!-- FLOW 10: AI CHAT -->
+  <!-- ============================================= -->
+  <div class="flow-card">
+    <div class="flow-header open" onclick="toggle(this)">
+      <div class="left">
+        <div class="icon-circle" style="background:#7c3aed;">🤖</div>
+        <div><h3>Luồng 10: AI Chat (Doly Tutor)</h3><span class="count">1 bảng · Phương pháp Socratic</span></div>
+      </div>
+      <span class="arrow">▼</span>
+    </div>
+    <div class="flow-body open">
+
+      <div class="flow-desc-text">
+        DOLY AI sử dụng phương pháp <strong>Socratic</strong>: không giải bài tập trực tiếp cho học sinh,
+        mà đặt câu hỏi gợi mở để học sinh tự suy luận. Mỗi tin nhắn đều lưu vào cơ sở dữ liệu để
+        duy trì ngữ cảnh hội thoại.
+      </div>
+
+      <div class="flow-diagram color-purple">
+        <h4 style="color:#a78bfa;font-size:13px;margin-bottom:10px;">  Quy trình trò chuyện với AI</h4>
+
+        <div class="step-row">
+          <div class="step-num"><div class="dot">1</div><div class="line"></div></div>
+          <div class="step-content">
+            <div class="step-title">Học sinh gửi câu hỏi</div>
+            <div class="step-desc">Nhập câu hỏi vào chat box. Hệ thống gửi kèm context (bài học hiện tại, nếu có)</div>
+          </div>
+        </div>
+        <div class="step-row">
+          <div class="step-num"><div class="dot">2</div><div class="line"></div></div>
+          <div class="step-content">
+            <div class="step-title">Lưu tin nhắn của user vào database</div>
+            <div class="step-db">→ INSERT INTO ai_chat_history (user_id, role, message, context) VALUES (?, 'user', ?, ?)</div>
+          </div>
+        </div>
+        <div class="step-row">
+          <div class="step-num"><div class="dot">3</div><div class="line"></div></div>
+          <div class="step-content">
+            <div class="step-title">Lấy lịch sử chat để xây dựng prompt</div>
+            <div class="step-desc">Lấy N tin nhắn gần nhất làm ngữ cảnh cho AI</div>
+            <div class="step-db">→ SELECT * FROM ai_chat_history WHERE user_id = ? ORDER BY created_at DESC LIMIT 20</div>
+          </div>
+        </div>
+        <div class="step-row">
+          <div class="step-num"><div class="dot">4</div><div class="line"></div></div>
+          <div class="step-content">
+            <div class="step-title">AI xử lý và trả lời</div>
+            <div class="step-desc">API AI nhận prompt (bao gồm lịch sử + câu hỏi mới), sinh câu trả lời theo phong cách Socratic</div>
+          </div>
+        </div>
+        <div class="step-row">
+          <div class="step-num"><div class="dot">5</div><div class="line"></div></div>
+          <div class="step-content">
+            <div class="step-title">Lưu câu trả lời của AI</div>
+            <div class="step-desc">Lưu vào database để duy trì hội thoại xuyên suốt</div>
+            <div class="step-db">→ INSERT INTO ai_chat_history (user_id, role, message, context) VALUES (?, 'assistant', ?, ?)</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="flow-tables">
+        <h4>Bảng liên quan</h4>
+        <div class="tb-row">
+          <span class="tb-tag tb-tag-fk">ai_chat_history (FK→users)</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================= -->
+  <!-- CROSS-FLOW INTERACTIONS -->
+  <!-- ============================================= -->
+  <div class="arch-section">
+    <h2> Liên kết giữa các luồng</h2>
+    <p style="color:#9ca3af;font-size:13px;margin-bottom:16px;line-height:1.7;">
+      Các luồng không hoạt động độc lập — chúng tương tác qua lại thông qua <strong>bảng users</strong> (bảng trung tâm) và các bảng trung gian:
+    </p>
+    <table style="width:100%;border-collapse:collapse;font-size:12.5px;">
+      <tr>
+        <th style="text-align:left;padding:8px 12px;background:#222244;border:1px solid #2a2a4a;color:#9ca3af;">Luồng A</th>
+        <th style="text-align:left;padding:8px 12px;background:#222244;border:1px solid #2a2a4a;color:#9ca3af;">Luồng B</th>
+        <th style="text-align:left;padding:8px 12px;background:#222244;border:1px solid #2a2a4a;color:#9ca3af;">Liên kết</th>
+      </tr>
+      <tr><td style="padding:8px 12px;border:1px solid #2a2a4a;color:#a78bfa;">🔐 Auth</td><td style="padding:8px 12px;border:1px solid #2a2a4a;">Tất cả</td><td style="padding:8px 12px;border:1px solid #2a2a4a;color:#9ca3af;">user_id + auth_token xác thực mọi request</td></tr>
+      <tr><td style="padding:8px 12px;border:1px solid #2a2a4a;color:#93c5fd;">📚 Lớp học</td><td style="padding:8px 12px;border:1px solid #2a2a4a;">📝 Giao bài</td><td style="padding:8px 12px;border:1px solid #2a2a4a;color:#9ca3af;">assignments.class_id → classes.id</td></tr>
+      <tr><td style="padding:8px 12px;border:1px solid #2a2a4a;color:#93c5fd;">📚 Lớp học</td><td style="padding:8px 12px;border:1px solid #2a2a4a;">📖 Học liệu</td><td style="padding:8px 12px;border:1px solid #2a2a4a;color:#9ca3af;">classes.subject → subjects.name</td></tr>
+      <tr><td style="padding:8px 12px;border:1px solid #2a2a4a;color:#fcd34d;">❓ Câu hỏi</td><td style="padding:8px 12px;border:1px solid #2a2a4a;">📝 Giao bài</td><td style="padding:8px 12px;border:1px solid #2a2a4a;color:#9ca3af;">exam_questions.question_id → question_bank.id</td></tr>
+      <tr><td style="padding:8px 12px;border:1px solid #2a2a4a;color:#fcd34d;">❓ Câu hỏi</td><td style="padding:8px 12px;border:1px solid #2a2a4a;">📖 Học liệu</td><td style="padding:8px 12px;border:1px solid #2a2a4a;color:#9ca3af;">question_bank.lesson_id → lessons.id</td></tr>
+      <tr><td style="padding:8px 12px;border:1px solid #2a2a4a;color:#fca5a5;">📝 Giao bài</td><td style="padding:8px 12px;border:1px solid #2a2a4a;">🏆 Gamification</td><td style="padding:8px 12px;border:1px solid #2a2a4a;color:#9ca3af;">Khi chấm điểm → cộng XP cho học sinh</td></tr>
+      <tr><td style="padding:8px 12px;border:1px solid #2a2a4a;color:#5eead4;">💬 Diễn đàn</td><td style="padding:8px 12px;border:1px solid #2a2a4a;">🏆 Gamification</td><td style="padding:8px 12px;border:1px solid #2a2a4a;color:#9ca3af;">Khi đặt câu hỏi/bình luận → cộng XP</td></tr>
+      <tr><td style="padding:8px 12px;border:1px solid #2a2a4a;color:#f472b6;">👪 Phụ huynh</td><td style="padding:8px 12px;border:1px solid #2a2a4a;">📝 Giao bài</td><td style="padding:8px 12px;border:1px solid #2a2a4a;color:#9ca3af;">Xem grades của con qua parent_student_links</td></tr>
+      <tr><td style="padding:8px 12px;border:1px solid #2a2a4a;color:#93c5fd;">⚙️ Quản trị</td><td style="padding:8px 12px;border:1px solid #2a2a4a;">🔐 Auth</td><td style="padding:8px 12px;border:1px solid #2a2a4a;color:#9ca3af;">Admin khoá/kích hoạt tài khoản users</td></tr>
+      <tr><td style="padding:8px 12px;border:1px solid #2a2a4a;color:#a78bfa;">🤖 AI Chat</td><td style="padding:8px 12px;border:1px solid #2a2a4a;">📖 Học liệu</td><td style="padding:8px 12px;border:1px solid #2a2a4a;color:#9ca3af;">context JSON chứa lesson_id → lấy bài học</td></tr>
+    </table>
+  </div>
+
+  <!-- ============================================= -->
+  <!-- API ENDPOINT MAP -->
+  <!-- ============================================= -->
+  <div class="arch-section">
+    <h2> Bản đồ API Endpoints</h2>
+    <table style="width:100%;border-collapse:collapse;font-size:12.5px;">
+      <tr>
+        <th style="text-align:left;padding:8px 12px;background:#222244;border:1px solid #2a2a4a;color:#9ca3af;">Endpoint</th>
+        <th style="text-align:left;padding:8px 12px;background:#222244;border:1px solid #2a2a4a;color:#9ca3af;">Method</th>
+        <th style="text-align:left;padding:8px 12px;background:#222244;border:1px solid #2a2a4a;color:#9ca3af;">Luồng</th>
+        <th style="text-align:left;padding:8px 12px;background:#222244;border:1px solid #2a2a4a;color:#9ca3af;">Xác thực</th>
+      </tr>
+      <tr><td style="padding:8px 12px;border:1px solid #2a2a4a;font-family:'Consolas',monospace;color:#a78bfa;">/api/auth_login.php</td><td style="padding:8px 12px;border:1px solid #2a2a4a;">POST</td><td style="padding:8px 12px;border:1px solid #2a2a4a;">🔐 Auth</td><td style="padding:8px 12px;border:1px solid #2a2a4a;">—</td></tr>
+      <tr><td style="padding:8px 12px;border:1px solid #2a2a4a;font-family:'Consolas',monospace;color:#a78bfa;">/api/auth_register.php</td><td style="padding:8px 12px;border:1px solid #2a2a4a;">POST</td><td style="padding:8px 12px;border:1px solid #2a2a4a;">🔐 Auth</td><td style="padding:8px 12px;border:1px solid #2a2a4a;">—</td></tr>
+      <tr><td style="padding:8px 12px;border:1px solid #2a2a4a;font-family:'Consolas',monospace;color:#a78bfa;">/api/auth_logout.php</td><td style="padding:8px 12px;border:1px solid #2a2a4a;">POST</td><td style="padding:8px 12px;border:1px solid #2a2a4a;">🔐 Auth</td><td style="padding:8px 12px;border:1px solid #2a2a4a;">Token</td></tr>
+      <tr><td style="padding:8px 12px;border:1px solid #2a2a4a;font-family:'Consolas',monospace;color:#93c5fd;">/api/class_create.php</td><td style="padding:8px 12px;border:1px solid #2a2a4a;">POST</td><td style="padding:8px 12px;border:1px solid #2a2a4a;">📚 Lớp</td><td style="padding:8px 12px;border:1px solid #2a2a4a;">Token + role=teacher</td></tr>
+      <tr><td style="padding:8px 12px;border:1px solid #2a2a4a;font-family:'Consolas',monospace;color:#93c5fd;">/api/class_join.php</td><td style="padding:8px 12px;border:1px solid #2a2a4a;">POST</td><td style="padding:8px 12px;border:1px solid #2a2a4a;">📚 Lớp</td><td style="padding:8px 12px;border:1px solid #2a2a4a;">Token + role=student</td></tr>
+      <tr><td style="padding:8px 12px;border:1px solid #2a2a4a;font-family:'Consolas',monospace;color:#93c5fd;">/api/class_list.php</td><td style="padding:8px 12px;border:1px solid #2a2a4a;">GET</td><td style="padding:8px 12px;border:1px solid #2a2a4a;">📚 Lớp</td><td style="padding:8px 12px;border:1px solid #2a2a4a;">Token</td></tr>
+      <tr><td style="padding:8px 12px;border:1px solid #2a2a4a;font-family:'Consolas',monospace;color:#6ee7b7;">/api/lessons_list.php</td><td style="padding:8px 12px;border:1px solid #2a2a4a;">GET</td><td style="padding:8px 12px;border:1px solid #2a2a4a;">📖 Học liệu</td><td style="padding:8px 12px;border:1px solid #2a2a4a;">Token</td></tr>
+      <tr><td style="padding:8px 12px;border:1px solid #2a2a4a;font-family:'Consolas',monospace;color:#6ee7b7;">/api/lesson_detail.php</td><td style="padding:8px 12px;border:1px solid #2a2a4a;">GET</td><td style="padding:8px 12px;border:1px solid #2a2a4a;">📖 Học liệu</td><td style="padding:8px 12px;border:1px solid #2a2a4a;">Token</td></tr>
+      <tr><td style="padding:8px 12px;border:1px solid #2a2a4a;font-family:'Consolas',monospace;color:#fcd34d;">/api/question_create.php</td><td style="padding:8px 12px;border:1px solid #2a2a4a;">POST</td><td style="padding:8px 12px;border:1px solid #2a2a4a;">❓ Câu hỏi</td><td style="padding:8px 12px;border:1px solid #2a2a4a;">Token + role=teacher</td></tr>
+      <tr><td style="padding:8px 12px;border:1px solid #2a2a4a;font-family:'Consolas',monospace;color:#fcd34d;">/api/exam_create.php</td><td style="padding:8px 12px;border:1px solid #2a2a4a;">POST</td><td style="padding:8px 12px;border:1px solid #2a2a4a;">❓ Kiểm tra</td><td style="padding:8px 12px;border:1px solid #2a2a4a;">Token + role=teacher</td></tr>
+      <tr><td style="padding:8px 12px;border:1px solid #2a2a4a;font-family:'Consolas',monospace;color:#fcd34d;">/api/exam_take.php</td><td style="padding:8px 12px;border:1px solid #2a2a4a;">GET</td><td style="padding:8px 12px;border:1px solid #2a2a4a;">❓ Kiểm tra</td><td style="padding:8px 12px;border:1px solid #2a2a4a;">Token + role=student</td></tr>
+      <tr><td style="padding:8px 12px;border:1px solid #2a2a4a;font-family:'Consolas',monospace;color:#fca5a5;">/api/assignment_create.php</td><td style="padding:8px 12px;border:1px solid #2a2a4a;">POST</td><td style="padding:8px 12px;border:1px solid #2a2a4a;">📝 Giao bài</td><td style="padding:8px 12px;border:1px solid #2a2a4a;">Token + role=teacher</td></tr>
+      <tr><td style="padding:8px 12px;border:1px solid #2a2a4a;font-family:'Consolas',monospace;color:#fca5a5;">/api/assignment_submit.php</td><td style="padding:8px 12px;border:1px solid #2a2a4a;">POST</td><td style="padding:8px 12px;border:1px solid #2a2a4a;">📝 Giao bài</td><td style="padding:8px 12px;border:1px solid #2a2a4a;">Token + role=student</td></tr>
+      <tr><td style="padding:8px 12px;border:1px solid #2a2a4a;font-family:'Consolas',monospace;color:#fca5a5;">/api/assignment_grade.php</td><td style="padding:8px 12px;border:1px solid #2a2a4a;">POST</td><td style="padding:8px 12px;border:1px solid #2a2a4a;">📝 Chấm điểm</td><td style="padding:8px 12px;border:1px solid #2a2a4a;">Token + role=teacher</td></tr>
+      <tr><td style="padding:8px 12px;border:1px solid #2a2a4a;font-family:'Consolas',monospace;color:#5eead4;">/api/forum_post_create.php</td><td style="padding:8px 12px;border:1px solid #2a2a4a;">POST</td><td style="padding:8px 12px;border:1px solid #2a2a4a;">💬 Diễn đàn</td><td style="padding:8px 12px;border:1px solid #2a2a4a;">Token</td></tr>
+      <tr><td style="padding:8px 12px;border:1px solid #2a2a4a;font-family:'Consolas',monospace;color:#5eead4;">/api/forum_comment.php</td><td style="padding:8px 12px;border:1px solid #2a2a4a;">POST</td><td style="padding:8px 12px;border:1px solid #2a2a4a;">💬 Diễn đàn</td><td style="padding:8px 12px;border:1px solid #2a2a4a;">Token</td></tr>
+      <tr><td style="padding:8px 12px;border:1px solid #2a2a4a;font-family:'Consolas',monospace;color:#5eead4;">/api/forum_vote.php</td><td style="padding:8px 12px;border:1px solid #2a2a4a;">POST</td><td style="padding:8px 12px;border:1px solid #2a2a4a;">💬 Diễn đàn</td><td style="padding:8px 12px;border:1px solid #2a2a4a;">Token</td></tr>
+      <tr><td style="padding:8px 12px;border:1px solid #2a2a4a;font-family:'Consolas',monospace;color:#fcd34d;">/api/user_xp_get.php</td><td style="padding:8px 12px;border:1px solid #2a2a4a;">GET</td><td style="padding:8px 12px;border:1px solid #2a2a4a;">🏆 Game</td><td style="padding:8px 12px;border:1px solid #2a2a4a;">Token</td></tr>
+      <tr><td style="padding:8px 12px;border:1px solid #2a2a4a;font-family:'Consolas',monospace;color:#f472b6;">/api/parent_link.php</td><td style="padding:8px 12px;border:1px solid #2a2a4a;">POST</td><td style="padding:8px 12px;border:1px solid #2a2a4a;">👪 Phụ huynh</td><td style="padding:8px 12px;border:1px solid #2a2a4a;">Token</td></tr>
+      <tr><td style="padding:8px 12px;border:1px solid #2a2a4a;font-family:'Consolas',monospace;color:#93c5fd;">/api/admin_users_list.php</td><td style="padding:8px 12px;border:1px solid #2a2a4a;">GET</td><td style="padding:8px 12px;border:1px solid #2a2a4a;">⚙️ Quản trị</td><td style="padding:8px 12px;border:1px solid #2a2a4a;">Token + role=admin</td></tr>
+      <tr><td style="padding:8px 12px;border:1px solid #2a2a4a;font-family:'Consolas',monospace;color:#93c5fd;">/api/admin_notification_create.php</td><td style="padding:8px 12px;border:1px solid #2a2a4a;">POST</td><td style="padding:8px 12px;border:1px solid #2a2a4a;">⚙️ Quản trị</td><td style="padding:8px 12px;border:1px solid #2a2a4a;">Token + role=admin</td></tr>
+      <tr><td style="padding:8px 12px;border:1px solid #2a2a4a;font-family:'Consolas',monospace;color:#a78bfa;">/api/ai_chat.php</td><td style="padding:8px 12px;border:1px solid #2a2a4a;">POST</td><td style="padding:8px 12px;border:1px solid #2a2a4a;">🤖 AI Chat</td><td style="padding:8px 12px;border:1px solid #2a2a4a;">Token</td></tr>
+    </table>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    DOLY LMS — Luồng Dữ Liệu v1.0 &middot; Thiết kế bởi Qoder AI
+  </div>
+
+</div>
+
+<script>
+  function toggle(el) {
+    el.classList.toggle('open');
+    el.nextElementSibling.classList.toggle('open');
+  }
+</script>
+</body>
+</html>

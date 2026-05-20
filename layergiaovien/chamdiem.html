@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="vi" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chấm và trả điểm - DOLY LMS</title>
+    <script src="../api/client.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: { 
+                        'brand-blue': '#2563EB',      
+                        'brand-dark-blue': '#1E3A8A', 
+                        'bg-main': '#F8FAFC',
+                    },
+                    fontFamily: { 
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'soft': '0 2px 10px rgba(0, 0, 0, 0.02)',
+                        'hover-soft': '0 10px 25px -3px rgba(37, 99, 235, 0.1)',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { background-color: #F8FAFC; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 10px; }
+        .sidebar-item:hover { background-color: #F1F5F9; color: #2563EB; }
+        .sidebar-item.active { background-color: #EFF6FF; color: #2563EB; }
+        
+        .text-bold-thick { -webkit-text-stroke: 0.7px #1E3A8A; }
+        .text-sub-thick { -webkit-text-stroke: 0.3px #94A3B8; }
+
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        .tab-content { animation: fadeIn 0.3s ease-in-out; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .accordion-content {
+            transition: max-height 0.4s ease-in-out, opacity 0.4s ease-in-out;
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+        }
+        .accordion-content.open {
+            max-height: 2000px;
+            opacity: 1;
+        }
+    </style>
+</head>
+<body class="antialiased font-sans text-slate-800">
+
+    <div class="flex min-h-screen">
+        <!-- Menu bên trái -->
+        <aside class="w-72 bg-white border-r border-slate-200 hidden lg:flex flex-col sticky top-0 h-screen z-50 transition-all">
+            <div class="p-8">
+                <a href="tongquan.html" class="flex items-center gap-3.5 hover:opacity-80 transition-opacity group">
+                    <div class="w-[42px] h-[42px] flex items-center justify-center shrink-0">
+                        <img src="../logodoly.png" alt="Doly Logo" class="w-full h-full object-contain" onerror="this.src='https://ui-avatars.com/api/?name=D&background=1E3A8A&color=fff'">
+                    </div>
+                    <div class="flex flex-col justify-center">
+                        <div class="text-[21px] font-black text-brand-dark-blue leading-none tracking-[-0.04em] text-bold-thick">DOLY LMS</div>
+                        <span class="text-[9px] font-black text-[#94A3B8] uppercase tracking-[0.18em] mt-1.5 text-sub-thick">TEACHER WORKSPACE</span>
+                    </div>
+                </a>
+            </div>
+            
+            <nav class="flex-1 py-4 px-5 space-y-2 custom-scrollbar">
+                <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3 px-3">Quản lý chung</p>
+                <a href="tongquan.html" class="sidebar-item flex items-center gap-3 px-4 py-4 rounded-2xl transition-all font-bold text-base text-slate-500 hover:text-brand-blue">
+                    <i class="fa-solid fa-house text-xl w-6 text-center"></i> <span>Bảng điều khiển</span>
+                </a>
+                <a href="./lophoccuatoi.html" class="sidebar-item flex items-center gap-3 px-4 py-4 rounded-2xl transition-all font-bold text-base text-slate-500 hover:text-brand-blue">
+                    <i class="fa-solid fa-users text-xl w-6 text-center"></i> <span>Lớp học</span>
+                </a>
+                <a href="chamdiem.html" class="sidebar-item active flex items-center gap-3 px-4 py-4 rounded-2xl transition-all font-[900] text-base shadow-sm shadow-blue-100">
+                    <i class="fa-solid fa-marker text-xl w-6 text-center"></i> <span>Chấm và trả điểm</span>
+                </a>
+                
+            </nav>
+
+                       <div class="p-6">
+                <div class="relative">
+                    <div onclick="document.getElementById('user-dropdown').classList.toggle('hidden')" class="flex items-center gap-3 p-3 rounded-2xl border border-slate-100 bg-slate-50 hover:bg-slate-100 transition-colors cursor-pointer select-none">
+                        <img id="user-avatar" src="https://ui-avatars.com/api/?name=User&background=1E3A8A&color=fff" class="w-10 h-10 rounded-full">
+                        <div class="flex-1">
+                            <p id="user-name" class="text-sm font-extrabold text-brand-dark-blue">Đang tải...</p>
+                            <p id="user-role" class="text-[11px] text-slate-500 font-bold">Giáo viên</p>
+                        </div>
+                        <i class="fa-solid fa-chevron-up text-[10px] text-slate-400"></i>
+                    </div>
+                    
+                    <div id="user-dropdown" class="hidden absolute bottom-full left-0 w-full mb-2 bg-white border border-slate-200 rounded-2xl shadow-hover-soft z-50 overflow-hidden">
+                        <a href="#" onclick="handleLogout()" class="flex items-center gap-3 px-4 py-3 text-sm font-extrabold text-red-600 hover:bg-red-50 transition-colors">
+                            <i class="fa-solid fa-arrow-right-from-bracket"></i> Đăng xuất
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <main class="flex-1 flex flex-col min-w-0">
+            <header class="h-20 bg-white border-b border-slate-200 flex items-center justify-between px-8 sticky top-0 z-40">
+                <div class="flex items-center gap-4">
+                    <button class="lg:hidden text-slate-500"><i class="fa-solid fa-bars text-xl"></i></button>
+                    <div class="hidden md:flex items-center bg-slate-100 px-5 py-2.5 rounded-full w-[400px] border border-transparent focus-within:border-brand-blue focus-within:bg-white transition-all">
+                        <i class="fa-solid fa-magnifying-glass text-slate-400 text-sm mr-3"></i>
+                        <input type="text" placeholder="Tìm kiếm bài tập..." class="bg-transparent border-none outline-none text-sm w-full text-slate-800 placeholder-slate-400 font-bold">
+                    </div>
+                </div>
+            </header>
+
+            <div class="p-8 max-w-[1200px] mx-auto w-full space-y-6">
+                <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-6">
+                    <div>
+                        <h1 class="text-[28px] font-bold text-brand-dark-blue uppercase mb-2 leading-none">CHẤM ĐIỂM</h1>
+                        <p class="text-[15px] font-medium text-slate-600">Quản lý và đánh giá bài tập của tất cả các lớp</p>
+                    </div>
+                </div>
+
+                <!-- Thống kê -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm flex items-center gap-5 cursor-pointer hover:border-amber-200 transition-colors" onclick="switchTab('can-cham', document.getElementById('btn-can-cham'))">
+                        <div class="w-14 h-14 rounded-xl bg-amber-50 text-amber-500 flex items-center justify-center text-2xl shrink-0"><i class="fa-solid fa-marker"></i></div>
+                        <div>
+                            <p class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-0.5">Cần chấm</p>
+                            <div class="text-2xl font-black text-brand-dark-blue leading-none">12 <span class="text-sm font-medium text-slate-400 normal-case">bài tập</span></div>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm flex items-center gap-5 cursor-pointer hover:border-emerald-200 transition-colors" onclick="switchTab('da-xong', document.getElementById('btn-da-xong'))">
+                        <div class="w-14 h-14 rounded-xl bg-slate-100 text-slate-500 flex items-center justify-center text-2xl shrink-0"><i class="fa-solid fa-check-double"></i></div>
+                        <div>
+                            <p class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-0.5">Đã hoàn thành</p>
+                            <div class="text-2xl font-black text-brand-dark-blue leading-none">24 <span class="text-sm font-medium text-slate-400 normal-case">bài tập</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tabs -->
+                <div class="flex items-center gap-2 border-b border-slate-200 pt-2">
+                    <button id="btn-can-cham" onclick="switchTab('can-cham', this)" class="tab-btn active px-6 py-3 border-b-2 border-brand-blue text-brand-blue font-bold text-sm whitespace-nowrap outline-none transition-all">Cần chấm điểm</button>
+                    <button id="btn-da-xong" onclick="switchTab('da-xong', this)" class="tab-btn px-6 py-3 border-b-2 border-transparent text-slate-500 font-medium hover:text-brand-dark-blue hover:border-slate-300 text-sm whitespace-nowrap outline-none transition-all">Đã hoàn thành</button>
+                </div>
+
+                <div class="mt-4">
+                    <!-- TAB 1: CẦN CHẤM ĐIỂM -->
+                    <div id="tab-can-cham" class="tab-content flex flex-col gap-5 block">
+                        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm hover:border-brand-blue transition-all overflow-hidden">
+                            <div id="header-list-hs-1" class="p-6 flex flex-col md:flex-row md:items-center justify-between gap-5 cursor-pointer hover:bg-slate-50 transition-colors" onclick="toggleAccordion('list-hs-1', 'icon-hs-1')">
+                                <div class="flex items-start gap-5">
+                                    <div class="w-[52px] h-[52px] rounded-2xl bg-[#FFF9E6] text-amber-500 flex items-center justify-center shrink-0"><i class="fa-solid fa-pen text-xl"></i></div>
+                                    <div class="pt-0.5">
+                                        <div class="flex items-center gap-2 mb-1.5">
+                                            <span class="bg-[#FFF9E6] text-amber-600 text-[11px] font-bold px-2 py-0.5 rounded">Cần chấm</span>
+                                            <span class="text-xs font-medium text-slate-400">Hạn: 15/10/2023 23:59</span>
+                                        </div>
+                                        <h3 class="font-extrabold text-slate-800 text-[17px] mb-0.5">Bài tập hệ tuần hoàn</h3>
+                                        <p class="text-sm text-slate-500">Lớp: <span class="font-bold text-slate-700">8A2</span></p>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-6 md:ml-auto">
+                                    <div class="text-center"><div class="text-xl font-bold text-slate-800 leading-tight">40/42</div><div class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Đã nộp</div></div>
+                                    <div class="w-px h-10 bg-slate-200"></div>
+                                    <div class="text-center w-[80px]"><div class="text-xl font-bold text-amber-500 leading-tight">12</div><div class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Chưa chấm</div></div>
+                                    <div class="ml-4 w-8 h-8 flex items-center justify-center rounded-full bg-slate-100 text-slate-500"><i id="icon-hs-1" class="fa-solid fa-chevron-down transition-transform duration-300"></i></div>
+                                </div>
+                            </div>
+
+                            <div id="list-hs-1" class="accordion-content bg-slate-50/50 border-t border-slate-100">
+                                <div class="p-4 md:p-6">
+                                    <div class="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
+                                        <table class="w-full text-left text-sm">
+                                            <thead class="bg-slate-50 border-b border-slate-200 text-slate-500 font-bold">
+                                                <tr>
+                                                    <th class="px-5 py-3 w-16 text-center">STT</th>
+                                                    <th class="px-5 py-3 w-32">Mã HS</th>
+                                                    <th class="px-5 py-3">Tên học sinh</th>
+                                                    <th class="px-5 py-3 text-center">Trạng thái chấm</th>
+                                                    <th class="px-5 py-3 text-center">Thao tác</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody class="divide-y divide-slate-100 font-medium">
+                                                <tr class="hover:bg-blue-50/50 transition-colors">
+                                                    <td class="px-5 py-3 text-center text-slate-400">1</td>
+                                                    <td class="px-5 py-3 text-slate-600 font-bold">HS23004</td>
+                                                    <td class="px-5 py-3">
+                                                        <div class="flex items-center gap-3">
+                                                            <img src="https://ui-avatars.com/api/?name=Pham+Hoang+An&background=EFF6FF&color=2563EB" class="w-7 h-7 rounded-full object-cover">
+                                                            <span class="font-bold text-slate-800">Phạm Hoàng An</span>
+                                                        </div>
+                                                    </td>
+                                                    <td class="px-5 py-3 text-center"><span class="bg-amber-100 text-amber-700 text-xs font-bold px-2.5 py-1 rounded-md">Chưa chấm</span></td>
+                                                    <td class="px-5 py-3 text-center"><a href="cham.html?id=HS23004&open=list-hs-1" class="text-brand-blue font-bold text-sm hover:underline"><i class="fa-solid fa-pen-clip mr-1"></i> Chấm bài</a></td>
+                                                </tr>
+                                                <tr class="hover:bg-blue-50/50 transition-colors">
+                                                    <td class="px-5 py-3 text-center text-slate-400">2</td>
+                                                    <td class="px-5 py-3 text-slate-600 font-bold">HS23006</td>
+                                                    <td class="px-5 py-3">
+                                                        <div class="flex items-center gap-3">
+                                                            <img src="https://ui-avatars.com/api/?name=Bui+Tuan+Anh&background=EFF6FF&color=2563EB" class="w-7 h-7 rounded-full object-cover">
+                                                            <span class="font-bold text-slate-800">Bùi Tuấn Anh</span>
+                                                        </div>
+                                                    </td>
+                                                    <td class="px-5 py-3 text-center"><span class="bg-emerald-50 text-emerald-600 border border-emerald-200 text-xs font-bold px-2.5 py-1 rounded-md">Đã chấm: 8.5đ</span></td>
+                                                    <td class="px-5 py-3 text-center"><a href="cham.html?id=HS23006&open=list-hs-1" class="text-slate-500 font-bold text-sm hover:text-brand-blue hover:underline">Sửa điểm</a></td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TAB 2: ĐÃ HOÀN THÀNH -->
+                    <div id="tab-da-xong" class="tab-content flex flex-col gap-5 hidden">
+                        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm hover:border-brand-blue transition-all overflow-hidden opacity-90 hover:opacity-100">
+                            <div id="header-list-hs-3" class="p-6 flex flex-col md:flex-row md:items-center justify-between gap-5 cursor-pointer hover:bg-slate-50 transition-colors" onclick="toggleAccordion('list-hs-3', 'icon-hs-3')">
+                                <div class="flex items-start gap-5">
+                                    <div class="w-[52px] h-[52px] rounded-2xl bg-slate-100 text-slate-500 flex items-center justify-center shrink-0"><i class="fa-solid fa-check-double text-xl"></i></div>
+                                    <div class="pt-0.5">
+                                        <div class="flex items-center gap-2 mb-1.5">
+                                            <span class="bg-slate-100 text-slate-600 text-[11px] font-bold px-2 py-0.5 rounded">Đã hoàn thành</span>
+                                            <span class="text-xs font-medium text-slate-400">Hạn: 05/10/2023 23:59</span>
+                                        </div>
+                                        <h3 class="font-extrabold text-slate-800 text-[17px] mb-0.5">Bài tập dự án tái chế</h3>
+                                        <p class="text-sm text-slate-500">Lớp: <span class="font-bold text-slate-700">9C1</span></p>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-6 md:ml-auto">
+                                    <div class="text-center"><div class="text-xl font-bold text-slate-800 leading-tight">38/38</div><div class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Đã nộp</div></div>
+                                    <div class="w-px h-10 bg-slate-200"></div>
+                                    <div class="text-center w-[80px]"><div class="text-xl font-bold text-slate-500 leading-tight">8.5</div><div class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Điểm TB</div></div>
+                                    <div class="ml-4 w-8 h-8 flex items-center justify-center rounded-full bg-slate-100 text-slate-500"><i id="icon-hs-3" class="fa-solid fa-chevron-down transition-transform duration-300"></i></div>
+                                </div>
+                            </div>
+                            <div id="list-hs-3" class="accordion-content bg-slate-50/50 border-t border-slate-100">
+                                <div class="p-4 md:p-6">
+                                    <div class="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
+                                        <table class="w-full text-left text-sm">
+                                            <thead class="bg-slate-50 border-b border-slate-200 text-slate-500 font-bold">
+                                                <tr>
+                                                    <th class="px-5 py-3 w-16 text-center">STT</th>
+                                                    <th class="px-5 py-3">Mã HS</th>
+                                                    <th class="px-5 py-3">Tên học sinh</th>
+                                                    <th class="px-5 py-3 text-center">Kết quả (%)</th>
+                                                    <th class="px-5 py-3 text-center">Thao tác</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody class="divide-y divide-slate-100 font-medium">
+                                                <tr class="hover:bg-blue-50/50 transition-colors">
+                                                    <td class="px-5 py-3 text-center text-slate-400">1</td>
+                                                    <td class="px-5 py-3 text-slate-600 font-bold">HS23015</td>
+                                                    <td class="px-5 py-3">
+                                                        <div class="flex items-center gap-3">
+                                                            <img src="https://ui-avatars.com/api/?name=Pham+Nhat+Minh&background=EFF6FF&color=2563EB" class="w-7 h-7 rounded-full object-cover">
+                                                            <span class="font-bold text-slate-800">Phạm Nhật Minh</span>
+                                                        </div>
+                                                    </td>
+                                                    <td class="px-5 py-3 text-center"><span class="font-black text-brand-dark-blue text-base">95%</span></td>
+                                                    <td class="px-5 py-3 text-center"><a href="cham.html?id=HS23015&open=list-hs-3" class="text-slate-500 font-bold text-sm hover:text-brand-blue hover:underline"><i class="fa-solid fa-eye mr-1"></i> Xem bài</a></td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // ===== Auth Check =====
+        document.addEventListener('DOMContentLoaded', function() {
+            var user = DolyAPI.loadSession();
+            if (!user || user.role !== 'teacher') {
+                window.location.href = '../login.html';
+                return;
+            }
+            document.getElementById('user-avatar').src = user.avatar || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(user.full_name || 'User') + '&background=1E3A8A&color=fff';
+            document.getElementById('user-name').textContent = user.full_name || 'Giáo viên';
+
+            // Add class_id to cham.html links if present in URL
+            var params = new URLSearchParams(window.location.search);
+            var classId = params.get('class_id');
+            if (classId) {
+                var chamLinks = document.querySelectorAll('a[href^="cham.html"]');
+                chamLinks.forEach(function(link) {
+                    var href = link.getAttribute('href');
+                    if (href.indexOf('class_id=') === -1) {
+                        link.setAttribute('href', href + '&class_id=' + classId);
+                    }
+                });
+            }
+        });
+
+        function handleLogout() {
+            DolyAPI.logout().catch(function(){}).then(function(){
+                DolyAPI.clearSession();
+                window.location.href = '../login.html';
+            });
+        }
+
+        // Sử dụng pageshow thay vì DOMContentLoaded để xử lý trường hợp dùng nút Back của trình duyệt
+        window.addEventListener('pageshow', function() {
+            // 1. Phục hồi Tab đang mở từ sessionStorage
+            const activeTab = sessionStorage.getItem('activeTab') || 'can-cham';
+            if (activeTab === 'da-xong') {
+                switchTab('da-xong', document.getElementById('btn-da-xong'), false);
+            } else {
+                switchTab('can-cham', document.getElementById('btn-can-cham'), false);
+            }
+
+            // 2. Phục hồi Accordion (danh sách) đang mở
+            const params = new URLSearchParams(window.location.search);
+            // Ưu tiên tham số trên URL trước, nếu không có thì lấy trong sessionStorage
+            const openId = params.get('open') || sessionStorage.getItem('openAccordion');
+            
+            if (openId) {
+                // Tự động suy ra ID của icon dựa trên ID của list (VD: list-hs-1 -> icon-hs-1)
+                const iconId = openId.replace('list', 'icon');
+                const content = document.getElementById(openId);
+                const icon = document.getElementById(iconId);
+                
+                // Tự động chuyển sang tab "Đã xong" nếu ID thuộc về danh sách đã hoàn thành
+                if (openId === 'list-hs-3' && activeTab !== 'da-xong') {
+                    switchTab('da-xong', document.getElementById('btn-da-xong'), false);
+                } 
+                // Tự động chuyển sang tab "Cần chấm" nếu ID thuộc về danh sách cần chấm
+                else if (openId === 'list-hs-1' && activeTab !== 'can-cham') {
+                    switchTab('can-cham', document.getElementById('btn-can-cham'), false);
+                }
+
+                // Thực hiện mở accordion
+                if (content && !content.classList.contains('open')) {
+                    content.classList.add('open');
+                    if (icon) icon.style.transform = 'rotate(180deg)';
+                    
+                    // Thêm một khoảng trễ nhỏ để UI kịp render trước khi cuộn
+                    setTimeout(() => {
+                        content.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }, 100);
+                }
+            }
+        });
+
+        function switchTab(tabId, btnElement, saveState = true) {
+            // Ẩn tất cả nội dung tab
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            
+            // Xóa trạng thái active của tất cả các nút
+            document.querySelectorAll('.tab-btn').forEach(el => {
+                el.classList.remove('border-brand-blue', 'text-brand-blue', 'font-bold');
+                el.classList.add('border-transparent', 'text-slate-500', 'font-medium');
+            });
+            
+            // Hiển thị nội dung tab được chọn
+            const targetTab = document.getElementById('tab-' + tabId);
+            if (targetTab) {
+                targetTab.classList.remove('hidden');
+            }
+            
+            // Cập nhật giao diện nút được chọn
+            if (btnElement) {
+                btnElement.classList.add('border-brand-blue', 'text-brand-blue', 'font-bold');
+                btnElement.classList.remove('border-transparent', 'text-slate-500', 'font-medium');
+            }
+
+            // Lưu trạng thái tab hiện tại vào sessionStorage
+            if (saveState) {
+                sessionStorage.setItem('activeTab', tabId);
+            }
+        }
+
+        function toggleAccordion(contentId, iconId) {
+            const content = document.getElementById(contentId);
+            const icon = document.getElementById(iconId);
+            
+            if (content.classList.contains('open')) {
+                // Nếu đang mở thì đóng lại và xóa bộ nhớ
+                content.classList.remove('open');
+                if (icon) icon.style.transform = 'rotate(0deg)';
+                sessionStorage.removeItem('openAccordion'); 
+            } else {
+                // Đóng các accordion khác nếu bạn chỉ muốn mở 1 cái cùng lúc (Tuỳ chọn)
+                document.querySelectorAll('.accordion-content.open').forEach(el => {
+                    el.classList.remove('open');
+                    const otherIconId = el.id.replace('list', 'icon');
+                    const otherIcon = document.getElementById(otherIconId);
+                    if (otherIcon) otherIcon.style.transform = 'rotate(0deg)';
+                });
+
+                // Mở accordion hiện tại và lưu vào bộ nhớ
+                content.classList.add('open');
+                if (icon) icon.style.transform = 'rotate(180deg)';
+                sessionStorage.setItem('openAccordion', contentId); 
+            }
+        }
+    </script>
+</body>
+</html>

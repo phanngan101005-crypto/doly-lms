@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="vi" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lớp học của tôi - DOLY LMS</title>
+    <script src="../api/client.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: { 
+                        'brand-blue': '#2563EB',      
+                        'brand-dark-blue': '#1E3A8A', 
+                        'bg-main': '#F8FAFC',
+                    },
+                    fontFamily: { 
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'soft': '0 2px 10px rgba(0, 0, 0, 0.02)',
+                        'hover-soft': '0 10px 25px -3px rgba(37, 99, 235, 0.1)',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { background-color: #F8FAFC; }
+        .custom-scrollbar::-webkit-scrollbar { width: 5px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 10px; }
+        .sidebar-item:hover { background-color: #F1F5F9; color: #2563EB; }
+        .sidebar-item.active { background-color: #EFF6FF; color: #2563EB; }
+        
+        .text-bold-thick {
+            -webkit-text-stroke: 0.7px #1E3A8A;
+        }
+        .text-sub-thick {
+            -webkit-text-stroke: 0.3px #94A3B8;
+        }
+
+        .copy-feedback {
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+        .copy-feedback.show {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body class="antialiased font-sans text-slate-800">
+
+    <div class="flex min-h-screen">
+        
+        <!-- Menu bên trái (Sidebar) -->
+        <aside class="w-72 bg-white border-r border-slate-200 hidden lg:flex flex-col sticky top-0 h-screen z-40 transition-all">
+            <div class="p-8">
+                <!-- LOGO -->
+                <a href="tongquan.html" class="flex items-center gap-3.5 hover:opacity-80 transition-opacity group">
+                    <div class="w-[42px] h-[42px] flex items-center justify-center shrink-0">
+                        <img src="../logodoly.png" alt="Doly Logo" class="w-full h-full object-contain" onerror="this.src='https://ui-avatars.com/api/?name=D&background=1E3A8A&color=fff'">
+                    </div>
+                    <div class="flex flex-col justify-center">
+                        <div class="text-[21px] font-black text-brand-dark-blue leading-none tracking-[-0.04em] text-bold-thick">
+                            DOLY LMS
+                        </div>
+                        <span class="text-[9px] font-black text-[#94A3B8] uppercase tracking-[0.18em] mt-1.5 text-sub-thick">
+                            TEACHER WORKSPACE
+                        </span>
+                    </div>
+                </a>
+            </div>
+            
+            <nav class="flex-1 py-4 px-5 space-y-2 custom-scrollbar">
+                <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3 px-3">Quản lý chung</p>
+                
+                <a href="tongquan.html" class="sidebar-item flex items-center gap-3 px-4 py-4 rounded-2xl transition-all font-bold text-base text-slate-500 hover:text-brand-blue">
+                    <i class="fa-solid fa-house text-xl w-6 text-center"></i> 
+                    <span>Bảng điều khiển</span>
+                </a>
+                <a href="./lophoccuatoi.html" class="sidebar-item active flex items-center gap-3 px-4 py-4 rounded-2xl transition-all font-[900] text-base shadow-sm shadow-blue-100">
+                    <i class="fa-solid fa-users text-xl w-6 text-center"></i> 
+                    <span>Lớp học</span>
+                </a>
+                <a href="chamdiem.html" class="sidebar-item flex items-center gap-3 px-4 py-4 rounded-2xl transition-all font-bold text-base text-slate-500 hover:text-brand-blue">
+                    <i class="fa-solid fa-marker text-xl w-6 text-center"></i> 
+                    <span>Chấm và trả điểm</span>
+                </a>
+                
+            </nav>
+
+            <div class="p-6">
+                <div class="relative">
+                    <div onclick="document.getElementById('user-dropdown').classList.toggle('hidden')" class="flex items-center gap-3 p-3 rounded-2xl border border-slate-100 bg-slate-50 hover:bg-slate-100 transition-colors cursor-pointer select-none">
+                        <img id="user-avatar" src="https://ui-avatars.com/api/?name=User&background=1E3A8A&color=fff" class="w-10 h-10 rounded-full">
+                        <div class="flex-1">
+                            <p id="user-name" class="text-sm font-extrabold text-brand-dark-blue">Đang tải...</p>
+                            <p id="user-role" class="text-[11px] text-slate-500 font-bold">Giáo viên</p>
+                        </div>
+                        <i class="fa-solid fa-chevron-up text-[10px] text-slate-400"></i>
+                    </div>
+                    
+                    <div id="user-dropdown" class="hidden absolute bottom-full left-0 w-full mb-2 bg-white border border-slate-200 rounded-2xl shadow-hover-soft z-50 overflow-hidden">
+                        <a href="#" onclick="handleLogout()" class="flex items-center gap-3 px-4 py-3 text-sm font-extrabold text-red-600 hover:bg-red-50 transition-colors">
+                            <i class="fa-solid fa-arrow-right-from-bracket"></i> Đăng xuất
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        
+        <!-- Nội dung chính -->
+        <main class="flex-1 flex flex-col min-w-0">
+            
+            <header class="h-20 bg-white border-b border-slate-200 flex items-center justify-between px-8 sticky top-0 z-30">
+                <div class="flex items-center gap-4">
+                    <button class="lg:hidden text-slate-500"><i class="fa-solid fa-bars text-xl"></i></button>
+                    
+                    <!-- Breadcrumbs -->
+                    <div class="hidden md:flex items-center gap-2 text-sm font-bold text-slate-500">
+                        <a href="lophoccuatoi.html" class="hover:text-brand-blue transition-colors">Lớp học</a>
+                        <i class="fa-solid fa-chevron-right text-[10px] text-slate-300"></i>
+                        <span class="text-brand-dark-blue font-extrabold">Bảng điểm (8A2)</span>
+                    </div>
+                </div>
+                
+                <div class="flex items-center gap-3">
+                   
+                </div>
+            </header>
+
+            <div class="p-8 max-w-[1200px] mx-auto w-full space-y-6">
+                
+                <!-- Header Lớp Học -->
+                <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-6">
+                    <div class="flex items-center gap-5">
+                        <div class="w-20 h-20 rounded-2xl bg-brand-blue text-white flex items-center justify-center font-bold text-3xl shrink-0">
+                            8A2
+                        </div>
+                        <div>
+                            <h1 class="text-2xl font-black text-brand-dark-blue tracking-[0.05em] uppercase mb-2">KHOA HỌC TỰ NHIÊN LỚP 8</h1>
+                            <div class="flex flex-wrap items-center gap-4 text-sm font-medium text-slate-600">
+                                <div class="flex items-center gap-2">
+                                    <i class="fa-solid fa-users text-slate-400"></i>
+                                    <span>Sĩ số: <span class="font-bold text-slate-800">30</span></span>
+                                </div>
+                                <span class="text-slate-300">|</span>
+                                <div class="flex items-center gap-2">
+                                    <i class="fa-solid fa-key text-slate-400"></i>
+                                    <span>Mã lớp:</span>
+                                    <span class="text-brand-dark-blue font-bold tracking-widest bg-slate-100 px-2 py-0.5 rounded">A8X9K2</span>
+                                    <button class="text-slate-400 hover:text-brand-blue transition-colors ml-1 relative" onclick="copyCode('A8X9K2', this)">
+                                        <i class="fa-regular fa-copy"></i>
+                                        <span class="copy-feedback absolute -top-8 left-1/2 -translate-x-1/2 bg-slate-800 text-white text-[10px] px-2 py-1 rounded font-bold whitespace-nowrap pointer-events-none">Đã chép</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-3">
+                        <button class="px-4 py-2.5 bg-white border border-slate-200 text-slate-700 rounded-lg text-sm font-bold hover:bg-slate-50 transition-all">
+                            <i class="fa-solid fa-gear mr-1"></i> Cài đặt
+                        </button>
+                        <a href="giaobai.html" class="px-5 py-2.5 bg-brand-blue text-white rounded-lg text-sm font-bold hover:bg-blue-700 transition-all">
+                            <i class="fa-solid fa-plus mr-1"></i> Giao bài
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Tabs Navigation -->
+                <div class="flex items-center gap-2 border-b border-slate-200 overflow-x-auto no-scrollbar">
+                    
+                    <a href="danhsachhocsinh.html" class="px-6 py-3 border-b-2 border-transparent text-slate-500 font-medium text-sm whitespace-nowrap block">Danh sách học sinh</a>
+                    <a href="bangdiem.html" class="px-6 py-3 border-b-2 border-brand-blue text-brand-blue font-bold text-sm whitespace-nowrap block">Bảng điểm</a>
+                </div>
+
+                <!-- Main Content Area: Bảng Điểm -->
+                <div class="space-y-4">
+                    
+                    <!-- Toolbar cho Bảng Điểm -->
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-2">
+                        <div class="relative max-w-sm w-full">
+                            <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                            <input type="text" placeholder="Tìm tên học sinh..." class="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-lg text-sm font-medium focus:outline-none focus:border-brand-blue focus:ring-1 focus:ring-brand-blue transition-all bg-white shadow-sm">
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <select class="bg-white border border-slate-200 text-sm font-medium text-slate-600 outline-none rounded-lg px-3 py-2 cursor-pointer shadow-sm">
+                                <option>Học kỳ 1</option>
+                                <option>Học kỳ 2</option>
+                                <option>Cả năm</option>
+                            </select>
+                            <button class="px-4 py-2 bg-white border border-slate-200 text-slate-700 text-sm font-bold rounded-lg hover:bg-slate-50 transition-colors shadow-sm flex items-center gap-2">
+                                <i class="fa-solid fa-file-arrow-down text-emerald-600"></i> Xuất Excel
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Lưới Bảng Điểm -->
+                    <div class="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
+                        <div class="overflow-x-auto overflow-y-auto max-h-[600px] custom-scrollbar relative">
+                            <table class="w-full text-left text-sm whitespace-nowrap min-w-[1100px]">
+                                <thead class="bg-slate-50 border-b border-slate-200 text-slate-600 font-bold text-xs uppercase tracking-wider sticky top-0 z-30 shadow-sm">
+                                    <tr>
+                                        <!-- 2 Cột cố định: STT và Tên Học Sinh -->
+                                        <th class="px-2 py-4 sticky-col-stt border-b border-r border-slate-200 text-center w-[60px] min-w-[60px] max-w-[60px]">STT</th>
+                                        <th class="px-6 py-4 sticky-col-name border-b border-r border-slate-200 w-[250px] min-w-[250px]">Học sinh</th>
+                                        
+                                        <!-- Các cột điểm -->
+                                        <th class="px-6 py-4 sticky-header border-b border-slate-200 text-center hover:bg-slate-100 cursor-pointer transition-colors" title="Bài tập hệ tuần hoàn">
+                                            <div class="flex flex-col items-center">
+                                                <span class="truncate w-36">Bài tập hệ tuần hoàn</span>
+                                                <span class="text-[10px] text-slate-400 font-medium normal-case mt-1">Hệ số 1</span>
+                                            </div>
+                                        </th>
+                                        <th class="px-6 py-4 sticky-header border-b border-slate-200 text-center hover:bg-slate-100 cursor-pointer transition-colors" title="Kiểm tra 15 phút hô hấp">
+                                            <div class="flex flex-col items-center">
+                                                <span class="truncate w-36">Kiểm tra 15 phút hô hấp</span>
+                                                <span class="text-[10px] text-slate-400 font-medium normal-case mt-1">Hệ số 1</span>
+                                            </div>
+                                        </th>
+                                        <th class="px-6 py-4 sticky-header border-b border-slate-200 text-center hover:bg-slate-100 cursor-pointer transition-colors" title="Dự án tái chế">
+                                            <div class="flex flex-col items-center">
+                                                <span class="truncate w-28">Dự án tái chế</span>
+                                                <span class="text-[10px] text-slate-400 font-medium normal-case mt-1">Hệ số 2</span>
+                                            </div>
+                                        </th>
+                                        <th class="px-6 py-4 sticky-header border-b border-slate-200 text-center hover:bg-slate-100 cursor-pointer transition-colors" title="Thi giữa kỳ 1">
+                                            <div class="flex flex-col items-center">
+                                                <span class="truncate w-28">Thi giữa kỳ 1</span>
+                                                <span class="text-[10px] text-slate-400 font-medium normal-case mt-1">Hệ số 2</span>
+                                            </div>
+                                        </th>
+                                        <th class="px-6 py-4 sticky-header border-b border-l border-slate-200 text-center bg-blue-50/50 font-black text-brand-dark-blue">
+                                            Điểm trung bình
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody id="score-table-body" class="divide-y divide-slate-100 text-slate-700 font-medium">
+                                    
+                                    <!-- 15 Rows Hiển thị Mặc định -->
+                                    <tr class="score-row hover:bg-slate-50 transition-colors">
+                                        <td class="px-2 py-3 sticky-col-stt border-r border-slate-200 text-center font-bold text-slate-400">1</td>
+                                        <td class="px-6 py-3 sticky-col-name border-r border-slate-200">
+                                            <div class="flex items-center gap-3">
+                                                <img src="https://ui-avatars.com/api/?name=Pham+Hoang+An&background=EFF6FF&color=2563EB" class="w-8 h-8 rounded-full object-cover">
+                                                <div class="flex flex-col">
+                                                    <span class="font-bold text-slate-800">Phạm Hoàng An</span>
+                                                    <span class="text-[11px] text-slate-400">HS23004</span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-3 text-center text-emerald-600 font-bold">8.0</td><td class="px-6 py-3 text-center text-slate-800 font-bold">7.5</td><td class="px-6 py-3 text-center text-emerald-600 font-bold">8.5</td><td class="px-6 py-3 text-center text-emerald-600 font-bold">8.0</td><td class="px-6 py-3 text-center bg-blue-50/30 border-l border-slate-200 font-black text-brand-blue text-base">8.1</td>
+                                    </tr>
+                                    <tr class="score-row hover:bg-slate-50 transition-colors">
+                                        <td class="px-2 py-3 sticky-col-stt border-r border-slate-200 text-center font-bold text-slate-400">2</td>
+                                        <td class="px-6 py-3 sticky-col-name border-r border-slate-200">
+                                            <div class="flex items-center gap-3">
+                                                <img src="https://ui-avatars.com/api/?name=Bui+Tuan+Anh&background=EFF6FF&color=2563EB" class="w-8 h-8 rounded-full object-cover">
+                                                <div class="flex flex-col">
+                                                    <span class="font-bold text-slate-800">Bùi Tuấn Anh</span>
+                                                    <span class="text-[11px] text-slate-400">HS23006</span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-3 text-center text-slate-800 font-bold">7.5</td><td class="px-6 py-3 text-center text-emerald-600 font-bold">8.0</td><td class="px-6 py-3 text-center text-slate-800 font-bold">7.0</td><td class="px-6 py-3 text-center text-slate-800 font-bold">7.5</td><td class="px-6 py-3 text-center bg-blue-50/30 border-l border-slate-200 font-black text-slate-700 text-base">7.4</td>
+                                    </tr>
+                                    <tr class="score-row hover:bg-slate-50 transition-colors">
+                                        <td class="px-2 py-3 sticky-col-stt border-r border-slate-200 text-center font-bold text-slate-400">3</td>
+                                        <td class="px-6 py-3 sticky-col-name border-r border-slate-200">
+                                            <div class="flex items-center gap-3">
+                                                <img src="https://ui-avatars.com/api/?name=Hoang+Tu+Anh&background=EFF6FF&color=2563EB" class="w-8 h-8 rounded-full object-cover">
+                                                <div class="flex flex-col">
+                                                    <span class="font-bold text-slate-800">Hoàng Tú Anh</span>
+                                                    <span class="text-[11px] text-slate-400">HS23029</span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-3 text-center text-emerald-600 font-bold">9.0</td><td class="px-6 py-3 text-center text-emerald-600 font-bold">8.5</td><td class="px-6 py-3 text-center text-emerald-600 font-bold">9.0</td><td class="px-6 py-3 text-center text-emerald-600 font-bold">9.5</td><td class="px-6 py-3 text-center bg-blue-50/30 border-l border-slate-200 font-black text-brand-blue text-base">9.1</td>
+                                    </tr>
+                                    <tr class="score-row hover:bg-slate-50 transition-colors">
+                                        <td class="px-2 py-3 sticky-col-stt border-r border-slate-200 text-center font-bold text-slate-400">4</td>
+                                        <td class="px-6 py-3 sticky-col-name border-r border-slate-200">
+                                            <div class="flex items-center gap-3">
+                                                <img src="https://ui-avatars.com/api/?name=Le+Bao+Anh&background=EFF6FF&color=2563EB" class="w-8 h-8 rounded-full object-cover">
+                                                <div class="flex flex-col">
+                                                    <span class="font-bold text-slate-800">Lê Bảo Anh</span>
+                                                    <span class="text-[11px] text-slate-400">HS23024</span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-3 text-center text-slate-800 font-bold">6.5</td><td class="px-6 py-3 text-center text-slate-800 font-bold">7.0</td><td class="px-6 py-3 text-center text-slate-800 font-bold">6.0</td><td class="px-6 py-3 text-center text-slate-800 font-bold">7.5</td><td class="px-6 py-3 text-center bg-blue-50/30 border-l border-slate-200 font-black text-slate-700 text-base">6.8</td>
+                                    </tr>
+                                    <tr class="score-row hover:bg-slate-50 transition-colors">
+                                        <td class="px-2 py-3 sticky-col-stt border-r border-slate-200 text-center font-bold text-slate-400">5</td>
+                                        <td class="px-6 py-3 sticky-col-name border-r border-slate-200">
+                                            <div class="flex items-center gap-3">
+                                                <img src="https://ui-avatars.com/api/?name=Nguyen+Hai+Anh&background=EFF6FF&color=2563EB" class="w-8 h-8 rounded-full object-cover">
+                                                <div class="flex flex-col">
+                                                    <span class="font-bold text-slate-800">Nguyễn Hải Anh</span>
+                                                    <span class="text-[11px] text-slate-400">HS23025</span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-3 text-center text-emerald-600 font-bold">8.5</td><td class="px-6 py-3 text-center text-emerald-600 font-bold">8.5</td><td class="px-6 py-3 text-center text-emerald-600 font-bold">9.0</td><td class="px-6 py-3 text-center text-emerald-600 font-bold">8.0</td><td class="px-6 py-3 text-center bg-blue-50/30 border-l border-slate-200 font-black text-brand-blue text-base">8.5</td>
+                                    </tr>
+                                    <tr class="score-row hover:bg-slate-50 transition-colors">
+                                        <td class="px-2 py-3 sticky-col-stt border-r border-slate-200 text-center font-bold text-slate-400">6</td>
+                                        <td class="px-6 py-3 sticky-col-name border-r border-slate-200">
+                                            <div class="flex items-center gap-3">
+                                                <img src="https://ui-avatars.com/api/?name=Duong+Quoc+Bao&background=EFF6FF&color=2563EB" class="w-8 h-8 rounded-full object-cover">
+                                                <div class="flex flex-col">
+                                                    <span class="font-bold text-slate-800">Dương Quốc Bảo</span>
+                                                    <span class="text-[11px] text-slate-400">HS23021</span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-3 text-center text-slate-800 font-bold">7.0</td><td class="px-6 py-3 text-center text-slate-800 font-bold">6.5</td><td class="px-6 py-3 text-center text-slate-800 font-bold">7.5</td><td class="px-6 py-3 text-center text-emerald-600 font-bold">8.0</td><td class="px-6 py-3 text-center bg-blue-50/30 border-l border-slate-200 font-black text-slate-700 text-base">7.4</td>
+                                    </tr>
+                                    <tr class="score-row hover:bg-slate-50 transition-colors">
+                                        <td class="px-2 py-3 sticky-col-stt border-r border-slate-200 text-center font-bold text-slate-400">7</td>
+                                        <td class="px-6 py-3 sticky-col-name border-r border-slate-200">
+                                            <div class="flex items-center gap-3">
+                                                <img src="https://ui-avatars.com/api/?name=Tran+Gia+Bao&background=EFF6FF&color=2563EB" class="w-8 h-8 rounded-full object-cover">
+                                                <div class="flex flex-col">
+                                                    <span class="font-bold text-slate-800">Trần Gia Bảo</span>
+                                                    <span class="text-[11px] text-slate-400">HS23001</span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-3 text-center text-emerald-600 font-bold">8.5</td><td class="px-6 py-3 text-center text-emerald-600 font-bold">9.0</td><td class="px-6 py-3 text-center text-slate-800 font-bold">7.5</td><td class="px-6 py-3 text-center text-emerald-600 font-bold">8.0</td><td class="px-6 py-3 text-center bg-blue-50/30 border-l border-slate-200 font-black text-brand-blue text-base">8.1</td>
+                                    </tr>
+                                    <tr class="score-row hover:bg-slate-50 transition-colors">
+                                        <td class="px-2 py-3 sticky-col-stt border-r border-slate-200 text-center font-bold text-slate-400">8</td>
+                                        <td class="px-6 py-3 sticky-col-name border-r border-slate-200">
+                                            <div class="flex items-center gap-3">
+                                                <img src="https://ui-avatars.com/api/?name=Do+Ha+Chau&background=EFF6FF&color=2563EB" class="w-8 h-8 rounded-full object-cover">
+                                                <div class="flex flex-col">
+                                                    <span class="font-bold text-slate-800">Đỗ Hà Châu</span>
+                                                    <span class="text-[11px] text-slate-400">HS23008</span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-3 text-center text-slate-800 font-bold">7.0</td><td class="px-6 py-3 text-center text-slate-800 font-bold">7.5</td><td class="px-6 py-3 text-center text-slate-800 font-bold">6.5</td><td class="px-6 py-3 text-center text-emerald-600 font-bold">8.0</td><td class="px-6 py-3 text-center bg-blue-50/30 border-l border-slate-200 font-black text-slate-700 text-base">7.3</td>
+                                    </tr>
+                                    <tr class="score-row hover:bg-slate-50 transition-colors">
+                                        <td class="px-2 py-3 sticky-col-stt border-r border-slate-200 text-center font-bold text-slate-400">9</td>
+                                        <td class="px-6 py-3 sticky-col-name border-r border-slate-200">
+                                            <div class="flex items-center gap-3">
+                                                <img src="https://ui-avatars.com/api/?name=Ngo+Hai+Dang&background=EFF6FF&color=2563EB" class="w-8 h-8 rounded-full object-cover">
+                                                <div class="flex flex-col">
+                                                    <span class="font-bold text-slate-800">Ngô Hải Đăng</span>
+                                                    <span class="text-[11px] text-slate-400">HS23009</span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-3 text-center text-slate-800 font-bold">6.0</td><td class="px-6 py-3 text-center text-slate-800 font-bold">6.5</td><td class="px-6 py-3 text-center text-slate-800 font-bold">7.0</td><td class="px-6 py-3 text-center text-slate-800 font-bold">6.0</td><td class="px-6 py-3 text-center bg-blue-50/30 border-l border-slate-200 font-black text-slate-700 text-base">6.4</td>
+                                    </tr>
+                                    <tr class="score-row hover:bg-slate-50 transition-colors">
+                                        <td class="px-2 py-3 sticky-col-stt border-r border-slate-200 text-center font-bold text-slate-400">10</td>
+                                        <td class="px-6 py-3 sticky-col-name border-r border-slate-200">
+                                            <div class="flex items-center gap-3">
+                                                <img src="https://ui-avatars.com/api/?name=Le+Tien+Dat&background=EFF6FF&color=2563EB" class="w-8 h-8 rounded-full object-cover">
+                                                <div class="flex flex-col">
+                                                    <span class="font-bold text-slate-800">Lê Tiến Đạt</span>
+                                                    <span class="text-[11px] text-slate-400">HS23013</span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-3 text-center text-slate-800 font-bold">6.5</td><td class="px-6 py-3 text-center text-slate-800 font-bold">7.0</td><td class="px-6 py-3 text-center text-slate-800 font-bold">5.5</td><td class="px-6 py-3 text-center text-slate-800 font-bold">6.0</td><td class="px-6 py-3 text-center bg-blue-50/30 border-l border-slate-200 font-black text-slate-700 text-base">6.1</td>
+                                    </tr>
+                                    <tr class="score-row hover:bg-slate-50 transition-colors">
+                                        <td class="px-2 py-3 sticky-col-stt border-r border-slate-200 text-center font-bold text-slate-400">11</td>
+                                        <td class="px-6 py-3 sticky-col-name border-r border-slate-200">
+                                            <div class="flex items-center gap-3">
+                                                <img src="https://ui-avatars.com/api/?name=Nguyen+Thu+Ha&background=EFF6FF&color=2563EB" class="w-8 h-8 rounded-full object-cover">
+                                                <div class="flex flex-col">
+                                                    <span class="font-bold text-slate-800">Nguyễn Thu Hà</span>
+                                                    <span class="text-[11px] text-slate-400">HS23014</span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-3 text-center text-emerald-600 font-bold">8.0</td><td class="px-6 py-3 text-center text-slate-800 font-bold">7.5</td><td class="px-6 py-3 text-center text-emerald-600 font-bold">8.5</td><td class="px-6 py-3 text-center text-emerald-600 font-bold">8.0</td><td class="px-6 py-3 text-center bg-blue-50/30 border-l border-slate-200 font-black text-brand-blue text-base">8.1</td>
+                                    </tr>
+                                    <tr class="score-row hover:bg-slate-50 transition-colors">
+                                        <td class="px-2 py-3 sticky-col-stt border-r border-slate-200 text-center font-bold text-slate-400">12</td>
+                                        <td class="px-6 py-3 sticky-col-name border-r border-slate-200">
+                                            <div class="flex items-center gap-3">
+                                                <img src="https://ui-avatars.com/api/?name=Bui+Duc+Hai&background=EFF6FF&color=2563EB" class="w-8 h-8 rounded-full object-cover">
+                                                <div class="flex flex-col">
+                                                    <span class="font-bold text-slate-800">Bùi Đức Hải</span>
+                                                    <span class="text-[11px] text-slate-400">HS23028</span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-3 text-center text-emerald-600 font-bold">9.0</td><td class="px-6 py-3 text-center text-emerald-600 font-bold">8.5</td><td class="px-6 py-3 text-center text-emerald-600 font-bold">9.5</td><td class="px-6 py-3 text-center text-emerald-600 font-bold">9.0</td><td class="px-6 py-3 text-center bg-blue-50/30 border-l border-slate-200 font-black text-brand-blue text-base">9.1</td>
+                                    </tr>
+                                    <tr class="score-row hover:bg-slate-50 transition-colors">
+                                        <td class="px-2 py-3 sticky-col-stt border-r border-slate-200 text-center font-bold text-slate-400">13</td>
+                                        <td class="px-6 py-3 sticky-col-name border-r border-slate-200">
+                                            <div class="flex items-center gap-3">
+                                                <img src="https://ui-avatars.com/api/?name=Ly+Quang+Huy&background=EFF6FF&color=2563EB" class="w-8 h-8 rounded-full object-cover">
+                                                <div class="flex flex-col">
+                                                    <span class="font-bold text-slate-800">Lý Quang Huy</span>
+                                                    <span class="text-[11px] text-slate-400">HS23011</span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-3 text-center text-slate-800 font-bold">7.5</td><td class="px-6 py-3 text-center text-slate-800 font-bold">7.0</td><td class="px-6 py-3 text-center text-slate-800 font-bold">6.5</td><td class="px-6 py-3 text-center text-slate-800 font-bold">7.0</td><td class="px-6 py-3 text-center bg-blue-50/30 border-l border-slate-200 font-black text-slate-700 text-base">6.9</td>
+                                    </tr>
+                                    <tr class="score-row hover:bg-slate-50 transition-colors">
+                                        <td class="px-2 py-3 sticky-col-stt border-r border-slate-200 text-center font-bold text-slate-400">14</td>
+                                        <td class="px-6 py-3 sticky-col-name border-r border-slate-200">
+                                            <div class="flex items-center gap-3">
+                                                <img src="https://ui-avatars.com/api/?name=Do+Minh+Khang&background=EFF6FF&color=2563EB" class="w-8 h-8 rounded-full object-cover">
+                                                <div class="flex flex-col">
+                                                    <span class="font-bold text-slate-800">Đỗ Minh Khang</span>
+                                                    <span class="text-[11px] text-slate-400">HS23030</span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-3 text-center text-emerald-600 font-bold">8.5</td><td class="px-6 py-3 text-center text-emerald-600 font-bold">8.0</td><td class="px-6 py-3 text-center text-emerald-600 font-bold">8.5</td><td class="px-6 py-3 text-center text-emerald-600 font-bold">9.0</td><td class="px-6 py-3 text-center bg-blue-50/30 border-l border-slate-200 font-black text-brand-blue text-base">8.6</td>
+                                    </tr>
+                                    <tr class="score-row hover:bg-slate-50 transition-colors">
+                                        <td class="px-2 py-3 sticky-col-stt border-r border-slate-200 text-center font-bold text-slate-400">15</td>
+                                        <td class="px-6 py-3 sticky-col-name border-r border-slate-200">
+                                            <div class="flex items-center gap-3">
+                                                <img src="https://ui-avatars.com/api/?name=Tran+Anh+Khoa&background=EFF6FF&color=2563EB" class="w-8 h-8 rounded-full object-cover">
+                                                <div class="flex flex-col">
+                                                    <span class="font-bold text-slate-800">Trần Anh Khoa</span>
+                                                    <span class="text-[11px] text-slate-400">HS23023</span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-3 text-center text-slate-800 font-bold">7.0</td><td class="px-6 py-3 text-center text-slate-800 font-bold">7.5</td><td class="px-6 py-3 text-center text-emerald-600 font-bold">8.0</td><td class="px-6 py-3 text-center text-slate-800 font-bold">7.5</td><td class="px-6 py-3 text-center bg-blue-50/30 border-l border-slate-200 font-black text-slate-700 text-base">7.6</td>
+                                    </tr>
+
+                                    <!-- 15 Rows Ẩn ban đầu -->
+                                    <tr class="score-row hidden hover:bg-slate-50 transition-colors">
+                                        <td class="px-2 py-3 sticky-col-stt border-r border-slate-200 text-center font-bold text-slate-400">16</td>
+                                        <td class="px-6 py-3 sticky-col-name border-r border-slate-200">
+                                            <div class="flex items-center gap-3">
+                                                <img src="https://ui-avatars.com/api/?name=Do+Trong+Kien&background=EFF6FF&color=2563EB" class="w-8 h-8 rounded-full object-cover">
+                                                <div class="flex flex-col">
+                                                    <span class="font-bold text-slate-800">Đỗ Trọng Kiên</span>
+                                                    <span class="text-[11px] text-slate-400">HS23019</span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-3 text-center text-slate-800 font-bold">6.5</td><td class="px-6 py-3 text-center text-slate-800 font-bold">6.0</td><td class="px-6 py-3 text-center text-slate-800 font-bold">7.0</td><td class="px-6 py-3 text-center text-slate-800 font-bold">6.5</td><td class="px-6 py-3 text-center bg-blue-50/30 border-l border-slate-200 font-black text-slate-700 text-base">6.6</td>
+                                    </tr>
+                                    <tr class="score-row hidden hover:bg-slate-50 transition-colors">
+                                        <td class="px-2 py-3 sticky-col-stt border-r border-slate-200 text-center font-bold text-slate-400">17</td>
+                                        <td class="px-6 py-3 sticky-col-name border-r border-slate-200">
+                                            <div class="flex items-center gap-3">
+                                                <img src="https://ui-avatars.com/api/?name=Vu+Phuong+Linh&background=EFF6FF&color=2563EB" class="w-8 h-8 rounded-full object-cover">
+                                                <div class="flex flex-col">
+                                                    <span class="font-bold text-slate-800">Vũ Phương Linh</span>
+                                                    <span class="text-[11px] text-slate-400">HS23005</span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-3 text-center text-slate-800 font-bold">7.5</td><td class="px-6 py-3 text-center text-slate-800 font-bold">7.0</td><td class="px-6 py-3 text-center text-emerald-600 font-bold">8.0</td><td class="px-6 py-3 text-center text-emerald-600 font-bold">8.5</td><td class="px-6 py-3 text-center bg-blue-50/30 border-l border-slate-200 font-black text-slate-700 text-base">7.9</td>
+                                    </tr>
+                                    <tr class="score-row hidden hover:bg-slate-50 transition-colors">
+                                        <td class="px-2 py-3 sticky-col-stt border-r border-slate-200 text-center font-bold text-slate-400">18</td>
+                                        <td class="px-6 py-3 sticky-col-name border-r border-slate-200">
+                                            <div class="flex items-center gap-3">
+                                                <img src="https://ui-avatars.com/api/?name=Tran+Khanh+Ly&background=EFF6FF&color=2563EB" class="w-8 h-8 rounded-full object-cover">
+                                                <div class="flex flex-col">
+                                                    <span class="font-bold text-slate-800">Trần Khánh Ly</span>
+                                                    <span class="text-[11px] text-slate-400">HS23012</span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-3 text-center text-emerald-600 font-bold">9.5</td><td class="px-6 py-3 text-center text-emerald-600 font-bold">8.5</td><td class="px-6 py-3 text-center text-emerald-600 font-bold">9.0</td><td class="px-6 py-3 text-center text-emerald-600 font-bold">8.5</td><td class="px-6 py-3 text-center bg-blue-50/30 border-l border-slate-200 font-black text-brand-blue text-base">8.8</td>
+                                    </tr>
+                                    <tr class="score-row hidden hover:bg-slate-50 transition-colors">
+                                        <td class="px-2 py-3 sticky-col-stt border-r border-slate-200 text-center font-bold text-slate-400">19</td>
+                                        <td class="px-6 py-3 sticky-col-name border-r border-slate-200">
+                                            <div class="flex items-center gap-3">
+                                                <img src="https://ui-avatars.com/api/?name=Pham+Nhat+Minh&background=EFF6FF&color=2563EB" class="w-8 h-8 rounded-full object-cover">
+                                                <div class="flex flex-col">
+                                                    <span class="font-bold text-slate-800">Phạm Nhật Minh</span>
+                                                    <span class="text-[11px] text-slate-400">HS23015</span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-3 text-center text-emerald-600 font-bold">9.0</td><td class="px-6 py-3 text-center text-slate-800 font-bold">7.5</td><td class="px-6 py-3 text-center text-emerald-600 font-bold">8.0</td><td class="px-6 py-3 text-center text-emerald-600 font-bold">8.5</td><td class="px-6 py-3 text-center bg-blue-50/30 border-l border-slate-200 font-black text-brand-blue text-base">8.3</td>
+                                    </tr>
+                                    <tr class="score-row hidden hover:bg-slate-50 transition-colors">
+                                        <td class="px-2 py-3 sticky-col-stt border-r border-slate-200 text-center font-bold text-slate-400">20</td>
+                                        <td class="px-6 py-3 sticky-col-name border-r border-slate-200">
+                                            <div class="flex items-center gap-3">
+                                                <img src="https://ui-avatars.com/api/?name=Le+Tra+My&background=EFF6FF&color=2563EB" class="w-8 h-8 rounded-full object-cover">
+                                                <div class="flex flex-col">
+                                                    <span class="font-bold text-slate-800">Lê Trà My</span>
+                                                    <span class="text-[11px] text-slate-400">HS23002</span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-3 text-center text-slate-800 font-bold">6.0</td><td class="px-6 py-3 text-center text-red-500 font-bold">4.5</td><td class="px-6 py-3 text-center text-slate-800 font-bold">6.5</td><td class="px-6 py-3 text-center text-slate-800 font-bold">5.0</td><td class="px-6 py-3 text-center bg-blue-50/30 border-l border-slate-200 font-black text-red-500 text-base">5.6</td>
+                                    </tr>
+                                    <tr class="score-row hidden hover:bg-slate-50 transition-colors">
+                                        <td class="px-2 py-3 sticky-col-stt border-r border-slate-200 text-center font-bold text-slate-400">21</td>
+                                        <td class="px-6 py-3 sticky-col-name border-r border-slate-200">
+                                            <div class="flex items-center gap-3">
+                                                <img src="https://ui-avatars.com/api/?name=Vu+Ngoc+My&background=EFF6FF&color=2563EB" class="w-8 h-8 rounded-full object-cover">
+                                                <div class="flex flex-col">
+                                                    <span class="font-bold text-slate-800">Vũ Ngọc My</span>
+                                                    <span class="text-[11px] text-slate-400">HS23027</span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-3 text-center text-emerald-600 font-bold">8.0</td><td class="px-6 py-3 text-center text-emerald-600 font-bold">8.5</td><td class="px-6 py-3 text-center text-emerald-600 font-bold">8.0</td><td class="px-6 py-3 text-center text-emerald-600 font-bold">9.0</td><td class="px-6 py-3 text-center bg-blue-50/30 border-l border-slate-200 font-black text-brand-blue text-base">8.4</td>
+                                    </tr>
+                                    <tr class="score-row hidden hover:bg-slate-50 transition-colors">
+                                        <td class="px-2 py-3 sticky-col-stt border-r border-slate-200 text-center font-bold text-slate-400">22</td>
+                                        <td class="px-6 py-3 sticky-col-name border-r border-slate-200">
+                                            <div class="flex items-center gap-3">
+                                                <img src="https://ui-avatars.com/api/?name=Vu+Dieu+Ngoc&background=EFF6FF&color=2563EB" class="w-8 h-8 rounded-full object-cover">
+                                                <div class="flex flex-col">
+                                                    <span class="font-bold text-slate-800">Vũ Diệu Ngọc</span>
+                                                    <span class="text-[11px] text-slate-400">HS23016</span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-3 text-center text-emerald-600 font-bold">9.0</td><td class="px-6 py-3 text-center text-emerald-600 font-bold">9.5</td><td class="px-6 py-3 text-center text-emerald-600 font-bold">8.5</td><td class="px-6 py-3 text-center text-emerald-600 font-bold">9.0</td><td class="px-6 py-3 text-center bg-blue-50/30 border-l border-slate-200 font-black text-brand-blue text-base">8.9</td>
+                                    </tr>
+                                    <tr class="score-row hidden hover:bg-slate-50 transition-colors">
+                                        <td class="px-2 py-3 sticky-col-stt border-r border-slate-200 text-center font-bold text-slate-400">23</td>
+                                        <td class="px-6 py-3 sticky-col-name border-r border-slate-200">
+                                            <div class="flex items-center gap-3">
+                                                <img src="https://ui-avatars.com/api/?name=Hoang+Thao+Nguyen&background=EFF6FF&color=2563EB" class="w-8 h-8 rounded-full object-cover">
+                                                <div class="flex flex-col">
+                                                    <span class="font-bold text-slate-800">Hoàng Thảo Nguyên</span>
+                                                    <span class="text-[11px] text-slate-400">HS23007</span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-3 text-center text-emerald-600 font-bold">9.0</td><td class="px-6 py-3 text-center text-emerald-600 font-bold">9.5</td><td class="px-6 py-3 text-center text-emerald-600 font-bold">9.0</td><td class="px-6 py-3 text-center text-emerald-600 font-bold">9.5</td><td class="px-6 py-3 text-center bg-blue-50/30 border-l border-slate-200 font-black text-brand-blue text-base">9.3</td>
+                                    </tr>
+                                    <tr class="score-row hidden hover:bg-slate-50 transition-colors">
+                                        <td class="px-2 py-3 sticky-col-stt border-r border-slate-200 text-center font-bold text-slate-400">24</td>
+                                        <td class="px-6 py-3 sticky-col-name border-r border-slate-200">
+                                            <div class="flex items-center gap-3">
+                                                <img src="https://ui-avatars.com/api/?name=Hoang+Yen+Nhi&background=EFF6FF&color=2563EB" class="w-8 h-8 rounded-full object-cover">
+                                                <div class="flex flex-col">
+                                                    <span class="font-bold text-slate-800">Hoàng Yến Nhi</span>
+                                                    <span class="text-[11px] text-slate-400">HS23018</span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-3 text-center text-emerald-600 font-bold">8.5</td><td class="px-6 py-3 text-center text-emerald-600 font-bold">8.0</td><td class="px-6 py-3 text-center text-emerald-600 font-bold">8.5</td><td class="px-6 py-3 text-center text-emerald-600 font-bold">8.5</td><td class="px-6 py-3 text-center bg-blue-50/30 border-l border-slate-200 font-black text-brand-blue text-base">8.4</td>
+                                    </tr>
+                                    <tr class="score-row hidden hover:bg-slate-50 transition-colors">
+                                        <td class="px-2 py-3 sticky-col-stt border-r border-slate-200 text-center font-bold text-slate-400">25</td>
+                                        <td class="px-6 py-3 sticky-col-name border-r border-slate-200">
+                                            <div class="flex items-center gap-3">
+                                                <img src="https://ui-avatars.com/api/?name=Duong+Mai+Phuong&background=EFF6FF&color=2563EB" class="w-8 h-8 rounded-full object-cover">
+                                                <div class="flex flex-col">
+                                                    <span class="font-bold text-slate-800">Dương Mai Phương</span>
+                                                    <span class="text-[11px] text-slate-400">HS23010</span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-3 text-center text-emerald-600 font-bold">8.5</td><td class="px-6 py-3 text-center text-emerald-600 font-bold">8.0</td><td class="px-6 py-3 text-center text-emerald-600 font-bold">8.5</td><td class="px-6 py-3 text-center text-emerald-600 font-bold">9.0</td><td class="px-6 py-3 text-center bg-blue-50/30 border-l border-slate-200 font-black text-brand-blue text-base">8.6</td>
+                                    </tr>
+                                    <tr class="score-row hidden hover:bg-slate-50 transition-colors">
+                                        <td class="px-2 py-3 sticky-col-stt border-r border-slate-200 text-center font-bold text-slate-400">26</td>
+                                        <td class="px-6 py-3 sticky-col-name border-r border-slate-200">
+                                            <div class="flex items-center gap-3">
+                                                <img src="https://ui-avatars.com/api/?name=Bui+Thanh+Son&background=EFF6FF&color=2563EB" class="w-8 h-8 rounded-full object-cover">
+                                                <div class="flex flex-col">
+                                                    <span class="font-bold text-slate-800">Bùi Thanh Sơn</span>
+                                                    <span class="text-[11px] text-slate-400">HS23017</span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-3 text-center text-slate-800 font-bold">7.0</td><td class="px-6 py-3 text-center text-slate-800 font-bold">6.5</td><td class="px-6 py-3 text-center text-slate-800 font-bold">7.0</td><td class="px-6 py-3 text-center text-slate-800 font-bold">7.5</td><td class="px-6 py-3 text-center bg-blue-50/30 border-l border-slate-200 font-black text-slate-700 text-base">7.1</td>
+                                    </tr>
+                                    <tr class="score-row hidden hover:bg-slate-50 transition-colors">
+                                        <td class="px-2 py-3 sticky-col-stt border-r border-slate-200 text-center font-bold text-slate-400">27</td>
+                                        <td class="px-6 py-3 sticky-col-name border-r border-slate-200">
+                                            <div class="flex items-center gap-3">
+                                                <img src="https://ui-avatars.com/api/?name=Ly+Phuong+Thao&background=EFF6FF&color=2563EB" class="w-8 h-8 rounded-full object-cover">
+                                                <div class="flex flex-col">
+                                                    <span class="font-bold text-slate-800">Lý Phương Thảo</span>
+                                                    <span class="text-[11px] text-slate-400">HS23022</span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-3 text-center text-emerald-600 font-bold">8.0</td><td class="px-6 py-3 text-center text-emerald-600 font-bold">8.5</td><td class="px-6 py-3 text-center text-emerald-600 font-bold">9.0</td><td class="px-6 py-3 text-center text-emerald-600 font-bold">8.5</td><td class="px-6 py-3 text-center bg-blue-50/30 border-l border-slate-200 font-black text-brand-blue text-base">8.6</td>
+                                    </tr>
+                                    <tr class="score-row hidden hover:bg-slate-50 transition-colors">
+                                        <td class="px-2 py-3 sticky-col-stt border-r border-slate-200 text-center font-bold text-slate-400">28</td>
+                                        <td class="px-6 py-3 sticky-col-name border-r border-slate-200">
+                                            <div class="flex items-center gap-3">
+                                                <img src="https://ui-avatars.com/api/?name=Ngo+Bich+Thuy&background=EFF6FF&color=2563EB" class="w-8 h-8 rounded-full object-cover">
+                                                <div class="flex flex-col">
+                                                    <span class="font-bold text-slate-800">Ngô Bích Thủy</span>
+                                                    <span class="text-[11px] text-slate-400">HS23020</span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-3 text-center text-slate-800 font-bold">7.5</td><td class="px-6 py-3 text-center text-emerald-600 font-bold">8.0</td><td class="px-6 py-3 text-center text-slate-800 font-bold">7.5</td><td class="px-6 py-3 text-center text-emerald-600 font-bold">8.0</td><td class="px-6 py-3 text-center bg-blue-50/30 border-l border-slate-200 font-black text-slate-700 text-base">7.8</td>
+                                    </tr>
+                                    <tr class="score-row hidden hover:bg-slate-50 transition-colors">
+                                        <td class="px-2 py-3 sticky-col-stt border-r border-slate-200 text-center font-bold text-slate-400">29</td>
+                                        <td class="px-6 py-3 sticky-col-name border-r border-slate-200">
+                                            <div class="flex items-center gap-3">
+                                                <img src="https://ui-avatars.com/api/?name=Nguyen+Minh+Triet&background=EFF6FF&color=2563EB" class="w-8 h-8 rounded-full object-cover">
+                                                <div class="flex flex-col">
+                                                    <span class="font-bold text-slate-800">Nguyễn Minh Triết</span>
+                                                    <span class="text-[11px] text-slate-400">HS23003</span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-3 text-center text-emerald-600 font-bold">10</td><td class="px-6 py-3 text-center text-emerald-600 font-bold">9.5</td><td class="px-6 py-3 text-center text-emerald-600 font-bold">10</td><td class="px-6 py-3 text-center text-emerald-600 font-bold">9.0</td><td class="px-6 py-3 text-center bg-blue-50/30 border-l border-slate-200 font-black text-brand-blue text-base">9.6</td>
+                                    </tr>
+                                    <tr class="score-row hidden hover:bg-slate-50 transition-colors border-b-transparent">
+                                        <td class="px-2 py-3 sticky-col-stt border-r border-slate-200 text-center font-bold text-slate-400">30</td>
+                                        <td class="px-6 py-3 sticky-col-name border-r border-slate-200">
+                                            <div class="flex items-center gap-3">
+                                                <img src="https://ui-avatars.com/api/?name=Pham+Quang+Vinh&background=EFF6FF&color=2563EB" class="w-8 h-8 rounded-full object-cover">
+                                                <div class="flex flex-col">
+                                                    <span class="font-bold text-slate-800">Phạm Quang Vinh</span>
+                                                    <span class="text-[11px] text-slate-400">HS23026</span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-3 text-center text-emerald-600 font-bold">8.5</td><td class="px-6 py-3 text-center text-emerald-600 font-bold">9.0</td><td class="px-6 py-3 text-center text-emerald-600 font-bold">8.5</td><td class="px-6 py-3 text-center text-emerald-600 font-bold">9.0</td><td class="px-6 py-3 text-center bg-blue-50/30 border-l border-slate-200 font-black text-brand-blue text-base">8.8</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <!-- Thêm container chứa nút xem thêm ở đây để nó luôn ở giữa card, không bị lệch khi cuộn bảng -->
+                        <div id="load-more-container" class="p-4 border-t border-slate-200 flex justify-center bg-white">
+                            <button id="load-more-btn" class="px-6 py-2.5 bg-slate-50 border border-slate-200 text-brand-blue font-bold rounded-xl hover:bg-slate-100 transition-colors text-sm shadow-sm inline-flex items-center gap-2">
+                                <i class="fa-solid fa-chevron-down text-xs"></i> Xem thêm
+                            </button>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <script>
+        function handleLogout() {
+            DolyAPI.logout().catch(function(){}).then(function(){
+                DolyAPI.clearSession();
+                window.location.href = '../login.html';
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            var session = DolyAPI.loadSession();
+            if (!session || session.role !== 'teacher') {
+                window.location.href = '../login.html';
+                return;
+            }
+            var user = session.user || {};
+            var nameEl = document.getElementById('user-name');
+            var avatarEl = document.getElementById('user-avatar');
+            if (nameEl) nameEl.textContent = user.full_name || 'Giáo viên';
+            if (avatarEl) avatarEl.src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(user.full_name || 'Teacher') + '&background=1E3A8A&color=fff';
+
+            // Load class info and grades from API
+            var params = new URLSearchParams(window.location.search);
+            var classId = params.get('class_id');
+            if (classId) {
+                loadClassInfo(classId);
+                loadGrades(classId);
+            }
+        });
+
+        function loadClassInfo(classId) {
+            DolyAPI.getClasses().then(function(classes) {
+                if (!classes || classes.length === 0) return;
+                var cls = classes.find(function(c) { return String(c.id) === String(classId); });
+                if (!cls) return;
+
+                // Update header
+                var nameDisplay = cls.name || cls.class_name || '';
+                var codeDisplay = cls.class_code || cls.code || '';
+                var subjectDisplay = cls.subject || 'KHOA HOC TU NHIEN';
+                var studentCount = cls.student_count || cls.member_count || '';
+
+                var iconEl = document.querySelector('.bg-white.rounded-2xl.p-6 .w-20.h-20');
+                if (iconEl) iconEl.textContent = nameDisplay.replace(/[^0-9A-Z]/g, '').substring(0, 3) || 'L';
+                var titleEl = document.querySelector('.bg-white.rounded-2xl.p-6 h1');
+                if (titleEl) titleEl.textContent = subjectDisplay.toUpperCase() + ' LOP ' + (nameDisplay.replace(/[^0-9]/g, '') || '');
+
+                var countEl = document.querySelector('.fa-users + span');
+                if (countEl && studentCount) countEl.innerHTML = 'Sĩ số: <span class="font-bold text-slate-800">' + studentCount + '</span>';
+                var codeEl = document.querySelector('.tracking-widest');
+                if (codeEl && codeDisplay) codeEl.textContent = codeDisplay;
+                var copyBtn = document.querySelector('[onclick*="copyCode"]');
+                if (copyBtn && codeDisplay) {
+                    var oldMatch = copyBtn.getAttribute('onclick').match(/\'([^\']+)\'/);
+                    if (oldMatch) copyBtn.setAttribute('onclick', copyBtn.getAttribute('onclick').replace(oldMatch[1], codeDisplay));
+                }
+
+                var breadcrumbEl = document.querySelector('.hidden.md\\:flex .text-brand-dark-blue');
+                if (breadcrumbEl) breadcrumbEl.textContent = 'Bảng điểm (' + nameDisplay + ')';
+            }).catch(function() {});
+        }
+
+        function loadGrades(classId) {
+            DolyAPI.getGrades(classId).then(function(grades) {
+                if (!grades || grades.length === 0) return;
+                renderGradeTable(grades);
+            }).catch(function() {});
+        }
+
+        function renderGradeTable(grades) {
+            var tbody = document.getElementById('score-table-body');
+            if (!tbody) return;
+            
+            var html = '';
+            grades.forEach(function(g, idx) {
+                var name = g.full_name || g.student_name || 'Học sinh ' + (idx + 1);
+                var code = g.student_code || g.id || 'HS' + String(idx + 1).padStart(5, '0');
+                var score = g.score !== null && g.score !== undefined ? g.score : '-';
+                var scoreClass = score !== '-' ? (score >= 8 ? 'text-emerald-600' : (score >= 5 ? 'text-slate-800' : 'text-red-500')) : 'text-slate-400';
+                var avgScore = g.avg_score || g.average || score;
+                var avgClass = avgScore >= 8 ? 'text-brand-blue' : (avgScore >= 5 ? 'text-slate-700' : 'text-red-500');
+
+                html += '<tr class="score-row hover:bg-slate-50 transition-colors' + (idx >= 15 ? ' hidden' : '') + '">';
+                html += '<td class="px-2 py-3 sticky-col-stt border-r border-slate-200 text-center font-bold text-slate-400">' + (idx + 1) + '</td>';
+                html += '<td class="px-6 py-3 sticky-col-name border-r border-slate-200"><div class="flex items-center gap-3">';
+                html += '<img src="https://ui-avatars.com/api/?name=' + encodeURIComponent(name) + '&background=EFF6FF&color=2563EB" class="w-8 h-8 rounded-full object-cover">';
+                html += '<div class="flex flex-col"><span class="font-bold text-slate-800">' + DolyAPI.esc(name) + '</span>';
+                html += '<span class="text-[11px] text-slate-400">' + DolyAPI.esc(code) + '</span></div></div></td>';
+                html += '<td class="px-6 py-3 text-center ' + scoreClass + ' font-bold">' + score + '</td>';
+                html += '<td class="px-6 py-3 text-center ' + scoreClass + ' font-bold">' + score + '</td>';
+                html += '<td class="px-6 py-3 text-center ' + scoreClass + ' font-bold">' + score + '</td>';
+                html += '<td class="px-6 py-3 text-center ' + scoreClass + ' font-bold">' + score + '</td>';
+                html += '<td class="px-6 py-3 text-center bg-blue-50/30 border-l border-slate-200 font-black ' + avgClass + ' text-base">' + avgScore + '</td>';
+                html += '</tr>';
+            });
+            tbody.innerHTML = html;
+
+            // Update load more button visibility
+            var loadMoreContainer = document.getElementById('load-more-container');
+            if (loadMoreContainer) {
+                if (grades.length <= 15) {
+                    loadMoreContainer.classList.add('hidden');
+                } else {
+                    loadMoreContainer.classList.remove('hidden');
+                }
+            }
+        }
+
+        document.addEventListener('click', function(event) {
+            const dropdown = document.getElementById('user-dropdown');
+            const menuBtn = dropdown?.closest('.relative')?.querySelector('div');
+            if (dropdown && menuBtn && !menuBtn.contains(event.target) && !dropdown.contains(event.target)) {
+                dropdown.classList.add('hidden');
+            }
+        });
+
+        // Xử lý nút xem thêm
+        document.getElementById('load-more-btn').addEventListener('click', function() {
+            const hiddenRows = document.querySelectorAll('.score-row.hidden');
+            hiddenRows.forEach(row => row.classList.remove('hidden'));
+            document.getElementById('load-more-container').classList.add('hidden');
+        });
+
+        // Copy mã lớp
+        function copyCode(code, btn) {
+            navigator.clipboard.writeText(code);
+            const tooltip = btn.querySelector('.copy-feedback');
+            tooltip.classList.add('show');
+            setTimeout(() => tooltip.classList.remove('show'), 1500);
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="vi" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tạo lớp học - DOLY LMS</title>
+    <script src="../api/client.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: { 
+                        'brand-blue': '#2563EB',
+                        'brand-dark-blue': '#1E3A8A',
+                    },
+                    fontFamily: { 
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { background-color: #F8FAFC; }
+        
+        /* Tùy chỉnh thanh cuộn nếu có */
+        .custom-scrollbar::-webkit-scrollbar { width: 5px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 10px; }
+        
+        /* Hiệu ứng copy tooltip */
+        .copy-tooltip {
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.2s ease-in-out;
+        }
+        .copy-tooltip.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body class="antialiased font-sans text-slate-800 min-h-screen flex items-center justify-center p-4 sm:p-8">
+
+    <!-- Card Form trung tâm -->
+    <div class="bg-white w-full max-w-xl rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 p-8 sm:p-10 relative overflow-hidden">
+        
+        <!-- Header mảng màu trang trí góc (Tùy chọn cho đẹp) -->
+        <div class="absolute top-0 right-0 w-32 h-32 bg-blue-50 rounded-bl-[100px] -z-0 opacity-50"></div>
+
+        <!-- Header: Back & Title -->
+        <div class="flex items-center gap-4 mb-10 relative z-10">
+            <!-- Nút quay lại được gắn cố định về trang Lớp học của tôi -->
+            <a href="lophoccuatoi.html" class="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-50 text-slate-500 hover:text-brand-blue hover:bg-blue-50 transition-colors shadow-sm border border-slate-100">
+                <i class="fa-solid fa-arrow-left text-lg"></i>
+            </a>
+            <h1 class="text-2xl font-black text-brand-dark-blue tracking-tight uppercase">Tạo lớp học mới</h1>
+        </div>
+
+        <form onsubmit="event.preventDefault(); createClass();" class="space-y-6 relative z-10">
+            
+            <!-- Tên lớp học -->
+            <div class="space-y-2">
+                <label for="class_name" class="block text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">Tên lớp học <span class="text-red-500">*</span></label>
+                <input type="text" id="class_name" placeholder="Ví dụ: Khoa học tự nhiên 8A2..." required
+                       class="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-[15px] font-bold text-slate-800 placeholder:text-slate-400 focus:bg-white focus:border-brand-blue focus:ring-4 focus:ring-blue-50 outline-none transition-all shadow-sm">
+            </div>
+
+            <!-- Ký hiệu lớp -->
+            <div class="space-y-2">
+                <label for="class_symbol" class="block text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">Ký hiệu / Tên viết tắt</label>
+                <input type="text" id="class_symbol" placeholder="VD: 8A2, 9C1..." 
+                       class="w-full sm:w-1/2 px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-[15px] font-bold text-slate-800 placeholder:text-slate-400 focus:bg-white focus:border-brand-blue focus:ring-4 focus:ring-blue-50 outline-none transition-all shadow-sm">
+            </div>
+
+            <!-- Khối & Môn học -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div class="space-y-2">
+                    <label for="grade" class="block text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">Khối lớp</label>
+                    <div class="relative">
+                        <select id="grade" class="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-[15px] font-bold text-slate-800 focus:bg-white focus:border-brand-blue focus:ring-4 focus:ring-blue-50 outline-none transition-all shadow-sm appearance-none cursor-pointer">
+                            <option>Khối 6</option>
+                            <option>Khối 7</option>
+                            <option selected>Khối 8</option>
+                            <option>Khối 9</option>
+                        </select>
+                        <i class="fa-solid fa-chevron-down absolute right-5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-sm"></i>
+                    </div>
+                </div>
+                <div class="space-y-2">
+                    <label for="subject" class="block text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">Môn học</label>
+                    <input type="text" id="subject" placeholder="VD: Toán, Ngữ Văn..." 
+                           class="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-[15px] font-bold text-slate-800 placeholder:text-slate-400 focus:bg-white focus:border-brand-blue focus:ring-4 focus:ring-blue-50 outline-none transition-all shadow-sm">
+                </div>
+            </div>
+
+            <!-- Mã lớp nổi bật -->
+            <div class="space-y-2 pt-2">
+                <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">Mã tham gia lớp học</label>
+                <div class="flex items-center gap-3">
+                    <div class="bg-blue-50/50 border-2 border-brand-blue/20 px-6 py-3.5 rounded-2xl flex-1 flex items-center justify-center shadow-inner">
+                        <span id="class-code" class="font-mono font-black text-brand-blue tracking-[0.25em] text-2xl">A8X9K2</span>
+                    </div>
+                    
+                    <div class="flex flex-col sm:flex-row gap-3">
+                        <button type="button" onclick="copyCode(this)" class="w-14 h-[56px] sm:w-auto sm:px-5 flex items-center justify-center gap-2 bg-white border border-slate-200 rounded-2xl text-slate-500 hover:text-brand-blue hover:border-brand-blue hover:bg-blue-50 transition-all shadow-sm group relative">
+                            <i class="fa-regular fa-copy text-lg"></i>
+                            <span class="hidden sm:inline font-bold text-sm">Chép</span>
+                            <!-- Tooltip -->
+                            <span class="copy-tooltip absolute -top-10 left-1/2 -translate-x-1/2 bg-slate-800 text-white text-[10px] px-3 py-1.5 rounded-lg font-bold pointer-events-none whitespace-nowrap">Đã chép mã!</span>
+                        </button>
+                        <button type="button" onclick="regenCode()" class="w-14 h-[56px] sm:w-auto sm:px-5 flex items-center justify-center gap-2 bg-white border border-slate-200 rounded-2xl text-slate-500 hover:text-brand-blue hover:border-brand-blue hover:bg-blue-50 transition-all shadow-sm" title="Tạo mã mới">
+                            <i class="fa-solid fa-rotate-right text-lg"></i>
+                            <span class="hidden sm:inline font-bold text-sm">Đổi</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mô tả -->
+            <div class="space-y-2 pt-2">
+                <label for="desc" class="block text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">Mô tả thêm (Không bắt buộc)</label>
+                <textarea id="desc" rows="3" placeholder="Nhập một vài dòng giới thiệu về lớp học này..." 
+                          class="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-[15px] font-medium text-slate-800 placeholder:text-slate-400 focus:bg-white focus:border-brand-blue focus:ring-4 focus:ring-blue-50 outline-none transition-all resize-none shadow-sm"></textarea>
+            </div>
+
+            <!-- Cài đặt phụ -->
+            <div class="flex items-center gap-3 pt-2 bg-slate-50 p-4 rounded-xl border border-slate-100">
+                <input type="checkbox" id="allow_code" class="w-5 h-5 rounded text-brand-blue border-slate-300 focus:ring-brand-blue cursor-pointer" checked>
+                <label for="allow_code" class="mb-0 cursor-pointer select-none font-bold text-slate-700 text-sm">
+                    Cho phép học sinh tự động tham gia bằng Mã lớp
+                </label>
+            </div>
+
+            <!-- Nút Action -->
+            <div class="pt-6">
+                <button type="submit" class="w-full py-4 bg-brand-blue text-white rounded-2xl font-black text-[15px] uppercase tracking-wide shadow-lg shadow-blue-200 hover:bg-blue-700 active:scale-[0.98] transition-all flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-plus-circle text-lg"></i> Hoàn tất tạo lớp
+                </button>
+            </div>
+
+        </form>
+    </div>
+
+    <!-- Nút Loading giả lập (sẽ bật khi bấm tạo lớp) -->
+    <div id="loading-overlay" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center hidden opacity-0 transition-opacity">
+        <div class="bg-white p-6 rounded-2xl shadow-xl flex flex-col items-center gap-4">
+            <i class="fa-solid fa-circle-notch fa-spin text-4xl text-brand-blue"></i>
+            <p class="font-bold text-slate-700">Đang khởi tạo lớp học...</p>
+        </div>
+    </div>
+
+    <script>
+        function regenCode() {
+            const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+            let code = '';
+            for (let i = 0; i < 6; i++) {
+                code += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            // Hiệu ứng nháy khi đổi mã
+            const codeEl = document.getElementById('class-code');
+            codeEl.style.opacity = '0';
+            setTimeout(() => {
+                codeEl.textContent = code;
+                codeEl.style.opacity = '1';
+            }, 150);
+        }
+
+        function copyCode(btnElement) {
+            const code = document.getElementById('class-code').textContent.trim();
+            
+            // Xử lý copy
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(code);
+            } else {
+                let textArea = document.createElement("textarea");
+                textArea.value = code;
+                textArea.style.position = "fixed";
+                textArea.style.left = "-9999px";
+                document.body.appendChild(textArea);
+                textArea.select();
+                try { document.execCommand('copy'); } catch (err) {}
+                textArea.remove();
+            }
+            
+            // Hiện tooltip
+            const tooltip = btnElement.querySelector('.copy-tooltip');
+            tooltip.classList.add('show');
+            
+            // Đổi icon
+            const icon = btnElement.querySelector('i.fa-copy');
+            if(icon) {
+                icon.classList.replace('fa-copy', 'fa-check');
+                icon.classList.add('text-emerald-500');
+            }
+
+            setTimeout(() => {
+                tooltip.classList.remove('show');
+                if(icon) {
+                    icon.classList.replace('fa-check', 'fa-copy');
+                    icon.classList.remove('text-emerald-500');
+                }
+            }, 2000);
+        }
+
+        function createClass() {
+            var overlay = document.getElementById('loading-overlay');
+            overlay.classList.remove('hidden');
+            overlay.classList.remove('opacity-0');
+
+            var name = document.getElementById('class_name').value.trim();
+            var subject = document.getElementById('subject').value.trim();
+            var gradeLevel = document.getElementById('grade').value.replace('Khối ', '');
+            var classCode = document.getElementById('class-code').textContent.trim();
+
+            DolyAPI.createClass(name, subject, gradeLevel, classCode).then(function(result) {
+                setTimeout(function() {
+                    window.location.href = 'lophoccuatoi.html';
+                }, 500);
+            }).catch(function(err) {
+                overlay.classList.add('hidden');
+                alert(err.message || 'Tạo lớp thất bại!');
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            var session = DolyAPI.loadSession();
+            if (!session || session.role !== 'teacher') {
+                window.location.href = '../login.html';
+                return;
+            }
+            regenCode(); // Tao ma moi khi load trang de tranh bi trung
+        });
+    </script>
+
+</body>
+</html>

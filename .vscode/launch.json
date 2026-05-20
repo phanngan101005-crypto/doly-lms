@@ -1,0 +1,21 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "chrome",
+            "request": "launch",
+            "name": "Mở DOLY LMS (XAMPP)",
+            "url": "http://localhost/doly%20(1)/login.html",
+            "webRoot": "${workspaceFolder}",
+            "runtimeArgs": ["--disable-web-security"]
+        },
+        {
+            "type": "msedge",
+            "request": "launch",
+            "name": "Mở DOLY LMS (Edge)",
+            "url": "http://localhost/doly%20(1)/login.html",
+            "webRoot": "${workspaceFolder}",
+            "runtimeArgs": ["--disable-web-security"]
+        }
+    ]
+}

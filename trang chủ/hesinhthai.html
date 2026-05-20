@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="vi" class="scroll-smooth overflow-x-hidden">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hệ Sinh Thái - DOLY LMS | Nền tảng học tập thông minh</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="../api/client.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Quicksand:wght@500;600;700;800&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="./style.css">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'doly-blue': '#2563EB', 
+                        'doly-dark': '#0f172a',
+                        'doly-yellow': '#FBBF24', 
+                        'ai-purple': '#8b5cf6',
+                        'chem-green': '#10b981', 
+                        'bio-pink': '#ec4899', 
+                    },
+                    fontFamily: {
+                        sans: ['Quicksand', 'sans-serif'],
+                        display: ['Montserrat', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'soft': '0 10px 40px -10px rgba(0,0,0,0.05)',
+                        'app': '0 20px 60px rgba(0,0,0,0.06)',
+                        'btn': '0 10px 20px rgba(37,99,235,0.15)',
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        body { background-color: #f8fafc; color: #334155; }
+        
+        :root {
+            --doly-deep-blue: #20356a; /* Xanh Navy Đậm */
+        }
+        
+        /* Đổi màu tiêu đề sang Xanh Navy */
+        h1, h2, h3, h4, 
+        .text-slate-800, 
+        .eco-tab-title {
+            color: var(--doly-deep-blue) !important;
+        }
+        .bg-slate-800 {
+            background-color: var(--doly-deep-blue) !important;
+        }
+        .border-slate-800 {
+            border-color: var(--doly-deep-blue) !important;
+        }
+
+        /* Đồng bộ màu chữ thanh điều hướng */
+        header nav a {
+            color: var(--doly-deep-blue) !important;
+        }
+        header nav a span.bg-doly-blue {
+            background-color: var(--doly-deep-blue) !important;
+            box-shadow: 0 0 10px rgba(32, 53, 106, 0.4) !important;
+        }
+        header nav a:hover { opacity: 0.8; }
+
+        /* Thanh cuộn tinh tế */
+        .custom-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scroll::-webkit-scrollbar-track { background: transparent; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        .custom-scroll::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        
+        /* Animation cho Tab Tương Tác */
+        .eco-content { transition: opacity 0.4s ease-in-out, transform 0.4s ease-in-out; }
+        .eco-content.hidden-tab { opacity: 0; transform: translateY(10px); pointer-events: none; z-index: 0; position: absolute; inset: 0; visibility: hidden;}
+        .eco-content.active-tab { opacity: 1; transform: translateY(0); pointer-events: auto; z-index: 10; position: relative; visibility: visible;}
+
+        .hover-lift:hover { transform: translateY(-5px); box-shadow: 0 20px 40px -10px rgba(0,0,0,0.08); }
+    </style>
+</head>
+<body class="antialiased font-sans selection:bg-slate-200 selection:text-slate-900 bg-slate-50 relative">
+
+    <div class="overflow-x-hidden relative w-full">
+
+       <header class="fixed top-6 left-0 w-full z-50 px-4 flex justify-center">
+    <div class="w-full max-w-7xl glass !rounded-full px-6 py-3 flex justify-between items-center transition-all shadow-lg border border-white/50">
+        
+        <a href="index.html" class="flex items-center gap-3 group shrink-0 w-[220px]">
+            <div class="transition-transform group-hover:rotate-12 duration-500 flex items-center justify-center">
+                <img src="../logodoly.png" alt="Doly Logo" class="w-12 h-12 object-contain">
+            </div>
+            <h1 class="text-xl font-display font-black tracking-tighter text-slate-800 hidden sm:block uppercase whitespace-nowrap">DOLY LMS</h1>
+        </a>
+            
+        <nav class="hidden lg:flex flex-1 justify-center items-center gap-8 xl:gap-12">
+            <a href="index.html" class="text-sm font-extrabold text-slate-500 hover:text-slate-800 relative py-1 transition-all group whitespace-nowrap">
+                TRANG CHỦ
+                <span class="absolute bottom-0 left-0 w-0 h-[3px] bg-slate-800 rounded-full transition-all duration-300 group-hover:w-full"></span>
+            </a>
+            
+            <a href="hesinhthai.html" class="text-sm font-extrabold relative py-1 transition-all whitespace-nowrap" style="color: #20356a;">
+                HỆ SINH THÁI HỌC TẬP
+                <span class="absolute bottom-0 left-0 w-full h-[3px] rounded-full" style="background-color: #20356a;"></span>
+            </a>
+            
+            <a href="diendan.html" class="text-sm font-extrabold text-slate-500 hover:text-slate-800 relative py-1 transition-all group whitespace-nowrap">
+                DIỄN ĐÀN VÀ CỘNG ĐỒNG
+                <span class="absolute bottom-0 left-0 w-0 h-[3px] bg-slate-800 rounded-full transition-all duration-300 group-hover:w-full"></span>
+            </a>
+            
+            <a href="tintucfaq.html" class="text-sm font-extrabold text-slate-500 hover:text-slate-800 relative py-1 transition-all group whitespace-nowrap">
+                TIN TỨC VÀ CÂU HỎI 
+                <span class="absolute bottom-0 left-0 w-0 h-[3px] bg-slate-800 rounded-full transition-all duration-300 group-hover:w-full"></span>
+            </a>
+        </nav>
+        
+        <div class="flex items-center justify-end shrink-0 w-[220px]">
+            <button onclick="window.location.href='../login.html'" class="btn-shine px-6 py-2.5 text-white text-[12px] font-black rounded-full shadow-lg transform hover:-translate-y-0.5 uppercase tracking-widest border border-white/20 transition-all whitespace-nowrap" style="background-color: #20356a;">
+                ĐĂNG KÝ / ĐĂNG NHẬP
+            </button>
+        </div>
+
+    </div>
+</header>
+        <section class="pt-40 pb-16 relative z-10 bg-slate-50 overflow-hidden">
+            <div class="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-5xl h-[400px] bg-gradient-to-b from-slate-200/50 to-transparent pointer-events-none rounded-b-full blur-3xl"></div>
+
+            <div class="container mx-auto px-4 max-w-6xl relative z-10" data-aos="zoom-in">
+                <div class="text-center mb-12">
+                    <div class="inline-flex items-center gap-2 px-4 py-1.5 bg-white text-slate-600 rounded-full text-[11px] font-black uppercase tracking-[0.15em] mb-4 border border-slate-200 shadow-sm">
+                        <i class="fas fa-layer-group text-slate-400"></i> Nền tảng KHTN doàn Diện
+                    </div>
+                    <h1 class="text-4xl md:text-5xl lg:text-6xl font-display font-black mb-6 leading-tight tracking-tight">
+                        Học tập say mê. <br class="hidden md:block">
+                        Vận hành bứt phá.
+                    </h1>
+                    <p class="text-slate-500 font-semibold text-base max-w-2xl mx-auto leading-relaxed">
+                        Nền tảng duy nhất đồng bộ hóa trải nghiệm của Học sinh, Giáo viên và Phụ huynh. Khám phá 4 tính năng cốt lõi làm nên sức mạnh của DOLY.
+                    </p>
+                </div>
+
+                <div id="co-may-doly" class="bg-white rounded-[2rem] shadow-app border border-slate-200 flex flex-col lg:flex-row overflow-hidden h-auto lg:h-[550px]">
+                    
+                    <div class="w-full lg:w-[300px] bg-slate-50/80 border-r border-slate-100 flex flex-col shrink-0">
+                        <div class="p-6 border-b border-slate-100 bg-white">
+                            <h2 class="text-base font-display font-black uppercase tracking-widest flex items-center"><i class="fas fa-microchip text-slate-400 mr-2"></i> Tính năng lõi</h2>
+                        </div>
+                        <div class="flex-1 p-4 space-y-2 overflow-y-auto custom-scroll flex lg:flex-col gap-2 lg:gap-0">
+                            
+                            <button onclick="switchEcoTab('roadmap')" id="tab-btn-roadmap" class="eco-tab-btn flex-1 lg:flex-none w-full text-left p-4 rounded-2xl bg-white border-[2px] border-slate-800 shadow-sm flex items-center gap-4 transition-all">
+                                <div class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-lg shrink-0 text-slate-800"><i class="fas fa-route"></i></div>
+                                <div class="hidden lg:block">
+                                    <h3 class="font-bold text-sm eco-tab-title text-slate-800">Lộ trình học tập</h3>
+                                    <p class="text-[10px] font-semibold text-slate-500">Tiến trình & mục tiêu</p>
+                                </div>
+                            </button>
+
+                            <button onclick="switchEcoTab('ai')" id="tab-btn-ai" class="eco-tab-btn flex-1 lg:flex-none w-full text-left p-4 rounded-2xl bg-transparent border-[2px] border-transparent hover:bg-white flex items-center gap-4 transition-all">
+                                <div class="w-10 h-10 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center text-lg shrink-0"><i class="fas fa-chart-line"></i></div>
+                                <div class="hidden lg:block">
+                                    <h3 class="font-bold text-sm text-slate-500 eco-tab-title transition-colors">Theo dõi tiến độ</h3>
+                                    <p class="text-[10px] font-semibold text-slate-500">Lịch học & điểm số</p>
+                                </div>
+                            </button>
+
+                            <button onclick="switchEcoTab('teacher')" id="tab-btn-teacher" class="eco-tab-btn flex-1 lg:flex-none w-full text-left p-4 rounded-2xl bg-transparent border-[2px] border-transparent hover:bg-white flex items-center gap-4 transition-all">
+                                <div class="w-10 h-10 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center text-lg shrink-0"><i class="fas fa-chalkboard-teacher"></i></div>
+                                <div class="hidden lg:block">
+                                    <h3 class="font-bold text-sm text-slate-500 eco-tab-title transition-colors">Trợ lý giáo viên</h3>
+                                    <p class="text-[10px] font-semibold text-slate-500">Giao bài & theo dõi lớp học
+                            </button>
+
+                            <button onclick="switchEcoTab('report')" id="tab-btn-report" class="eco-tab-btn flex-1 lg:flex-none w-full text-left p-4 rounded-2xl bg-transparent border-[2px] border-transparent hover:bg-white flex items-center gap-4 transition-all">
+                                <div class="w-10 h-10 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center text-lg shrink-0"><i class="fas fa-user-shield"></i></div>
+                                <div class="hidden lg:block">
+                                    <h3 class="font-bold text-sm text-slate-500 eco-tab-title transition-colors">Cổng Phụ Huynh</h3>
+                                    <p class="text-[10px] font-semibold text-slate-500">Kết quả & tiến độ</p>
+                                </div>
+                            </button>
+
+                        </div>
+                    </div>
+
+                    <div class="flex-1 relative overflow-y-auto custom-scroll w-full bg-white">
+                        
+                        <div id="content-roadmap" class="eco-content active-tab p-6 md:p-10 w-full h-full flex flex-col">
+                            <div class="mb-6">
+                                <span class="bg-slate-100 border border-slate-200 text-slate-600 text-[10px] font-black uppercase tracking-[0.2em] px-3 py-1 rounded-md">Dành cho Học sinh</span>
+                                <h2 class="text-2xl md:text-3xl font-display font-black mt-4 mb-2">Theo dõi học tập. Hoàn thành bài tập. Nâng cao kết quả.</h2>
+                                <p class="text-slate-500 font-medium text-sm leading-relaxed">Theo dõi bài tập cần làm, lịch sử nộp bài và tiến độ học tập của bạn trong từng lớp.</p>
+                            </div>
+                            
+                            <div class="flex-1 flex flex-col justify-center space-y-4">
+                                <div class="bg-slate-50 p-5 rounded-2xl border border-slate-200 flex items-center gap-4 hover:shadow-sm transition-shadow">
+                                    <div class="w-10 h-10 bg-white rounded-xl shadow-sm flex items-center justify-center text-slate-400 font-black border border-slate-100 shrink-0">1</div>
+                                    <div>
+                                        <h4 class="font-bold text-[14px] mb-0.5">Theo dõi bài tập cần hoàn thành</h4>
+                                        <p class="text-[12px] text-slate-500 font-medium">Xem danh sách bài tập, hạn nộp và trạng thái trong từng lớp.</p>
+                                    </div>
+                                </div>
+                                <div class="bg-slate-100 p-5 rounded-2xl border border-slate-300 flex items-center gap-4 shadow-sm transform scale-[1.02]">
+                                    <div class="w-10 h-10 bg-slate-800 rounded-xl shadow-sm flex items-center justify-center text-white font-black shrink-0" style="color: white !important;">2</div>
+                                    <div>
+                                        <h4 class="font-bold text-[14px] mb-0.5">Làm bài & nộp bài trực tiếp</h4>
+                                        <p class="text-[12px] text-slate-600 font-medium">Thực hiện bài tập tự luận hoặc trắc nghiệm ngay trong hệ thống.</p>
+                                    </div>
+                                    <i class="fas fa-crosshairs text-3xl text-slate-300 ml-auto hidden md:block opacity-50"></i>
+                                </div>
+                                <div class="bg-slate-50 p-5 rounded-2xl border border-slate-200 flex items-center gap-4 hover:shadow-sm transition-shadow">
+                                    <div class="w-10 h-10 bg-white rounded-xl shadow-sm flex items-center justify-center text-slate-400 font-black border border-slate-100 shrink-0">3</div>
+                                    <div>
+                                        <h4 class="font-bold text-[14px] mb-0.5">Xem kết quả & lịch sử học tập</h4>
+                                        <p class="text-[12px] text-slate-500 font-medium">Theo dõi điểm số, trạng thái chấm bài và tiến độ học tập.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="content-ai" class="eco-content hidden-tab p-6 md:p-10 w-full h-full flex flex-col bg-slate-50/50">
+                            <div class="mb-5">
+                                <span class="bg-slate-100 border border-slate-200 text-slate-600 text-[10px] font-black uppercase tracking-[0.2em] px-3 py-1 rounded-md">Dành cho Học sinh</span>
+                                <h2 class="text-2xl md:text-3xl font-display font-black mt-4 mb-2">Theo dõi kết quả học tập</h2>
+                                <p class="text-slate-500 font-medium text-sm leading-relaxed">Học sinh xem điểm, bài tập, lịch học và nhận báo cáo kết quả học tập.</p>
+                            </div>
+                            
+                            <div class="flex-1 bg-white rounded-2xl border border-slate-200 shadow-sm p-6 flex flex-col gap-6">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div class="bg-slate-50 p-5 rounded-2xl border border-slate-200">
+                                        <p class="text-[11px] uppercase tracking-[0.18em] text-slate-500 font-black mb-2">Bài tập đã giao</p>
+                                        <p class="text-3xl font-black text-slate-800">7</p>
+                                    </div>
+                                    <div class="bg-slate-50 p-5 rounded-2xl border border-slate-200">
+                                        <p class="text-[11px] uppercase tracking-[0.18em] text-slate-500 font-black mb-2">Điểm trung bình</p>
+                                        <p class="text-3xl font-black text-slate-800">8.4</p>
+                                    </div>
+                                </div>
+                                <div class="bg-slate-50 p-5 rounded-2xl border border-slate-200">
+                                    <p class="text-[11px] uppercase tracking-[0.18em] text-slate-500 font-black mb-3">Tiến độ học luyện</p>
+                                    <div class="flex items-center justify-between text-sm font-bold text-slate-700 mb-2">
+                                        <span>Hoàn thành bài tập</span><span>85%</span>
+                                    </div>
+                                    <div class="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
+                                        <div class="h-full w-[85%] bg-slate-800 rounded-full"></div>
+                                    </div>
+                                </div>
+                                
+                            </div>
+                        </div>
+
+                        <div id="content-teacher" class="eco-content hidden-tab p-6 md:p-10 w-full h-full flex flex-col">
+                            <div class="mb-8">
+                                <span class="bg-slate-100 border border-slate-200 text-slate-600 text-[10px] font-black uppercase tracking-[0.2em] px-3 py-1 rounded-md">DÀNH CHO GIÁO VIÊN</span>
+                                <h2 class="text-2xl md:text-3xl font-display font-black mt-4 mb-2">Quản lý lớp học dễ dàng.</h2>
+                                <p class="text-slate-500 font-medium text-sm leading-relaxed">Tạo lớp học, giao bài, chấm điểm và theo dõi kết quả học tập trên một nền tảng trực quan dành cho giáo viên.</p>
+                            </div>
+
+                            <div class="flex-1 flex flex-col md:flex-row gap-6 items-center">
+                                <div class="w-full md:w-1/2 flex flex-col gap-4">
+                                    <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 shadow-sm flex items-start gap-3">
+                                        <i class="fas fa-check-double text-slate-700 text-lg mt-0.5"></i>
+                                        <div><h4 class="font-bold text-[13px]">Tạo và giao bài tập</h4><p class="text-[11px] text-slate-500 mt-1 font-medium">Tạo bài tập và gửi cho toàn bộ học sinh chỉ trong vài bước.</p></div>
+                                    </div>
+                                    <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 shadow-sm flex items-start gap-3">
+                                        <i class="fas fa-chart-bar text-slate-700 text-lg mt-0.5"></i>
+                                        <div><h4 class="font-bold text-[13px]">Theo dõi kết quả học tập</h4><p class="text-[11px] text-slate-500 mt-1 font-medium">Xem bảng điểm, thống kê kết quả và tiến độ của từng lớp học.</p></div>
+                                    </div>
+                                </div>
+                                <div class="w-full md:w-1/2 bg-white rounded-[1.5rem] border border-slate-200 shadow-lg p-5 flex flex-col h-[240px]">
+                                    <p class="text-xs font-black mb-4 border-b border-slate-100 pb-3 flex items-center justify-between text-slate-800">
+                                        <span>Kết quả lớp học</span> <span class="text-[9px] text-slate-500 font-bold bg-slate-100 px-2 py-1 rounded">Sĩ số 40</span>
+                                    </p>
+                                    <div class="space-y-4 flex-1">
+                                        <div>
+                                            <div class="flex justify-between text-[10px] font-bold text-slate-600 mb-1.5"><span>Điểm Giỏi (>8)</span> <span class="text-slate-800">65%</span></div>
+                                            <div class="w-full h-2 bg-slate-100 rounded-full overflow-hidden"><div class="h-full bg-slate-800 w-[65%]"></div></div>
+                                        </div>
+                                        <div>
+                                            <div class="flex justify-between text-[10px] font-bold text-slate-600 mb-1.5"><span>Điểm Khá (6.5-8)</span> <span class="text-slate-400">25%</span></div>
+                                            <div class="w-full h-2 bg-slate-100 rounded-full overflow-hidden"><div class="h-full bg-slate-400 w-[25%]"></div></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="content-report" class="eco-content hidden-tab p-6 md:p-10 w-full h-full flex flex-col">
+                            <div class="mb-8">
+                                <span class="bg-slate-100 border border-slate-200 text-slate-600 text-[10px] font-black uppercase tracking-[0.2em] px-3 py-1 rounded-md">Dành cho Phụ Huynh</span>
+                                <h2 class="text-2xl md:text-3xl font-display font-black mt-4 mb-2">Thảnh Thơi Đồng Hành.</h2>
+                                <p class="text-slate-500 font-medium text-sm leading-relaxed">Xem điểm số, bài tập và tiến độ của con ngay trên Cổng Phụ Huynh.</p>
+                            </div>
+
+                            <div class="flex-1 flex flex-col md:flex-row gap-6 items-center">
+                                <div class="w-full md:w-1/2 flex flex-col gap-4">
+                                    <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 shadow-sm flex items-start gap-3">
+                                        <i class="fas fa-check-circle text-slate-500 text-lg mt-0.5"></i>
+                                        <div><h4 class="font-bold text-[13px]">Kết quả học tập</h4><p class="text-[11px] text-slate-500 font-medium mt-1">Theo dõi điểm số và kết quả bài kiểm tra của con ngay trong tài khoản phụ huynh.</p></div>
+                                    </div>
+                                    <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 shadow-sm flex items-start gap-3">
+                                        <i class="fas fa-book-open text-slate-500 text-lg mt-0.5"></i>
+                                        <div><h4 class="font-bold text-[13px]">Bài tập & tiến độ</h4><p class="text-[11px] text-slate-500 font-medium mt-1">Xem con đang làm bài nào, bài nào đã chấm và trạng thái hoàn thành.</p></div>
+                                    </div>
+                                </div>
+                                <div class="w-full md:w-1/2 flex justify-center">
+                                    <div class="w-[260px] bg-white rounded-2xl border border-slate-200 shadow-lg overflow-hidden flex flex-col h-[250px]">
+                                        <div class="bg-slate-800 border-b border-slate-700 p-3 flex justify-between items-center">
+                                            <div class="flex items-center gap-2">
+                                                <i class="fas fa-shield-alt text-white" style="color: white !important;"></i>
+                                                <span class="text-xs font-black text-white" style="color: white !important;">Cổng Phụ Huynh</span>
+                                            </div>
+                                            <div class="w-6 h-6 rounded-full bg-slate-700 flex items-center justify-center text-[10px] text-slate-300" style="background-color: #334155 !important;"><i class="fas fa-user"></i></div>
+                                        </div>
+                                        <div class="p-4 flex-1 bg-slate-50 flex flex-col gap-3 overflow-y-auto custom-scroll">
+                                            <div class="bg-white p-3 rounded-xl border border-slate-200 shadow-sm relative overflow-hidden">
+                                                <div class="absolute left-0 top-0 bottom-0 w-1 bg-slate-400"></div>
+                                                <div class="flex justify-between items-start mb-2 ml-1">
+                                                    <p class="text-[11px] font-bold text-slate-800">Hoàng Nam (Lớp 8A)</p>
+                                                    <span class="text-[8px] font-bold text-slate-400">Vừa xong</span>
+                                                </div>
+                                                <p class="text-[10px] text-slate-500 font-medium mb-2 ml-1">Hoàn thành bài kiểm tra <b>Hóa Học</b>.</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="py-10 bg-white relative z-10 border-b border-slate-100">
+            <div class="container mx-auto max-w-4xl px-4">
+                <div class="bg-slate-50 rounded-3xl p-6 border border-slate-200 shadow-sm flex flex-col md:flex-row items-center gap-8">
+                    
+                    <div class="w-full md:w-1/3 text-center md:text-left">
+                        <div class="inline-flex items-center gap-2 px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-[10px] font-black uppercase tracking-wider mb-3">
+                            <i class="fas fa-trophy text-yellow-500"></i> Vinh danh tuần
+                        </div>
+                        <h3 class="text-2xl font-display font-black mb-2">Bảng Xếp Hạng</h3>
+                        <p class="text-slate-500 text-xs font-medium">Top học sinh có nỗ lực bền bỉ và điểm số cao nhất.</p>
+                    </div>
+
+                    <div class="w-full md:flex-1 grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div class="bg-white p-4 rounded-2xl border border-slate-100 flex items-center gap-3 shadow-sm">
+                            <span class="text-xl font-black text-slate-300">2</span>
+                            <div class="w-10 h-10 rounded-full bg-slate-100 border-2 border-white overflow-hidden shrink-0">
+                                <img src="https://ui-avatars.com/api/?name=Hoang+Nam&background=e2e8f0&color=1e3a8a&font-weight=bold" alt="User">
+                            </div>
+                            <div>
+                                <p class="text-[12px] font-black leading-tight text-slate-800">Hoàng Nam</p>
+                                <p class="text-[10px] font-bold text-slate-400">2,850 XP</p>
+                            </div>
+                        </div>
+
+                        <div class="bg-slate-800 p-4 rounded-2xl border border-slate-800 flex items-center gap-3 relative shadow-lg transform scale-105">
+                            <div class="absolute -top-2 -right-2 bg-yellow-400 text-[8px] font-black text-slate-900 uppercase px-2 py-0.5 rounded-full shadow-sm">TOP 1</div>
+                            <span class="text-xl font-black text-yellow-400">1</span>
+                            <div class="w-10 h-10 rounded-full bg-white border-2 border-yellow-400 overflow-hidden shrink-0">
+                                <img src="https://ui-avatars.com/api/?name=Minh+Anh&background=1e3a8a&color=fff&font-weight=bold" alt="User">
+                            </div>
+                            <div>
+                                <p class="text-[12px] font-black text-white leading-tight" style="color: white !important;">Minh Anh</p>
+                                <p class="text-[10px] font-bold text-blue-200">3,120 XP</p>
+                            </div>
+                        </div>
+
+                        <div class="bg-white p-4 rounded-2xl border border-slate-100 flex items-center gap-3 shadow-sm">
+                            <span class="text-xl font-black text-orange-300">3</span>
+                            <div class="w-10 h-10 rounded-full bg-slate-100 border-2 border-white overflow-hidden shrink-0">
+                                <img src="https://ui-avatars.com/api/?name=Bao+Ngoc&background=e2e8f0&color=1e3a8a&font-weight=bold" alt="User">
+                            </div>
+                            <div>
+                                <p class="text-[12px] font-black leading-tight text-slate-800">Bảo Ngọc</p>
+                                <p class="text-[10px] font-bold text-slate-400">2,790 XP</p>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <section class="pt-20 pb-40 bg-slate-50 relative z-10">
+            <div class="container mx-auto px-4 max-w-6xl" data-aos="fade-up">
+                <div class="text-center mb-16">
+                    <span class="text-slate-600 text-[10px] font-black uppercase tracking-[0.2em] bg-white shadow-sm px-4 py-1.5 rounded-full border border-slate-200 mb-4 inline-flex items-center gap-2"><i class="fas fa-layer-group"></i> Trải Nghiệm Thực Tế</span>
+                    <h2 class="text-3xl md:text-4xl font-display font-black mb-4 tracking-tight">Khám Phá Các Phân Hệ <br class="hidden md:block"><span class="text-slate-400" style="color: #94a3b8 !important;">Không Gian Học Tập</span></h2>
+                    <p class="text-slate-500 font-medium text-sm md:text-base max-w-2xl mx-auto">Nhấp vào từng tính năng bên dưới để truy cập trực tiếp vào các phân hệ đã được lập trình hoàn thiện trong hệ sinh thái DOLY LMS.</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    
+                    <div class="bg-white rounded-[2rem] p-8 border border-slate-200 hover-lift group shadow-sm flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center gap-4 mb-6">
+                                <div class="w-14 h-14 bg-blue-50 rounded-2xl flex items-center justify-center text-2xl text-doly-blue group-hover:scale-110 transition-transform"><i class="fas fa-cube"></i></div>
+                                <div>
+                                    <h3 class="text-xl font-display font-black leading-tight">Phòng Lab 3D <br>& Khảo Sát</h3>
+                                </div>
+                            </div>
+                            <p class="text-[13px] text-slate-500 font-medium leading-relaxed mb-6">Tương tác trực tiếp với vật thể 3D xoay 360 độ (như cấu tạo tim) và trải nghiệm luồng học tập Gamification.</p>
+                        </div>
+                        <div class="flex flex-wrap gap-3">
+                            <a href="hocthuat.html" class="inline-flex items-center gap-2 px-5 py-2.5 bg-slate-800 text-white text-xs font-bold rounded-xl shadow-btn hover:opacity-90 transition-opacity" style="color: white !important;">
+                                Vào Không Gian Học
+                            </a>
+                            <a href="lab.html" class="inline-flex items-center gap-2 px-5 py-2.5 bg-slate-50 text-slate-700 border border-slate-200 text-xs font-bold rounded-xl hover:bg-slate-100 transition-colors">
+                                Thử Lab 3D
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-[2rem] p-8 border border-slate-200 hover-lift group shadow-sm flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center gap-4 mb-6">
+                                <div class="w-14 h-14 bg-purple-50 rounded-2xl flex items-center justify-center text-2xl text-ai-purple group-hover:scale-110 transition-transform"><i class="fas fa-robot"></i></div>
+                                <div>
+                                    <h3 class="text-xl font-display font-black leading-tight">Gia Sư <br>DOLY AI</h3>
+                                </div>
+                            </div>
+                            <p class="text-[13px] text-slate-500 font-medium leading-relaxed mb-6">Hệ thống AI áp dụng phương pháp Socratic. Trò chuyện trực tiếp, rèn luyện tư duy từng bước mà không lo chép đáp án.</p>
+                        </div>
+                        <div>
+                            <a href="AI.html" class="inline-flex items-center gap-2 px-5 py-2.5 bg-purple-50 text-ai-purple border border-purple-100 text-xs font-bold rounded-xl hover:bg-purple-100 transition-colors">
+                                <i class="fas fa-comment-dots"></i> Chat với Doly AI
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-[2rem] p-8 border border-slate-200 hover-lift group shadow-sm flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center gap-4 mb-6">
+                                <div class="w-14 h-14 bg-pink-50 rounded-2xl flex items-center justify-center text-2xl text-bio-pink group-hover:scale-110 transition-transform"><i class="fas fa-play-circle"></i></div>
+                                <div>
+                                    <h3 class="text-xl font-display font-black leading-tight">Kho Bài Giảng <br>& Video Đồ Họa</h3>
+                                </div>
+                            </div>
+                            <p class="text-[13px] text-slate-500 font-medium leading-relaxed mb-6">Đắm chìm vào các video hoạt hình 2D/3D sinh động mô phỏng các hiện tượng tự nhiên, cùng lý thuyết bám sát SGK.</p>
+                        </div>
+                        <div class="flex flex-wrap gap-3">
+                            <a href="video.html" class="inline-flex items-center gap-2 px-5 py-2.5 bg-pink-50 text-bio-pink border border-pink-100 text-xs font-bold rounded-xl hover:bg-pink-100 transition-colors">
+                                <i class="fas fa-video"></i> Xem Video
+                            </a>
+                            <a href="baigiang.html" class="inline-flex items-center gap-2 px-5 py-2.5 bg-slate-50 text-slate-600 border border-slate-200 text-xs font-bold rounded-xl hover:bg-slate-100 transition-colors">
+                                <i class="fas fa-book-open"></i> Đọc Bài Giảng
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-[2rem] p-8 border border-slate-200 hover-lift group shadow-sm flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center gap-4 mb-6">
+                                <div class="w-14 h-14 bg-yellow-50 rounded-2xl flex items-center justify-center text-2xl text-yellow-600 group-hover:scale-110 transition-transform"><i class="fas fa-file-pdf"></i></div>
+                                <div>
+                                    <h3 class="text-xl font-display font-black leading-tight">Thư Viện PDF <br>& Sơ Đồ Tư Duy</h3>
+                                </div>
+                            </div>
+                            <p class="text-[13px] text-slate-500 font-medium leading-relaxed mb-6">Tải xuống tức thì kho tàng sơ đồ tư duy (Mindmap) thiết kế ấn tượng, đề thi thử và phiếu bài tập chất lượng cao.</p>
+                        </div>
+                        <div>
+                            <a href="tailieu.html" class="inline-flex items-center gap-2 px-5 py-2.5 bg-yellow-50 text-yellow-600 border border-yellow-200 text-xs font-bold rounded-xl hover:bg-yellow-100 transition-colors">
+                                <i class="fas fa-download"></i> Vào Thư Viện
+                            </a>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+      <footer class="bg-slate-900 text-white pt-20 pb-16 relative z-20 w-full overflow-hidden -mt-8 rounded-t-[4rem] shadow-[0_-15px_40px_rgba(15,23,42,0.15)]">
+    <div class="absolute top-0 left-1/4 w-96 h-96 bg-[#0A2FB6]/30 rounded-full blur-[120px]"></div>
+    
+    <div class="container mx-auto px-6 relative z-10 text-center max-w-7xl">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-16 text-left mb-24">
+            <div class="space-y-8">
+                <a href="index.html" class="flex items-center gap-2 group">
+                    <div class="w-12 h-12 transition-transform group-hover:rotate-12 duration-500 flex items-center justify-center">
+                        <img src="../logodoly.png" alt="Doly Logo" class="w-full h-full object-contain">
+                    </div>
+                    <span class="text-2xl font-display font-black text-white tracking-tighter uppercase">DOLY LMS</span>
+                </a>
+                <p class="text-slate-400 text-sm leading-relaxed font-medium">Hệ sinh thái giáo dục số thông minh nhất dành cho học sinh KHTN Việt Nam.</p>
+            </div>
+            <div>
+                <h4 class="text-sm font-black uppercase tracking-[0.2em] mb-10 text-[#FFD700]">Học Tập</h4>
+                <ul class="space-y-5 text-slate-400 text-sm font-bold">
+                    <li><a href="#" class="hover:text-[#0A2FB6] transition-colors">Nội dung học thuật</a></li>
+                    <li><a href="#" class="hover:text-[#0A2FB6] transition-colors">Lịch học Smart</a></li>
+                    <li><a href="hocthuat.html" class="hover:text-[#0A2FB6] transition-colors">Thí nghiệm ảo 3D</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="text-sm font-black uppercase tracking-[0.2em] mb-10 text-[#FFD700]">Kết Nối</h4>
+                <ul class="space-y-5 text-slate-400 text-sm font-bold">
+                    <li><a href="diendan.html" class="hover:text-[#0A2FB6] transition-colors">Cộng đồng hội cá heo</a></li>
+                    <li><a href="#" class="hover:text-[#0A2FB6] transition-colors">Trung tâm hỗ trợ</a></li>
+                    <li><a href="#" class="hover:text-[#0A2FB6] transition-colors">Tư vấn phụ huynh</a></li>
+                </ul>
+            </div>
+            <div class="space-y-8">
+                <h4 class="text-sm font-black uppercase tracking-[0.2em] mb-10 text-[#FFD700]">Đăng Ký</h4>
+                <div class="relative">
+                    <input type="email" placeholder="Email của bạn..." class="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold focus:outline-none focus:border-[#0A2FB6] transition-all">
+                    <button class="absolute right-2 top-2 bottom-2 bg-[#0A2FB6] text-white px-5 rounded-xl shadow-[0_0_20px_rgba(10,47,182,0.4)] hover:bg-blue-700 transition-colors"><i class="fas fa-paper-plane"></i></button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="pt-12 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-10">
+            <p class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">&copy; 2026 DOLY LMS - KIẾN TẠO TƯƠNG LAI SỐ</p>
+            <div class="flex justify-center gap-12 text-slate-300 text-2xl">
+                <a href="#" class="hover:text-[#0A2FB6] transition transform hover:-translate-y-2"><i class="fab fa-facebook-f"></i></a>
+                <a href="#" class="hover:text-red-500 transition transform hover:-translate-y-2"><i class="fab fa-youtube"></i></a>
+                <a href="#" class="hover:text-white transition transform hover:-translate-y-2"><i class="fab fa-tiktok"></i></a>
+            </div>
+        </div>
+    </div>
+</footer>
+
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script>
+        AOS.init({ once: true, offset: 40, duration: 600, easing: 'ease-out-cubic' });
+
+        // Logic chuyển Tab Tương Tác cho phần Cỗ Máy Doly
+        function switchEcoTab(tabId) {
+            document.querySelectorAll('.eco-tab-btn').forEach(btn => {
+                btn.classList.remove('bg-white', 'shadow-sm', 'border-slate-800');
+                btn.classList.add('bg-transparent', 'border-transparent');
+                
+                const title = btn.querySelector('.eco-tab-title');
+                title.classList.remove('text-slate-800');
+                title.classList.add('text-slate-500');
+            });
+            
+            const activeBtn = document.getElementById(`tab-btn-${tabId}`);
+            activeBtn.classList.remove('bg-transparent', 'border-transparent');
+            activeBtn.classList.add('bg-white', 'shadow-sm', 'border-slate-800');
+            activeBtn.querySelector('.eco-tab-title').classList.replace('text-slate-500', 'text-slate-800');
+            
+            document.querySelectorAll('.eco-content').forEach(content => {
+                content.classList.remove('active-tab');
+                content.classList.add('hidden-tab');
+            });
+            document.getElementById(`content-${tabId}`).classList.remove('hidden-tab');
+            document.getElementById(`content-${tabId}`).classList.add('active-tab');
+        }
+
+        // Auth
+        document.addEventListener('DOMContentLoaded', function() {
+            var user = DolyAPI.loadSession();
+            var avatarEl = document.querySelector('[data-avatar]');
+            if (avatarEl) {
+                avatarEl.textContent = user && user.full_name
+                    ? user.full_name.split(' ').map(function(w){return w[0];}).join('').substring(0,2).toUpperCase()
+                    : '?';
+            }
+        });
+        function handleLogout() {
+            DolyAPI.logout().catch(function(){}).finally(function(){
+                DolyAPI.clearSession();
+                window.location.href = 'login.html';
+            });
+        }
+    </script>
+</body>
+</html>

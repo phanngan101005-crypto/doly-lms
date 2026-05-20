@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="vi" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trạm Không Gian - DOLY LMS</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="../api/client.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        'brand-blue': '#0A2FB6', 'brand-cyan': '#00E5FF', 'brand-purple': '#9D00FF', 'brand-yellow': '#FFD700', 'brand-dark': '#0B0F19',
+                        'phys-blue': '#3b82f6', 'chem-green': '#10b981', 'bio-pink': '#ec4899', 'earth-orange': '#f97316',
+                    },
+                    fontFamily: { sans: ['Plus Jakarta Sans', 'sans-serif'], display: ['Montserrat', 'sans-serif'] },
+                }
+            }
+        }
+    </script>
+    <style>
+        html, body { overflow-x: hidden !important; width: 100%; max-width: 100%; position: relative; transition: background-color 0.4s ease; }
+        body { background-color: #f8fafc; color: #334155; }
+        .dark body { background-color: #0f172a; color: #cbd5e1; }
+        
+        ::-webkit-scrollbar { width: 6px; } 
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        .dark ::-webkit-scrollbar-thumb { background: #475569; }
+        
+        .aurora-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100vh; z-index: -1; overflow: hidden; transition: opacity 0.5s; }
+        .dark .aurora-bg { opacity: 0.15; }
+        
+        .orb { position: absolute; border-radius: 50%; filter: blur(120px); opacity: 0.3; animation: floatOrb 25s infinite alternate ease-in-out; }
+        .orb-1 { width: 70vw; height: 70vw; background: #c7d2fe; top: -20%; left: -10%; animation-delay: 0s; }
+        .orb-2 { width: 60vw; height: 60vw; background: #e9d5ff; bottom: -20%; right: -10%; animation-delay: -5s; }
+
+        @keyframes floatOrb { 0% { transform: translate(0, 0) scale(1) rotate(0deg); } 100% { transform: translate(10vw, -10vh) scale(1.1) rotate(180deg); } }
+
+        .glass-panel { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(25px); border: 1px solid rgba(255, 255, 255, 0.8); }
+        .dark .glass-panel { background: rgba(30, 41, 59, 0.7); border-color: rgba(255, 255, 255, 0.1); }
+        
+        .clean-card { background: #ffffff; border-radius: 2rem; box-shadow: 0 10px 40px -10px rgba(0,0,0,0.05); border: 1px solid rgba(255,255,255,0.8); transition: all 0.3s; }
+        .dark .clean-card { background: rgba(30, 41, 59, 0.6); backdrop-filter: blur(20px); border-color: rgba(255, 255, 255, 0.05); box-shadow: 0 10px 40px -10px rgba(0,0,0,0.5); }
+        .clean-card:hover { transform: translateY(-4px); box-shadow: 0 20px 40px -10px rgba(10,47,182,0.1); border-color: rgba(10,47,182,0.1); }
+        .dark .clean-card:hover { border-color: rgba(255, 255, 255, 0.15); box-shadow: 0 20px 40px -10px rgba(0, 229, 255, 0.1); }
+
+        .map-grid { background-image: radial-gradient(rgba(203, 213, 225, 0.5) 1.5px, transparent 1.5px); background-size: 30px 30px; }
+        .dark .map-grid { background-image: radial-gradient(rgba(51, 65, 85, 0.5) 1.5px, transparent 1.5px); }
+
+        @keyframes bounce-subtle { 0%, 100% { transform: translateY(0) scale(1.05); } 50% { transform: translateY(-8px) scale(1.05); } }
+        .node-current { animation: bounce-subtle 2s infinite ease-in-out; box-shadow: 0 0 30px rgba(0, 229, 255, 0.5); }
+        @keyframes float { 0% { transform: translateY(0px) rotate(0deg); } 50% { transform: translateY(-15px) rotate(5deg); } 100% { transform: translateY(0px) rotate(0deg); } }
+        .floating-icon { animation: float 6s ease-in-out infinite; }
+    </style>
+    <script src="../auth-middleware.js"></script>
+</head>
+<body data-required-role="student" class="antialiased selection:bg-brand-blue selection:text-white flex flex-col min-h-screen relative">
+
+    <div class="aurora-bg"><div class="orb orb-1"></div><div class="orb orb-2"></div></div>
+
+    <div class="fixed top-6 left-0 w-full z-50 px-6 flex justify-center">
+        <header class="w-full max-w-7xl glass-panel !rounded-full px-8 py-3 flex justify-between items-center shadow-sm">
+            <a href="dashboad.html" class="flex items-center gap-3">
+                <div class="w-10 h-10 flex items-center justify-center">
+                    <img src="../logodoly.png" alt="Doly Logo" class="w-full h-full object-contain">
+                </div>
+                <h1 class="text-lg font-display font-black text-brand-dark dark:text-white hidden sm:block">DOLY LMS</h1>
+            </a>
+            
+           <nav class="hidden lg:flex flex-1 justify-center gap-6 xl:gap-12 text-[11px] xl:text-[13px] font-bold uppercase tracking-wide text-[#1e2b4d] dark:text-slate-300 mx-4">
+                <a href="dashboad.html" class="relative after:content-[''] after:absolute after:-bottom-2 after:left-0 after:w-full after:h-[3px] after:bg-[#1e2b4d] dark:after:bg-brand-cyan whitespace-nowrap">TRANG CHỦ</a>
+                <a href="lophoc.html" class="opacity-85 hover:opacity-100 transition-opacity whitespace-nowrap">LỚP HỌC</a>
+                <a href="hocthuat.html" class="opacity-85 hover:opacity-100 transition-opacity whitespace-nowrap">HỌC TẬP</a>
+                 <a href="khokiemtra.html" class="opacity-85 hover:opacity-100 transition-opacity whitespace-nowrap">KHO KIỂM TRA</a>
+                <a href="diendan.html" class="opacity-85 hover:opacity-100 transition-opacity whitespace-nowrap">DIỄN ĐÀN VÀ CỘNG ĐỒNG</a>
+                <a href="tintuc.html" class="opacity-85 hover:opacity-100 transition-opacity whitespace-nowrap">TIN TỨC</a>
+            </nav>
+            <div class="flex items-center gap-4">
+                <button onclick="toggleTheme()" class="w-9 h-9 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 flex items-center justify-center hover:scale-110 transition shadow-sm border border-transparent dark:border-slate-700">
+                    <i class="fas fa-moon dark:hidden"></i>
+                    <i class="fas fa-sun hidden dark:block text-brand-yellow"></i>
+                </button>
+
+                <button onclick="handleLogout()" class="w-9 h-9 rounded-full bg-red-50 dark:bg-red-900/30 text-red-500 dark:text-red-400 flex items-center justify-center hover:scale-110 transition shadow-sm border border-red-200 dark:border-red-800" title="Dang xuat">
+                    <i class="fas fa-sign-out-alt text-sm"></i>
+                </button>
+
+                <button id="avatar-btn-header" class="w-10 h-10 rounded-full border-2 border-brand-blue dark:border-brand-cyan overflow-hidden hover:scale-105 transition shadow-sm p-0.5">
+                    <div class="w-full h-full rounded-full bg-gradient-to-br from-brand-blue to-brand-cyan flex items-center justify-center text-white font-display font-black text-sm">HN</div>
+                </button>
+            </div>
+        </header>
+    </div>
+
+    <main class="flex-1 container mx-auto px-4 md:px-6 pt-32 pb-12 max-w-7xl relative z-10">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
+            
+            <div class="lg:col-span-8 flex flex-col gap-10">
+                
+                <div class="bg-gradient-to-br from-brand-dark via-slate-900 to-brand-blue/80 rounded-[3rem] p-8 text-white relative overflow-hidden shadow-2xl flex flex-col gap-6" data-aos="fade-down">
+                    <div class="absolute right-0 top-0 w-64 h-64 bg-brand-cyan/20 rounded-full blur-3xl transform translate-x-1/2 -translate-y-1/4 pointer-events-none"></div>
+                    
+                    <div class="flex flex-col md:flex-row items-center justify-between relative z-10">
+                        <div class="flex items-center gap-6 w-full md:w-auto mb-4 md:mb-0">
+                            <div class="relative shrink-0">
+                                <div class="w-24 h-24 rounded-3xl border-4 border-white/20 overflow-hidden bg-white/10 backdrop-blur-sm p-1">
+                                    <div id="avatar-hero" class="w-full h-full rounded-2xl bg-gradient-to-br from-brand-blue to-brand-cyan flex items-center justify-center text-white font-display font-black text-3xl">HN</div>
+                                </div>
+                                <div id="level-badge" class="absolute -bottom-3 -right-3 w-10 h-10 bg-brand-yellow text-yellow-900 rounded-full border-4 border-slate-900 flex items-center justify-center font-black text-xs shadow-lg">Lv5</div>
+                            </div>
+                            <div class="flex-1">
+                                <h2 id="student-name" class="text-3xl font-display font-black mb-1">Học sinh 🚀</h2>
+                                <p class="text-[10px] font-black uppercase tracking-widest text-brand-cyan mb-4">Danh hiệu: Thợ Săn Kiến Thức</p>
+                                
+                                <div class="flex items-center gap-4">
+                                    <div class="w-40 md:w-64 h-2.5 bg-slate-800 rounded-full overflow-hidden">
+                                        <div id="xp-progress-bar" class="h-full bg-gradient-to-r from-brand-cyan to-brand-blue w-[75%] rounded-full shadow-[0_0_10px_#00E5FF]"></div>
+                                    </div>
+                                    <span id="xp-next-level" class="text-xs font-bold text-slate-300"><strong class="text-white">450 XP</strong> nữa lên Cấp 6</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="flex flex-col items-center justify-center bg-white/10 backdrop-blur-md rounded-3xl p-5 border border-white/20 shrink-0">
+                            <span class="text-xs font-black uppercase text-slate-300 mb-1">Tổng điểm XP</span>
+                            <span id="student-xp" class="text-4xl font-display font-black text-brand-yellow drop-shadow-md">0</span>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-3 gap-4 pt-6 border-t border-white/10 relative z-10">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-white/10 text-brand-cyan flex items-center justify-center text-lg"><i class="fas fa-clock"></i></div>
+                            <div>
+                                <p class="text-[10px] font-bold text-slate-400 uppercase">Giờ học tuần</p>
+                                <p id="student-learning-hours" class="text-sm font-black text-white">0 Giờ</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3 border-l border-white/10 pl-4">
+                            <div class="w-10 h-10 rounded-full bg-white/10 text-brand-purple flex items-center justify-center text-lg"><i class="fas fa-bullseye"></i></div>
+                            <div>
+                                <p class="text-[10px] font-bold text-slate-400 uppercase">Độ chính xác</p>
+                                <p id="student-accuracy" class="text-sm font-black text-white">0%</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3 border-l border-white/10 pl-4">
+                            <div class="w-10 h-10 rounded-full bg-white/10 text-brand-yellow flex items-center justify-center text-lg"><i class="fas fa-trophy"></i></div>
+                            <div>
+                                <p class="text-[10px] font-bold text-slate-400 uppercase">Xếp hạng</p>
+                                <p id="student-rank" class="text-sm font-black text-white">Top --</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="clean-card p-8" data-aos="fade-up">
+                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+                        <div>
+                            <h2 id="streak-title" class="text-xl font-display font-black text-brand-dark dark:text-white flex items-center gap-2">
+                                <i class="fas fa-fire text-orange-500 animate-pulse"></i> Chuỗi 12 ngày học
+                            </h2>
+                            <p class="text-sm font-medium text-slate-500 dark:text-slate-400 mt-1">Duy trì chuỗi để nhận Rương Huyền Thoại vào Chủ Nhật!</p>
+                        </div>
+                        
+                        <button id="btn-diem-danh" onclick="diemDanh()" class="bg-gradient-to-r from-brand-yellow to-orange-500 text-yellow-900 px-6 py-3 rounded-full font-black text-sm uppercase tracking-widest shadow-lg hover:shadow-orange-500/50 hover:scale-105 transition animate-bounce border-2 border-white dark:border-slate-800 flex items-center gap-2 z-20">
+                            Điểm danh ngay <i class="fas fa-hand-pointer"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="flex justify-between items-end px-2 md:px-8">
+                        <div class="flex flex-col items-center gap-2"><span class="text-[11px] font-bold text-slate-400">T2</span><div class="w-12 h-12 rounded-full bg-orange-100 dark:bg-orange-900/30 text-orange-500 flex items-center justify-center border-2 border-orange-200 dark:border-orange-500/30"><i class="fas fa-check"></i></div></div>
+                        <div class="flex flex-col items-center gap-2"><span class="text-[11px] font-bold text-slate-400">T3</span><div class="w-12 h-12 rounded-full bg-orange-100 dark:bg-orange-900/30 text-orange-500 flex items-center justify-center border-2 border-orange-200 dark:border-orange-500/30"><i class="fas fa-check"></i></div></div>
+                        <div class="flex flex-col items-center gap-2"><span class="text-[11px] font-bold text-slate-400">T4</span><div class="w-12 h-12 rounded-full bg-orange-100 dark:bg-orange-900/30 text-orange-500 flex items-center justify-center border-2 border-orange-200 dark:border-orange-500/30"><i class="fas fa-check"></i></div></div>
+                        <div class="flex flex-col items-center gap-2"><span class="text-[11px] font-bold text-slate-400">T5</span><div class="w-12 h-12 rounded-full bg-orange-100 dark:bg-orange-900/30 text-orange-500 flex items-center justify-center border-2 border-orange-200 dark:border-orange-500/30"><i class="fas fa-check"></i></div></div>
+                        
+                        <div class="flex flex-col items-center gap-2 relative">
+                            <span class="text-[12px] font-black text-orange-500">T6</span>
+                            <div id="icon-hom-nay" class="w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500 flex items-center justify-center text-2xl border-4 border-white dark:border-slate-700 transition-all duration-500"><i class="fas fa-fire"></i></div>
+                        </div>
+
+                        <div class="flex flex-col items-center gap-2 opacity-50"><span class="text-[11px] font-bold text-slate-400">T7</span><div class="w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-300 dark:text-slate-600 flex items-center justify-center border-2 border-slate-200 dark:border-slate-700"><i class="fas fa-gift"></i></div></div>
+                        <div class="flex flex-col items-center gap-2 opacity-50 relative"><div class="absolute -top-6 text-brand-purple text-[16px]"><i class="fas fa-gem"></i></div><span class="text-[11px] font-bold text-slate-400">CN</span><div class="w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-300 dark:text-slate-600 flex items-center justify-center border-2 border-slate-200 dark:border-slate-700"><i class="fas fa-treasure-chest"></i></div></div>
+                    </div>
+                </div>
+
+                <div class="w-full relative py-12 flex flex-col items-center map-grid rounded-[3rem]" data-aos="fade-up">
+                    
+                    <div class="absolute top-10 left-10 text-6xl opacity-30 floating-icon">🪐</div>
+                    <div class="absolute top-[40%] right-5 text-4xl opacity-20 floating-icon" style="animation-delay: 1s;">🛸</div>
+                    <div class="absolute bottom-20 left-20 text-5xl opacity-20 floating-icon" style="animation-delay: 2s;">☄️</div>
+                    <div class="absolute top-20 right-20 text-3xl text-brand-cyan/20 floating-icon" style="animation-delay: 1.5s;"><i class="fas fa-star"></i></div>
+
+                    <h3 class="text-3xl font-display font-black text-brand-dark dark:text-white mb-12 text-center uppercase tracking-wider relative z-10 px-8 py-3 rounded-full bg-white/40 dark:bg-slate-800/40 backdrop-blur-md shadow-sm border border-white/50 dark:border-slate-700/50">Chương VII: Sinh Học Cơ Thể Người</h3>
+                    
+                    <div class="absolute top-[120px] bottom-10 w-4 bg-slate-200 dark:bg-slate-700/50 rounded-full z-0 left-1/2 transform -translate-x-1/2"></div>
+                    <div class="absolute top-[120px] h-[48%] w-4 bg-brand-cyan rounded-full z-0 left-1/2 transform -translate-x-1/2 shadow-[0_0_20px_#00E5FF]"></div>
+
+                    <div class="flex flex-col w-full max-w-md space-y-20 relative z-10 mt-6">
+                        
+                        <a href="hocthuat.html" class="flex w-full justify-start pl-8 group cursor-pointer relative z-20">
+                            <div class="w-16 h-16 bg-brand-cyan rounded-full flex flex-col items-center justify-center text-white shadow-[0_10px_20px_rgba(0,229,255,0.3)] border-[6px] border-white dark:border-slate-900 transform transition group-hover:scale-110 z-10"><i class="fas fa-check text-2xl"></i></div>
+                            <div class="absolute left-32 top-1/2 transform -translate-y-1/2 bg-white dark:bg-slate-800 px-5 py-3 rounded-2xl shadow-xl border border-slate-100 dark:border-slate-700 opacity-0 group-hover:opacity-100 transition whitespace-nowrap">
+                                <p class="text-[10px] font-black text-slate-400 uppercase mb-1">Bài 32 <span class="text-brand-cyan ml-1 bg-cyan-50 dark:bg-slate-700 px-2 py-0.5 rounded-md"><i class="fas fa-redo text-[8px]"></i> Học lại</span></p>
+                                <p class="text-sm font-bold text-brand-dark dark:text-white">Cấu tạo hô hấp</p>
+                            </div>
+                        </a>
+
+                        <a href="hocthuat.html" class="flex w-full justify-end pr-8 group cursor-pointer relative z-20">
+                            <div class="absolute right-32 top-1/2 transform -translate-y-1/2 bg-white dark:bg-slate-800 px-5 py-3 rounded-2xl shadow-xl border border-slate-100 dark:border-slate-700 opacity-0 group-hover:opacity-100 transition whitespace-nowrap text-right">
+                                <p class="text-[10px] font-black text-slate-400 uppercase mb-1"><span class="text-brand-cyan mr-1 bg-cyan-50 dark:bg-slate-700 px-2 py-0.5 rounded-md"><i class="fas fa-redo text-[8px]"></i> Học lại</span> Bài 33</p>
+                                <p class="text-sm font-bold text-brand-dark dark:text-white">Cơ chế thở</p>
+                            </div>
+                            <div class="w-16 h-16 bg-brand-cyan rounded-full flex flex-col items-center justify-center text-white shadow-[0_10px_20px_rgba(0,229,255,0.3)] border-[6px] border-white dark:border-slate-900 transform transition group-hover:scale-110 z-10"><i class="fas fa-check text-2xl"></i></div>
+                        </a>
+
+                        <div class="flex w-full justify-center relative my-4">
+                            <a href="hocthuat.html" class="relative group z-20">
+                                <span class="absolute inline-flex h-full w-full rounded-full bg-brand-cyan opacity-40 animate-ping"></span>
+                                <div class="node-current w-28 h-28 bg-gradient-to-br from-brand-cyan to-brand-blue rounded-full flex flex-col items-center justify-center text-white border-[8px] border-white dark:border-slate-900 z-10 cursor-pointer shadow-2xl">
+                                    <i class="fas fa-play text-4xl ml-2 mb-1"></i>
+                                </div>
+                                <div class="absolute -top-3 -right-3 w-10 h-10 bg-brand-yellow rounded-full flex items-center justify-center text-white border-4 border-white dark:border-slate-900 shadow-lg transform rotate-12"><i class="fas fa-crown text-lg"></i></div>
+                                
+                                <div class="absolute top-full left-1/2 transform -translate-x-1/2 mt-5 bg-white dark:bg-slate-800 px-6 py-3 rounded-2xl shadow-xl border border-slate-100 dark:border-slate-700 whitespace-nowrap text-center">
+                                    <p class="text-[10px] font-black text-brand-blue dark:text-brand-cyan uppercase tracking-widest mb-1">Tiếp tục cày</p>
+                                    <p class="text-base font-bold text-brand-dark dark:text-white">Bài 34: Vệ sinh hô hấp</p>
+                                </div>
+                            </a>
+                        </div>
+
+                        <div class="flex w-full justify-start pl-16 mt-20 opacity-50">
+                            <div class="w-14 h-14 bg-slate-200 dark:bg-slate-700 rounded-full flex items-center justify-center text-slate-400 dark:text-slate-500 border-[6px] border-white dark:border-slate-900 shadow-inner z-10"><i class="fas fa-lock text-xl"></i></div>
+                        </div>
+
+                        <div class="flex w-full justify-center mt-12 opacity-80">
+                            <div class="w-24 h-24 bg-gradient-to-br from-purple-100 to-slate-200 dark:from-slate-700 dark:to-slate-800 rounded-3xl flex items-center justify-center text-slate-400 dark:text-slate-500 border-[6px] border-white dark:border-slate-900 shadow-2xl z-10 transform rotate-3"><i class="fas fa-treasure-chest text-4xl"></i></div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="lg:col-span-4 space-y-10" data-aos="fade-left">
+                
+                <div class="clean-card overflow-hidden">
+                    <div class="p-6 bg-slate-900 text-white relative">
+                        <div class="absolute top-0 right-0 w-32 h-32 bg-brand-yellow/10 rounded-full blur-2xl transform translate-x-1/2 -translate-y-1/2"></div>
+                        <div class="flex justify-between items-center mb-5 relative z-10">
+                            <h2 class="text-base font-display font-black text-white flex items-center gap-2"><i class="fas fa-box-open text-brand-yellow"></i> Kho Báu & Vật Phẩm</h2>
+                            <a href="#" class="text-[10px] font-black uppercase text-slate-400 hover:text-white transition">Túi đồ</a>
+                        </div>
+                        
+                        <div class="flex justify-between gap-3 relative z-10">
+                            <div class="flex-1 bg-gradient-to-b from-yellow-400/20 to-yellow-600/10 rounded-2xl p-4 text-center border border-yellow-500/30 cursor-pointer hover:bg-yellow-400/30 transition transform hover:-translate-y-1">
+                                <i class="fas fa-treasure-chest text-4xl text-brand-yellow mb-2 animate-pulse"></i>
+                                <p class="text-[10px] font-bold text-yellow-400 uppercase">Mở ngay</p>
+                            </div>
+                            <div class="flex-1 bg-white/5 rounded-2xl p-4 text-center border border-white/5 opacity-50 relative">
+                                <div class="absolute -top-2 -right-2 w-6 h-6 bg-slate-800 rounded-full flex items-center justify-center text-[10px] text-slate-400"><i class="fas fa-lock"></i></div>
+                                <i class="fas fa-box text-4xl text-slate-500 mb-2"></i>
+                                <p class="text-[10px] font-bold text-slate-500 uppercase">Lv.6</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-6 bg-white dark:bg-slate-800/50">
+                        <div class="flex justify-between items-center mb-4">
+                            <h2 class="text-sm font-bold text-slate-700 dark:text-slate-300 flex items-center gap-2"><i class="fas fa-medal text-brand-cyan"></i> Huy hiệu sưu tầm</h2>
+                        </div>
+                        <div class="grid grid-cols-3 gap-3">
+                            <div class="flex flex-col items-center group text-center cursor-pointer">
+                                <div class="w-12 h-12 rounded-2xl bg-yellow-100 dark:bg-yellow-900/40 text-brand-yellow flex items-center justify-center text-xl mb-2 shadow-sm border border-yellow-200 dark:border-yellow-700/50 group-hover:scale-110 transition"><i class="fas fa-fire"></i></div>
+                            </div>
+                            <div class="flex flex-col items-center group text-center cursor-pointer">
+                                <div class="w-12 h-12 rounded-2xl bg-purple-100 dark:bg-purple-900/40 text-brand-purple flex items-center justify-center text-xl mb-2 shadow-sm border border-purple-200 dark:border-purple-700/50 group-hover:scale-110 transition"><i class="fas fa-brain"></i></div>
+                            </div>
+                            <div class="flex flex-col items-center group text-center opacity-40 grayscale cursor-not-allowed">
+                                <div class="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-slate-700 text-slate-400 flex items-center justify-center text-xl mb-2 border border-slate-200 dark:border-slate-600"><i class="fas fa-lock"></i></div>
+                            </div>
+                        </div>
+                        <p class="text-[10px] text-slate-500 dark:text-slate-400 mt-3 text-center">Thiếu <strong class="text-brand-cyan">2</strong> huy hiệu để nhận Khung Avatar.</p>
+                    </div>
+                </div>
+
+                <div class="clean-card p-6 border-t-4 border-t-brand-cyan">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-base font-display font-black text-brand-dark dark:text-white flex items-center gap-2"><i class="fas fa-tasks text-brand-cyan"></i> Nhiệm vụ ngày</h2>
+                        <span class="text-[10px] font-black text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded">14:20:00</span>
+                    </div>
+                    
+                    <div class="space-y-6">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-2xl bg-blue-50 dark:bg-blue-900/30 text-brand-blue dark:text-brand-cyan flex items-center justify-center shrink-0 border border-blue-100 dark:border-blue-800"><i class="fas fa-book-open"></i></div>
+                            <div class="flex-1">
+                                <div class="flex justify-between mb-2"><h3 class="text-sm font-bold text-slate-800 dark:text-slate-200">Hoàn thành 1 bài học</h3><span class="text-xs font-black text-brand-yellow">50 XP</span></div>
+                                <div class="w-full bg-slate-100 dark:bg-slate-700 h-2 rounded-full"><div class="bg-brand-blue dark:bg-brand-cyan h-2 rounded-full w-[0%]"></div></div>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-4 opacity-50">
+                            <div class="w-12 h-12 rounded-2xl bg-green-50 dark:bg-green-900/30 text-green-500 flex items-center justify-center shrink-0 border border-green-100 dark:border-green-800"><i class="fas fa-check-double"></i></div>
+                            <div class="flex-1">
+                                <div class="flex justify-between mb-2"><h3 class="text-sm font-bold text-slate-800 dark:text-slate-200 line-through">Đạt 80% bài Quiz</h3><span class="text-xs font-black text-green-500"><i class="fas fa-check"></i> Xong</span></div>
+                                <div class="w-full bg-slate-100 dark:bg-slate-700 h-2 rounded-full"><div class="bg-green-500 h-2 rounded-full w-full"></div></div>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-2xl bg-purple-50 dark:bg-purple-900/30 text-brand-purple flex items-center justify-center shrink-0 border border-purple-100 dark:border-purple-800"><i class="fas fa-vr-cardboard"></i></div>
+                            <div class="flex-1">
+                                <div class="flex justify-between mb-2"><h3 class="text-sm font-bold text-slate-800 dark:text-slate-200">Trải nghiệm Lab 3D</h3><span class="text-xs font-black text-brand-yellow">30 XP</span></div>
+                                <div class="w-full bg-slate-100 dark:bg-slate-700 h-2 rounded-full"><div class="bg-brand-purple h-2 rounded-full w-[0%]"></div></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="clean-card p-6 bg-gradient-to-b from-white to-brand-blue/5 dark:from-slate-800 dark:to-slate-900/50">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-base font-display font-black text-brand-dark dark:text-white">Đấu Trường</h2>
+                        <span class="px-3 py-1 bg-yellow-100 dark:bg-yellow-900/40 text-yellow-700 dark:text-yellow-400 text-[10px] font-black uppercase rounded-lg border border-yellow-200 dark:border-yellow-700/50">Giải Vàng</span>
+                    </div>
+                    
+                    <div class="space-y-4">
+                        <div class="flex items-center gap-4 p-3 bg-white dark:bg-slate-700 rounded-2xl border border-yellow-300 dark:border-yellow-600/50 shadow-md">
+                            <span class="w-6 text-center text-base font-black text-brand-yellow"><i class="fas fa-crown"></i></span>
+                            <div class="w-10 h-10 rounded-xl bg-slate-200 dark:bg-slate-600 flex items-center justify-center text-slate-600 dark:text-slate-300 font-bold text-xs">TA</div>
+                            <div class="flex-1"><p class="text-sm font-bold text-slate-800 dark:text-white">Tú Anh</p></div>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 font-bold">8,200 XP</p>
+                        </div>
+                        <div class="flex items-center gap-4 p-3 bg-transparent rounded-2xl opacity-80">
+                            <span class="w-6 text-center text-base font-black text-slate-400">2</span>
+                            <div class="w-10 h-10 rounded-xl bg-slate-200 dark:bg-slate-600 flex items-center justify-center text-slate-600 dark:text-slate-300 font-bold text-xs">MA</div>
+                            <div class="flex-1"><p class="text-sm font-bold text-slate-700 dark:text-slate-300">Minh Anh</p></div>
+                            <p class="text-xs text-slate-500 font-bold">7,850 XP</p>
+                        </div>
+                        <div class="flex items-center gap-4 p-3 bg-transparent rounded-2xl opacity-80 border-b border-slate-100 dark:border-slate-700 pb-5">
+                            <span class="w-6 text-center text-base font-black text-orange-400/70">3</span>
+                            <div class="w-10 h-10 rounded-xl bg-slate-200 dark:bg-slate-600 flex items-center justify-center text-slate-600 dark:text-slate-300 font-bold text-xs">TT</div>
+                            <div class="flex-1"><p class="text-sm font-bold text-slate-700 dark:text-slate-300">Tuấn Tú</p></div>
+                            <p class="text-xs text-slate-500 font-bold">7,100 XP</p>
+                        </div>
+
+                        <div class="py-1 text-center text-slate-300 dark:text-slate-600 text-sm"><i class="fas fa-ellipsis-v"></i></div>
+
+                        <div class="flex items-center gap-4 p-3 bg-brand-blue dark:bg-brand-cyan text-white dark:text-slate-900 rounded-2xl shadow-xl transform hover:scale-105 transition cursor-pointer mt-3">
+                            <span class="w-6 text-center text-base font-black text-blue-200 dark:text-slate-700">12</span>
+                            <div class="w-10 h-10 rounded-xl bg-white dark:bg-slate-900 flex items-center justify-center text-brand-blue dark:text-brand-cyan font-bold text-xs border border-transparent">HN</div>
+                            <div class="flex-1"><p class="text-sm font-bold">Hoàng Nam (Bạn)</p></div>
+                            <p class="text-xs font-black opacity-80">5,550 XP</p>
+                        </div>
+                    </div>
+                    <p class="text-xs text-center text-slate-500 dark:text-slate-400 mt-6"><i class="far fa-clock"></i> Kết thúc trong: <strong>2 ngày 4 giờ</strong></p>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <footer class="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-t border-slate-200 dark:border-slate-800 py-12 mt-16 z-20 relative w-full">
+        <div class="container mx-auto px-6 relative z-10 max-w-7xl">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12 text-left mb-12">
+                <div class="space-y-6">
+                    <a href="index.html" class="flex items-center gap-2 group">
+                        <div class="w-10 h-10 transition-transform group-hover:rotate-12 duration-500 flex items-center justify-center">
+                            <img src="../logodoly.png" alt="Doly Logo" class="w-full h-full object-contain">
+                        </div>
+                        <span class="text-xl font-display font-black text-brand-dark dark:text-white tracking-tighter uppercase">DOLY LMS</span>
+                    </a>
+                    <p class="text-slate-500 dark:text-slate-400 text-xs leading-relaxed font-medium">Hệ sinh thái giáo dục số thông minh nhất dành cho học sinh KHTN Việt Nam.</p>
+                </div>
+                <div>
+                    <h4 class="text-xs font-black uppercase tracking-[0.2em] mb-6 text-brand-blue dark:text-brand-yellow">Học Tập</h4>
+                    <ul class="space-y-3 text-slate-600 dark:text-slate-400 text-xs font-bold">
+                        <li><a href="#" class="hover:text-brand-blue dark:hover:text-brand-cyan transition-colors">Nội dung học thuật</a></li>
+                        <li><a href="#" class="hover:text-brand-blue dark:hover:text-brand-cyan transition-colors">Lịch học Smart</a></li>
+                        <li><a href="hocthuat.html" class="hover:text-brand-blue dark:hover:text-brand-cyan transition-colors">Thí nghiệm ảo 3D</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-xs font-black uppercase tracking-[0.2em] mb-6 text-brand-blue dark:text-brand-yellow">Kết Nối</h4>
+                    <ul class="space-y-3 text-slate-600 dark:text-slate-400 text-xs font-bold">
+                        <li><a href="diendan.html" class="hover:text-brand-blue dark:hover:text-brand-cyan transition-colors">Cộng đồng hội cá heo</a></li>
+                        <li><a href="#" class="hover:text-brand-blue dark:hover:text-brand-cyan transition-colors">Trung tâm hỗ trợ</a></li>
+                        <li><a href="#" class="hover:text-brand-blue dark:hover:text-brand-cyan transition-colors">Tư vấn phụ huynh</a></li>
+                    </ul>
+                </div>
+                <div class="space-y-6">
+                    <h4 class="text-xs font-black uppercase tracking-[0.2em] mb-6 text-brand-blue dark:text-brand-yellow">Đăng Ký</h4>
+                    <div class="relative">
+                        <input type="email" placeholder="Email của bạn..." class="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3 text-xs font-bold focus:outline-none focus:border-brand-blue transition-all dark:text-white">
+                        <button class="absolute right-1.5 top-1.5 bottom-1.5 bg-brand-blue text-white px-4 rounded-lg shadow-md hover:bg-blue-800 transition-colors"><i class="fas fa-paper-plane text-xs"></i></button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="pt-8 border-t border-slate-200 dark:border-slate-800 flex flex-col md:flex-row justify-between items-center gap-6">
+                <p class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500">&copy; 2026 DOLY LMS - KIẾN TẠO TƯƠNG LAI SỐ</p>
+                <div class="flex justify-center gap-8 text-slate-400 dark:text-slate-500 text-lg">
+                    <a href="#" class="hover:text-brand-blue transition transform hover:-translate-y-1"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#" class="hover:text-red-500 transition transform hover:-translate-y-1"><i class="fab fa-youtube"></i></a>
+                    <a href="#" class="hover:text-brand-dark dark:hover:text-white transition transform hover:-translate-y-1"><i class="fab fa-tiktok"></i></a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <div class="fixed bottom-8 right-8 z-[100]">
+        <button onclick="toggleAIChat()" class="w-16 h-16 bg-white dark:bg-slate-800 border-2 border-slate-100 dark:border-slate-700 rounded-full shadow-[0_15px_30px_rgba(10,47,182,0.2)] flex items-center justify-center hover:scale-110 transition-transform transform hover:-rotate-12 cursor-pointer group relative">
+             <img src="../logodoly.png" alt="Doly Logo" class="w-full h-full object-contain">
+            <span class="absolute top-0 right-0 w-3 h-3 bg-red-500 border-2 border-white dark:border-slate-800 rounded-full animate-ping"></span>
+            <span class="absolute top-0 right-0 w-3 h-3 bg-red-500 border-2 border-white dark:border-slate-800 rounded-full"></span>
+            <span class="absolute -top-12 right-0 bg-brand-blue text-white text-[10px] font-black uppercase px-4 py-2 rounded-xl opacity-0 group-hover:opacity-100 transition whitespace-nowrap shadow-lg">Hỏi Doly AI</span>
+        </button>
+    </div>
+
+    <div id="ai-chat-panel" class="fixed top-0 right-0 w-full md:w-96 h-full bg-white dark:bg-slate-900 shadow-[-10px_0_30px_rgba(0,0,0,0.1)] z-[110] transform translate-x-full transition-transform duration-300 flex flex-col border-l border-slate-200 dark:border-slate-800">
+        <div class="p-4 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50 dark:bg-slate-800/50">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-brand-cyan rounded-full flex items-center justify-center text-xl shadow-sm border-2 border-white dark:border-slate-700">🐬</div>
+                <div>
+                    <h3 class="font-black text-sm text-brand-dark dark:text-white">Doly Trợ Lý Số</h3>
+                    <p class="text-[10px] text-brand-cyan font-bold"><i class="fas fa-circle text-[8px] mr-1 animate-pulse"></i>Luôn sẵn sàng</p>
+                </div>
+            </div>
+            <button onclick="toggleAIChat()" class="w-8 h-8 flex items-center justify-center text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-full transition"><i class="fas fa-times"></i></button>
+        </div>
+        
+        <div id="chat-history" class="flex-1 p-4 overflow-y-auto space-y-4 bg-white dark:bg-slate-900 relative">
+            <div class="absolute inset-0 opacity-5 pointer-events-none" style="background-image: radial-gradient(#334155 1px, transparent 1px); background-size: 20px 20px;"></div>
+            
+            <div class="flex gap-3 w-5/6 relative z-10 mt-2">
+                <div class="w-8 h-8 rounded-full bg-brand-cyan text-white flex items-center justify-center shrink-0 text-sm shadow-sm">🐬</div>
+                <div class="bg-slate-100 dark:bg-slate-800 p-3 rounded-2xl rounded-tl-none text-sm text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
+                    Chào bạn! Mình là Doly. Chúc mừng bạn đã đạt 12 ngày Streak 🔥. Bạn đã sẵn sàng học tiếp bài "Vệ sinh hô hấp" chưa?
+                </div>
+            </div>
+        </div>
+
+        <div class="p-4 border-t border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900">
+            <div class="relative">
+                <input type="text" id="chat-input" placeholder="Hỏi Doly điều gì đó..." class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-full pl-5 pr-12 py-3.5 text-sm focus:outline-none focus:border-brand-cyan dark:text-white transition" onkeydown="if(event.key === 'Enter') sendMsg()">
+                <button onclick="sendMsg()" class="absolute right-2 top-1.5 w-9 h-9 bg-brand-cyan text-white rounded-full flex items-center justify-center hover:bg-blue-400 transition shadow-sm"><i class="fas fa-paper-plane text-xs"></i></button>
+            </div>
+            <p class="text-[9px] text-center text-slate-400 mt-2">Doly AI có thể mắc lỗi. Hãy kiểm tra lại thông tin nhé.</p>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script>
+        AOS.init({ once: true, offset: 50, duration: 800, easing: 'ease-out-cubic' });
+
+        function toggleTheme() { document.documentElement.classList.toggle('dark'); }
+
+        function diemDanh() {
+            const btn = document.getElementById('btn-diem-danh');
+            const iconHomNay = document.getElementById('icon-hom-nay');
+
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang điểm danh...';
+            btn.onclick = null;
+
+            DolyAPI.checkIn()
+                .then(function(result) {
+                    btn.innerHTML = '<i class="fas fa-check-circle"></i> Đã điểm danh';
+                    btn.className = "bg-green-500 text-white px-6 py-3 rounded-full font-black text-xs uppercase tracking-widest shadow-lg border-2 border-white dark:border-slate-800 flex items-center gap-2 z-20 cursor-default";
+
+                    iconHomNay.className = "w-14 h-14 rounded-full bg-gradient-to-tr from-orange-500 to-yellow-400 text-white flex items-center justify-center text-xl shadow-[0_0_20px_rgba(249,115,22,0.4)] border-4 border-white dark:border-slate-800 scale-110 transition-all duration-500";
+
+                    confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 }, colors: ['#FFD700', '#00E5FF', '#9D00FF', '#ff416c'] });
+
+                    // Update streak display
+                    var streakTitle = document.getElementById('streak-title');
+                    if (streakTitle && result.current_streak) {
+                        streakTitle.innerHTML = '<i class="fas fa-fire text-orange-500 animate-pulse"></i> Chuỗi ' + result.current_streak + ' ngày học';
+                    }
+
+                    // Reload dashboard to refresh data
+                    loadStudentDashboard();
+                })
+                .catch(function(err) {
+                    if (err.message && err.message.indexOf('da diem danh') !== -1) {
+                        btn.innerHTML = '<i class="fas fa-check-circle"></i> Đã điểm danh';
+                        btn.className = "bg-green-500 text-white px-6 py-3 rounded-full font-black text-xs uppercase tracking-widest shadow-lg border-2 border-white dark:border-slate-800 flex items-center gap-2 z-20 cursor-default";
+                        iconHomNay.className = "w-14 h-14 rounded-full bg-gradient-to-tr from-orange-500 to-yellow-400 text-white flex items-center justify-center text-xl shadow-[0_0_20px_rgba(249,115,22,0.4)] border-4 border-white dark:border-slate-800 scale-110 transition-all duration-500";
+                    } else {
+                        btn.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Thử lại';
+                        btn.onclick = diemDanh;
+                        btn.className = "bg-red-500 text-white px-6 py-3 rounded-full font-black text-xs uppercase tracking-widest shadow-lg border-2 border-white dark:border-slate-800 flex items-center gap-2 z-20 animate-bounce";
+                        alert('Không thể điểm danh: ' + (err.message || 'Lỗi kết nối'));
+                    }
+                });
+        }
+
+        function toggleAIChat() {
+            const panel = document.getElementById('ai-chat-panel');
+            panel.classList.toggle('translate-x-full');
+        }
+
+        function sendMsg() {
+            const input = document.getElementById('chat-input');
+            const history = document.getElementById('chat-history');
+            const text = input.value.trim();
+            if(!text) return;
+
+            history.innerHTML += '<div class="flex gap-2 w-5/6 ml-auto justify-end mb-4 relative z-10"><div class="bg-brand-blue text-white p-3 rounded-2xl rounded-tr-none text-sm shadow-sm">' + DolyAPI.esc(text) + '</div></div>';
+            input.value = '';
+            history.scrollTop = history.scrollHeight;
+
+            const loadingId = 'ai-loading-' + Date.now();
+            history.innerHTML += '<div id="' + loadingId + '" class="flex gap-3 w-5/6 mb-4 relative z-10"><div class="w-8 h-8 rounded-full bg-brand-cyan text-white flex items-center justify-center shrink-0 text-sm shadow-sm">🐬</div><div class="bg-slate-100 dark:bg-slate-800 p-3 rounded-2xl rounded-tl-none text-sm text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700"><span class="flex gap-1 items-center">Doly đang suy nghĩ <i class="fas fa-circle text-[4px] animate-bounce"></i><i class="fas fa-circle text-[4px] animate-bounce" style="animation-delay: 0.1s"></i><i class="fas fa-circle text-[4px] animate-bounce" style="animation-delay: 0.2s"></i></span></div></div>';
+            history.scrollTop = history.scrollHeight;
+
+            DolyAPI.chat(text)
+                .then(function(result) {
+                    var loadingEl = document.getElementById(loadingId);
+                    if (loadingEl) {
+                        loadingEl.outerHTML = '<div class="flex gap-3 w-5/6 mb-4 relative z-10"><div class="w-8 h-8 rounded-full bg-brand-cyan text-white flex items-center justify-center shrink-0 text-sm shadow-sm">🐬</div><div class="bg-slate-100 dark:bg-slate-800 p-3 rounded-2xl rounded-tl-none text-sm text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">' + DolyAPI.esc(result.reply) + '</div></div>';
+                    }
+                    history.scrollTop = history.scrollHeight;
+                })
+                .catch(function(err) {
+                    var loadingEl = document.getElementById(loadingId);
+                    if (loadingEl) {
+                        loadingEl.outerHTML = '<div class="flex gap-3 w-5/6 mb-4 relative z-10"><div class="w-8 h-8 rounded-full bg-red-400 text-white flex items-center justify-center shrink-0 text-sm shadow-sm">⚠️</div><div class="bg-red-50 dark:bg-red-900/30 p-3 rounded-2xl rounded-tl-none text-sm text-red-700 dark:text-red-300 border border-red-200 dark:border-red-800">Doly gặp lỗi: ' + DolyAPI.esc(err.message || 'Mất kết nối') + '</div></div>';
+                    }
+                    history.scrollTop = history.scrollHeight;
+                });
+        }
+
+        function getInitials(name) {
+            if (!name) return '?';
+            var parts = name.trim().split(' ');
+            if (parts.length === 1) return parts[0].charAt(0).toUpperCase();
+            return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();
+        }
+
+        function updateUserAvatar(fullName) {
+            var initials = getInitials(fullName);
+            var els = document.querySelectorAll('#avatar-hero, #avatar-btn-header div:first-child');
+            var avatarHero = document.getElementById('avatar-hero');
+            if (avatarHero) avatarHero.textContent = initials;
+            var avatarHeader = document.querySelector('#avatar-btn-header div');
+            if (avatarHeader) avatarHeader.textContent = initials;
+        }
+
+        function updateXPDisplay(xp) {
+            xp = xp || 0;
+            var level = Math.floor(xp / 1000) + 1;
+            var xpInLevel = xp % 1000;
+            var xpNeeded = 1000 - xpInLevel;
+            var progressPct = Math.min(100, Math.round((xpInLevel / 1000) * 100));
+
+            var levelBadge = document.getElementById('level-badge');
+            if (levelBadge) levelBadge.textContent = 'Lv' + level;
+
+            var progressBar = document.getElementById('xp-progress-bar');
+            if (progressBar) progressBar.style.width = progressPct + '%';
+
+            var nextLevelEl = document.getElementById('xp-next-level');
+            if (nextLevelEl) {
+                if (xpNeeded === 1000) {
+                    nextLevelEl.innerHTML = '<strong class="text-white">' + xp + ' XP</strong>';
+                } else {
+                    nextLevelEl.innerHTML = '<strong class="text-white">' + xpNeeded + ' XP</strong> nữa lên Cấp ' + (level + 1);
+                }
+            }
+        }
+
+        DolyAPI.requireAuth();
+
+        async function loadStudentDashboard() {
+            try {
+                var session = DolyAPI.loadSession();
+                if (!session) return;
+
+                // Use DolyAPI helper to call student_dashboard endpoint
+                var response = await fetch('../api/student_dashboard.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        auth_token: (DolyAPI.loadSession() || {}).auth_token
+                    })
+                });
+                var result = await response.json();
+                if (!response.ok || !result.success) {
+                    throw new Error(result.message || 'Khong the tai dashboard hoc sinh.');
+                }
+
+                const user = result.data.user;
+                const stats = result.data.stats;
+
+                document.getElementById('student-name').textContent = user.full_name + ' 🚀';
+                document.getElementById('student-xp').textContent = String(stats.total_xp || 0);
+                document.getElementById('student-learning-hours').textContent = Math.max(1, Math.round((stats.learning_progress.avg_progress || 0) / 8)) + ' Giờ';
+                document.getElementById('student-accuracy').textContent = Math.round((stats.avg_score || 0) * 10) + '%';
+                document.getElementById('student-rank').textContent = (stats.avg_score || 0) >= 8 ? 'Top 20%' : 'Top 50%';
+
+                // Update user avatar and level from real data
+                updateUserAvatar(user.full_name);
+                updateXPDisplay(stats.total_xp);
+
+                // Update streak display
+                if (stats.current_streak) {
+                    var streakTitle = document.getElementById('streak-title');
+                    if (streakTitle) {
+                        streakTitle.innerHTML = '<i class="fas fa-fire text-orange-500 animate-pulse"></i> Chuỗi ' + stats.current_streak + ' ngày học';
+                    }
+                }
+
+                // Load streak + attendance data
+                loadStreakData();
+
+                // Load leaderboard
+                loadLeaderboard();
+
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        async function loadStreakData() {
+            try {
+                var data = await DolyAPI.getStreak();
+                if (!data || !data.attendance) return;
+
+                // Build a set of attendance dates
+                var attendedDates = {};
+                data.attendance.forEach(function(a) {
+                    attendedDates[a.attendance_date] = true;
+                });
+
+                // Update the 7-day calendar
+                var days = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
+                var today = new Date();
+                var dayElements = document.querySelectorAll('.clean-card.p-8 .flex.justify-between.items-end > div');
+
+                // Find today's day index (0=Sun, 1=Mon, ... 6=Sat)
+                var todayDayIndex = today.getDay(); // 0=Sun, 1=Mon...
+
+                // Map to display order: T2(1), T3(2), T4(3), T5(4), T6(5), T7(6), CN(0)
+                var displayOrder = [1, 2, 3, 4, 5, 6, 0];
+
+                dayElements.forEach(function(el, idx) {
+                    if (idx >= displayOrder.length) return;
+                    var dayNum = displayOrder[idx]; // 0-based day number
+
+                    // Calculate the date of this day in the current week
+                    var diff = dayNum - todayDayIndex;
+                    var d = new Date(today);
+                    d.setDate(today.getDate() + diff);
+                    var dateStr = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+
+                    // Don't update future dates
+                    if (diff > 0) return;
+
+                    // Check if attended on this date
+                    if (attendedDates[dateStr]) {
+                        var iconDiv = el.querySelector('div:last-child');
+                        if (iconDiv) {
+                            iconDiv.className = 'w-12 h-12 rounded-full bg-orange-100 dark:bg-orange-900/30 text-orange-500 flex items-center justify-center border-2 border-orange-200 dark:border-orange-500/30';
+                            iconDiv.innerHTML = '<i class="fas fa-check"></i>';
+                        }
+                    }
+                });
+
+                // Check if already checked in today
+                var todayStr = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0') + '-' + String(today.getDate()).padStart(2, '0');
+                if (attendedDates[todayStr]) {
+                    var btn = document.getElementById('btn-diem-danh');
+                    var iconHomNay = document.getElementById('icon-hom-nay');
+                    if (btn) {
+                        btn.innerHTML = '<i class="fas fa-check-circle"></i> Đã điểm danh';
+                        btn.className = "bg-green-500 text-white px-6 py-3 rounded-full font-black text-xs uppercase tracking-widest shadow-lg border-2 border-white dark:border-slate-800 flex items-center gap-2 z-20 cursor-default";
+                        btn.onclick = null;
+                    }
+                    if (iconHomNay) {
+                        iconHomNay.className = "w-14 h-14 rounded-full bg-gradient-to-tr from-orange-500 to-yellow-400 text-white flex items-center justify-center text-xl shadow-[0_0_20px_rgba(249,115,22,0.4)] border-4 border-white dark:border-slate-800 scale-110 transition-all duration-500";
+                    }
+                }
+            } catch (err) {
+                console.error('Khong the tai du lieu streak:', err);
+            }
+        }
+
+        async function loadLeaderboard() {
+            try {
+                var data = await DolyAPI.getXP();
+                if (!data || !data.leaderboard) return;
+
+                var leaderboardEl = document.querySelector('.clean-card.bg-gradient-to-b');
+                if (!leaderboardEl) return;
+
+                var listEl = leaderboardEl.querySelector('.space-y-4');
+                if (!listEl) return;
+
+                var session = DolyAPI.loadSession();
+                var currentUserId = session ? session.user_id || session.id : null;
+
+                var html = '';
+                var currentUser = data.leaderboard.find(function(u) {
+                    return String(u.id) === String(currentUserId);
+                });
+
+                data.leaderboard.slice(0, 10).forEach(function(u, idx) {
+                    var rank = idx + 1;
+                    var initials = getInitials(u.full_name);
+                    var isCurrentUser = String(u.id) === String(currentUserId);
+                    var rowClass = isCurrentUser
+                        ? 'bg-brand-blue dark:bg-brand-cyan text-white dark:text-slate-900 rounded-2xl shadow-xl transform hover:scale-105 transition cursor-pointer mt-3'
+                        : (rank <= 3 ? 'bg-white dark:bg-slate-700 rounded-2xl border shadow-md' : 'bg-transparent rounded-2xl opacity-80');
+                    var rankClass = rank === 1 ? 'text-brand-yellow' : (rank === 2 ? 'text-slate-400' : (rank === 3 ? 'text-orange-400/70' : 'text-slate-400'));
+                    var rankIcon = rank === 1 ? '<i class="fas fa-crown"></i>' : rank;
+
+                    var nameDisplay = isCurrentUser ? (u.full_name + ' (Bạn)') : u.full_name;
+
+                    html += '<div class="flex items-center gap-4 p-3 ' + rowClass + '">';
+                    html += '<span class="w-6 text-center text-base font-black ' + rankClass + '">' + rankIcon + '</span>';
+                    html += '<div class="w-10 h-10 rounded-xl bg-slate-200 dark:bg-slate-600 flex items-center justify-center text-slate-600 dark:text-slate-300 font-bold text-xs">' + initials + '</div>';
+                    html += '<div class="flex-1"><p class="text-sm font-bold text-slate-800 dark:text-white">' + DolyAPI.esc(nameDisplay) + '</p></div>';
+                    html += '<p class="text-xs text-slate-500 dark:text-slate-400 font-bold">' + (u.total_xp || 0) + ' XP</p>';
+                    html += '</div>';
+
+                    if (rank === 3 && data.leaderboard.length > 4) {
+                        html += '<div class="py-1 text-center text-slate-300 dark:text-slate-600 text-sm"><i class="fas fa-ellipsis-v"></i></div>';
+                    }
+                });
+
+                listEl.innerHTML = html;
+            } catch (err) {
+                console.error('Khong the tai leaderboard:', err);
+            }
+        }
+
+        loadStudentDashboard();
+
+        function handleLogout() {
+            DolyAPI.logout().catch(function(){}).finally(function(){
+                DolyAPI.clearSession();
+                window.location.href = '../login.html';
+            });
+        }
+    </script>
+</body>
+</html>

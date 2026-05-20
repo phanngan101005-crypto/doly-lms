@@ -1,0 +1,1615 @@
+<!DOCTYPE html>
+<html lang="vi" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doly Ultimate Learning Engine - Perfect Flow</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="../api/client.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Quicksand:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        'doly-cream': '#F9FAFB', 'doly-blue': '#2563EB', 'doly-dark': '#0f172a',
+                        'doly-yellow': '#FBBF24', 'phys-blue': '#3b82f6', 'chem-green': '#10b981',
+                        'bio-pink': '#ec4899', 'earth-orange': '#f97316', 'ai-purple': '#8b5cf6',
+                        'brand-blue': '#0A2FB6', 'brand-cyan': '#00E5FF', 'brand-purple': '#9D00FF', 'brand-yellow': '#FFD700', 'brand-dark': '#0B0F19',
+                    },
+                    fontFamily: { sans: ['Quicksand', 'sans-serif'], display: ['Montserrat', 'sans-serif'] },
+                    animation: {
+                        'spin-slow': 'spin 8s linear infinite',
+                        'float': 'float 3s ease-in-out infinite',
+                        'slide-down': 'slideDown 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+                        'pulse-fast': 'pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'unlock-bounce': 'unlockBounce 1.5s cubic-bezier(0.28, 0.84, 0.42, 1) forwards'
+                    },
+                    keyframes: {
+                        float: { '0%, 100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-10px)' } },
+                        slideDown: { '0%': { opacity: 0, transform: 'translateY(-20px)' }, '100%': { opacity: 1, transform: 'translateY(0)' } },
+                        unlockBounce: {
+                            '0%': { transform: 'scale(0.5)', opacity: 0 },
+                            '50%': { transform: 'scale(1.2)', opacity: 1 },
+                            '70%': { transform: 'scale(0.9)' },
+                            '100%': { transform: 'scale(1)', opacity: 1 }
+                        }
+                    },
+                    boxShadow: { 'soft-md': '0 4px 20px -2px rgba(0,0,0,0.05)', 'soft-xl': '0 10px 40px -10px rgba(0,0,0,0.08)' }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { background-color: #f1f5f9; color: #0f172a; overflow-x: hidden; position: relative; transition: background-color 0.5s ease; }
+        .custom-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scroll::-webkit-scrollbar-track { background: transparent; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        .custom-scroll::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        
+        @keyframes fadeInScale { from { opacity: 0; transform: translateY(15px) scale(0.99); } to { opacity: 1; transform: translateY(0) scale(1); } }
+        .tab-content { display: none; animation: fadeInScale 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; opacity: 0; }
+        .tab-content.active { display: block; }
+        .tab-btn { position: relative; overflow: hidden; }
+        .tab-btn::after { content: ''; position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); width: 0; height: 3px; background-color: #8b5cf6; transition: width 0.3s ease; border-radius: 3px 3px 0 0; }
+        .tab-btn.active::after { width: 100%; }
+        .tab-btn.active { color: #8b5cf6; background: #f8fafc; }
+        
+        .flashcard-inner { transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1); transform-style: preserve-3d; }
+        .flashcard:hover .flashcard-inner { transform: rotateY(180deg); box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); }
+        .flashcard-front, .flashcard-back { backface-visibility: hidden; position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+        .flashcard-back { transform: rotateY(180deg); }
+
+        .match-item { transition: all 0.2s; cursor: pointer; border-color: #e2e8f0; }
+        .match-item:hover { transform: translateY(-2px); border-color: #cbd5e1; }
+        .match-item.selected { border-color: #3b82f6; background-color: #eff6ff; transform: scale(1.02); box-shadow: 0 4px 15px rgba(59, 130, 246, 0.2); }
+        .match-item.matched { border-color: #10b981; background-color: #ecfdf5; color: #047857; pointer-events: none; opacity: 0.5; }
+        .match-item.error { border-color: #ef4444; background-color: #fef2f2; animation: shakeError 0.4s both; }
+
+        .fb-dropzone { display: inline-block; min-width: 100px; height: 36px; border-bottom: 2px dashed #94a3b8; margin: 0 6px; vertical-align: baseline; text-align: center; font-weight: bold; color: #4f46e5; transition: all 0.3s; cursor: pointer; border-radius: 6px 6px 0 0; line-height: 34px; padding: 0 10px; background-color: rgba(255,255,255,0.5);}
+        .fb-dropzone:hover { background-color: #f1f5f9; border-color: #8b5cf6;}
+        .fb-dropzone.filled { background-color: #e0e7ff; border-color: #6366f1; border-bottom-style: solid; box-shadow: inset 0 -2px 0 #6366f1; }
+        .fb-dropzone.correct { border-color: #10b981; color: #10b981; background-color: #ecfdf5; pointer-events: none; border-bottom-style: solid; box-shadow: inset 0 -2px 0 #10b981; }
+        .fb-dropzone.incorrect { border-color: #ef4444; color: #ef4444; background-color: #fef2f2; border-bottom-style: solid; box-shadow: inset 0 -2px 0 #ef4444; }
+
+        .shake { animation: shakeError 0.4s cubic-bezier(.36,.07,.19,.97) both; }
+        @keyframes shakeError { 10%, 90% { transform: translate3d(-2px, 0, 0); } 20%, 80% { transform: translate3d(4px, 0, 0); } 30%, 50%, 70% { transform: translate3d(-6px, 0, 0); } 40%, 60% { transform: translate3d(6px, 0, 0); } }
+
+        .progress-ring__circle { transition: stroke-dashoffset 0.8s ease-in-out; transform: rotate(-90deg); transform-origin: 50% 50%; }
+
+        body.focus-mode aside { transform: translateX(-100%); position: absolute; }
+        body.focus-mode #main-content { max-width: 100%; margin: 0 auto; }
+        body.focus-mode { background-color: #f1f5f9; }
+        .btn-hover-lift { transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1); }
+        .btn-hover-lift:hover { transform: translateY(-3px); box-shadow: 0 10px 20px -10px rgba(0,0,0,0.15); }
+
+        .glass-panel { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(25px); border: 1px solid rgba(255, 255, 255, 0.8); }
+        .dark .glass-panel { background: rgba(30, 41, 59, 0.7); border-color: rgba(255, 255, 255, 0.1); }
+
+        .aurora-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100vh; z-index: -1; overflow: hidden; }
+        .dark .aurora-bg { opacity: 0.15; }
+
+        .orb { position: absolute; border-radius: 50%; filter: blur(120px); opacity: 0.3; animation: floatOrb 25s infinite alternate ease-in-out; }
+        .orb-1 { width: 70vw; height: 70vw; background: #c7d2fe; top: -20%; left: -10%; }
+        .orb-2 { width: 60vw; height: 60vw; background: #e9d5ff; bottom: -20%; right: -10%; animation-delay: -5s; }
+        @keyframes floatOrb { 0% { transform: translate(0, 0) scale(1) rotate(0deg); } 100% { transform: translate(10vw, -10vh) scale(1.1) rotate(180deg); } }
+
+        .clean-card { background: #ffffff; border-radius: 2rem; box-shadow: 0 10px 40px -10px rgba(0,0,0,0.05); border: 1px solid rgba(255,255,255,0.8); transition: all 0.3s; }
+        .dark .clean-card { background: rgba(30, 41, 59, 0.6); backdrop-filter: blur(20px); border-color: rgba(255, 255, 255, 0.05); box-shadow: 0 10px 40px -10px rgba(0,0,0,0.5); }
+    </style>
+</head>
+<body class="antialiased text-slate-800 font-sans h-screen w-screen overflow-hidden selection:bg-ai-purple selection:text-white relative bg-slate-50 flex flex-col pt-[88px]">
+
+<div class="aurora-bg"><div class="orb orb-1"></div><div class="orb orb-2"></div></div>
+
+<!-- Glass-panel Navigation Bar -->
+<div class="fixed top-6 left-0 w-full z-50 px-6 flex justify-center">
+    <header class="w-full max-w-7xl glass-panel !rounded-full px-8 py-3 flex justify-between items-center shadow-sm">
+        <a href="dashboad.html" class="flex items-center gap-3">
+            <div class="w-10 h-10 flex items-center justify-center">
+                <img src="../logodoly.png" alt="Doly Logo" class="w-full h-full object-contain">
+            </div>
+            <h1 class="text-lg font-display font-black text-brand-dark dark:text-white hidden sm:block">DOLY LMS</h1>
+        </a>
+        
+        <nav class="hidden lg:flex flex-1 justify-center gap-6 xl:gap-12 text-[11px] xl:text-[13px] font-bold uppercase tracking-wide text-[#1e2b4d] dark:text-slate-300 mx-4">
+            <a href="dashboad.html" class="opacity-85 hover:opacity-100 transition-opacity whitespace-nowrap">TRANG CHỦ</a>
+            <a href="lophoc.html" class="opacity-85 hover:opacity-100 transition-opacity whitespace-nowrap">LỚP HỌC</a>
+            <a href="hocthuat.html" class="relative after:content-[''] after:absolute after:-bottom-2 after:left-0 after:w-full after:h-[3px] after:bg-[#1e2b4d] dark:after:bg-brand-cyan whitespace-nowrap">HỌC TẬP</a>
+            <a href="khokiemtra.html" class="opacity-85 hover:opacity-100 transition-opacity whitespace-nowrap">KHO KIỂM TRA</a>
+            <a href="diendan.html" class="opacity-85 hover:opacity-100 transition-opacity whitespace-nowrap">DIỄN ĐÀN VÀ CỘNG ĐỒNG</a>
+            <a href="tintuc.html" class="opacity-85 hover:opacity-100 transition-opacity whitespace-nowrap">TIN TỨC</a>
+        </nav>
+        
+        <div class="flex items-center gap-4">
+            <button onclick="toggleTheme()" class="w-9 h-9 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 flex items-center justify-center hover:scale-110 transition shadow-sm border border-transparent dark:border-slate-700">
+                <i class="fas fa-moon dark:hidden"></i>
+                <i class="fas fa-sun hidden dark:block text-brand-yellow"></i>
+            </button>
+            
+            <button onclick="handleLogout()" class="w-9 h-9 rounded-full bg-red-50 dark:bg-red-900/30 text-red-500 dark:text-red-400 flex items-center justify-center hover:scale-110 transition shadow-sm border border-red-200 dark:border-red-800" title="Dang xuat">
+                <i class="fas fa-sign-out-alt text-sm"></i>
+            </button>
+            
+            <button class="w-10 h-10 rounded-full border-2 border-brand-blue dark:border-brand-cyan overflow-hidden hover:scale-105 transition shadow-sm p-0.5">
+                <div id="header-avatar" class="w-full h-full rounded-full bg-gradient-to-br from-brand-blue to-brand-cyan flex items-center justify-center text-white font-display font-black text-sm">HS</div>
+            </button>
+        </div>
+    </header>
+</div>
+
+    <div id="unlock-overlay" class="fixed inset-0 z-[99999] bg-slate-900/90 backdrop-blur-sm hidden flex-col items-center justify-center text-white transition-all duration-300 opacity-0">
+        <div class="text-center animate-unlock-bounce">
+            <div class="w-32 h-32 mx-auto bg-gradient-to-br from-chem-green to-teal-500 rounded-full flex items-center justify-center shadow-[0_0_50px_rgba(16,185,129,0.5)] mb-6 border-4 border-white/20">
+                <i id="unlock-icon" class="fas fa-lock-open text-6xl text-white"></i>
+            </div>
+            <h2 class="text-3xl font-display font-black text-chem-green mb-2 tracking-widest uppercase">ĐÃ MỞ KHÓA</h2>
+            <p class="text-5xl font-black text-white drop-shadow-lg mb-4" id="unlock-lesson-title">Bài 34: Hệ hô hấp</p>
+            <p class="text-slate-300 font-bold text-lg">Bạn đã hoàn thành xuất sắc thử thách!</p>
+        </div>
+    </div>
+
+    <div id="course-complete-overlay" class="fixed inset-0 z-[99999] bg-slate-900/95 backdrop-blur-md hidden flex-col items-center justify-center text-white transition-all duration-500 opacity-0">
+        <div class="text-center animate-unlock-bounce max-w-lg px-6">
+            <div class="w-40 h-40 mx-auto bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center shadow-[0_0_80px_rgba(251,191,36,0.6)] mb-8 border-4 border-white/20">
+                <i class="fas fa-trophy text-7xl text-white"></i>
+            </div>
+            <h2 class="text-4xl font-display font-black text-yellow-400 mb-4 tracking-widest uppercase drop-shadow-lg">XUẤT SẮC!</h2>
+            <p class="text-2xl font-bold text-white mb-6 leading-relaxed">Bạn đã xuất sắc hoàn thành!<br><span class="text-ai-purple font-black">Chương VII: Sinh học cơ thể người</span></p>
+            <p class="text-slate-300 font-medium text-base mb-10 bg-slate-800/50 p-6 rounded-2xl border border-slate-700">Chúc mừng bạn đã chinh phục thành công 3 bài học cốt lõi. Hãy tiếp tục duy trì ngọn lửa đam mê học tập này nhé! Doly luôn đồng hành cùng bạn.</p>
+            <button onclick="closeCourseComplete()" class="px-10 py-4 bg-gradient-to-r from-ai-purple to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white font-black rounded-full shadow-xl transition-all hover:scale-105 active:scale-95 text-lg">
+                Tuyệt vời! Đóng lại
+            </button>
+        </div>
+    </div>
+
+    <div class="flex-1 flex overflow-hidden relative w-full mx-auto" id="app-container">
+        
+        <aside class="w-[320px] xl:w-[360px] bg-white h-full overflow-y-auto custom-scroll hidden lg:flex flex-col shrink-0 z-30 border-r border-slate-200 shadow-sm relative">
+            <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-[0.03] pointer-events-none"></div>
+            <div class="p-6 space-y-8 relative z-10">
+                <div>
+                    <h3 class="font-display font-black text-sm text-slate-800 uppercase tracking-widest mb-4 flex items-center gap-2"><i class="fas fa-list-ul text-ai-purple"></i> Danh sách bài học</h3>
+                    <div class="space-y-3 relative before:absolute before:inset-y-0 before:left-[23px] before:w-0.5 before:bg-slate-100 before:-z-10" id="sidebar-lessons"></div>
+                </div>
+                <div class="w-full h-px bg-slate-100"></div>
+                <div class="bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl p-6 text-white relative overflow-hidden shadow-xl border border-slate-700">
+                    <i class="fas fa-chart-pie absolute -right-4 -bottom-4 text-7xl text-slate-700 pointer-events-none opacity-50"></i>
+                    <div class="flex items-center gap-4 mb-6 relative z-10">
+                        <div class="relative w-16 h-16 shrink-0 bg-slate-800 rounded-full shadow-inner p-1">
+                            <svg class="w-full h-full drop-shadow-md" viewBox="0 0 100 100">
+                                <circle class="text-slate-700 stroke-current" stroke-width="8" cx="50" cy="50" r="40" fill="transparent"></circle>
+                                <circle id="circular-progress" class="text-chem-green progress-ring__circle stroke-current filter drop-shadow-[0_0_8px_rgba(16,185,129,0.5)]" stroke-width="8" stroke-linecap="round" cx="50" cy="50" r="40" fill="transparent" stroke-dasharray="251.2" stroke-dashoffset="251.2"></circle>
+                            </svg>
+                            <div class="absolute inset-0 flex items-center justify-center">
+                                <span class="text-sm font-black text-white" id="progress-text">0%</span>
+                            </div>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-sm text-slate-100 mb-1 drop-shadow-sm">Tiến độ bài học</h4>
+                            <div class="text-[10px] text-slate-300 space-y-1" id="checklist-container"></div>
+                        </div>
+                    </div>
+                    <div class="relative z-10 bg-slate-800/50 p-3 rounded-xl border border-slate-700/50 backdrop-blur-sm">
+                        <h4 class="font-bold text-xs text-slate-400 uppercase tracking-wider mb-3 flex items-center justify-between">Cây Kỹ Năng AI <i class="fas fa-brain text-ai-purple"></i></h4>
+                        <div class="space-y-2" id="skill-tree-container"></div>
+                    </div>
+                    <div class="mt-4 pt-4 border-t border-slate-700 hidden relative z-10" id="weak-points-suggestion"></div>
+                </div>
+                <div>
+                    <h3 class="font-display font-black text-sm text-slate-800 uppercase tracking-widest mb-3 flex items-center gap-2"><i class="fas fa-lightbulb text-amber-500"></i> Cốt lõi bài học</h3>
+                    <div class="bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 p-5 rounded-2xl shadow-sm">
+                        <ul class="space-y-3" id="key-points-container"></ul>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <main class="flex-1 h-full overflow-y-auto custom-scroll relative z-20 bg-transparent transition-all duration-500" id="main-content">
+            <div class="max-w-5xl mx-auto p-4 md:p-8 lg:p-12 pb-32">
+                
+                <div class="mb-8">
+                    <div class="flex items-center gap-3 mb-3">
+                        <span class="px-3 py-1.5 bg-gradient-to-r from-ai-purple to-purple-500 text-white rounded-md text-[10px] font-black uppercase tracking-widest shadow-md">Bài <span id="lesson-number-badge">...</span></span>
+                        <span class="px-3 py-1.5 bg-white border border-slate-200 text-xs font-bold text-slate-500 rounded-md flex items-center shadow-sm"><i class="far fa-clock mr-1.5 text-slate-400"></i> <span id="lesson-duration">...</span></span>
+                    </div>
+                    <h1 class="text-4xl lg:text-5xl font-display font-black text-slate-800 tracking-tight leading-tight" id="lesson-title">Đang tải...</h1>
+                </div>
+
+                <div class="bg-white rounded-[2rem] shadow-soft-xl border border-slate-100 overflow-hidden relative">
+                    <div class="flex overflow-x-auto custom-scroll border-b border-slate-100 sticky top-0 z-30 bg-white/95 backdrop-blur-md px-2 md:px-6 pt-2">
+                        <button onclick="openTab('hoctap')" id="btn-hoctap" class="tab-btn active flex-1 px-4 py-5 text-[11px] md:text-sm font-black uppercase tracking-widest text-slate-400 hover:text-ai-purple transition-colors whitespace-nowrap flex items-center justify-center gap-2"><i class="fas fa-book-open text-lg"></i><span>1. Kiến Thức</span></button>
+                        <button onclick="openTab('game')" id="btn-game" class="tab-btn flex-1 px-4 py-5 text-[11px] md:text-sm font-black uppercase tracking-widest text-slate-400 hover:text-ai-purple transition-colors whitespace-nowrap flex items-center justify-center gap-2"><i class="fas fa-layer-group text-lg"></i><span>2. Củng Cố</span></button>
+                        <button onclick="openTab('luyentap')" id="btn-luyentap" class="tab-btn flex-1 px-4 py-5 text-[11px] md:text-sm font-black uppercase tracking-widest text-slate-400 hover:text-ai-purple transition-colors whitespace-nowrap flex items-center justify-center gap-2"><i class="fas fa-pencil-alt text-lg"></i><span>3. Luyện & Test</span></button>
+                        <button onclick="openTab('qa')" id="btn-qa" class="tab-btn flex-1 px-4 py-5 text-[11px] md:text-sm font-black uppercase tracking-widest text-slate-400 hover:text-ai-purple transition-colors whitespace-nowrap flex items-center justify-center gap-2"><i class="fas fa-comments text-lg"></i><span>4. Hỏi Đáp AI</span></button>
+                    </div>
+
+                    <div class="p-6 md:p-10 relative min-h-[600px] z-10 bg-white">
+                        <div id="tab-hoctap" class="tab-content active"></div>
+                        <div id="tab-game" class="tab-content space-y-10"></div>
+                        <div id="tab-luyentap" class="tab-content space-y-10"></div>
+                        
+                        <div id="tab-qa" class="tab-content h-full">
+                            <div class="grid md:grid-cols-2 gap-8 h-[600px]">
+                                <div class="flex flex-col h-full bg-slate-50 rounded-3xl border border-slate-200 p-6 relative overflow-hidden shadow-inner">
+                                    <h4 class="font-black text-slate-800 text-lg mb-5 flex items-center"><div class="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center mr-3"><i class="fas fa-users"></i></div> Cộng đồng Lớp học</h4>
+                                    <div class="flex-1 overflow-y-auto custom-scroll space-y-4 pr-2" id="qa-community-list"></div>
+                                    <button onclick="${currentUser ? '' : 'requireLogin(event)'}" class="w-full mt-4 py-3 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-600 hover:text-blue-600 hover:border-blue-300 hover:shadow-md transition-all"><i class="fas fa-plus mr-1"></i> Hỏi Thầy/Cô</button>
+                                </div>
+                                
+                                <div class="flex flex-col h-full bg-gradient-to-b from-purple-50 to-white rounded-3xl border border-purple-200 p-6 relative overflow-hidden shadow-sm">
+                                    <h4 class="font-black text-ai-purple text-lg mb-4 flex items-center"><div class="w-8 h-8 rounded-full bg-purple-100 text-ai-purple flex items-center justify-center mr-3"><i class="fas fa-robot"></i></div> Gia sư AI Doly</h4>
+                                    <div class="flex gap-2 mb-4">
+                                        <button class="flex-1 py-2 px-1 bg-white border border-purple-100 rounded-xl text-xs font-bold text-purple-700 hover:bg-purple-100 transition-all shadow-sm" onclick="${currentUser ? `sendToAI('Tóm tắt bài này bằng gạch đầu dòng')` : `requireLogin(event)`}">Tóm tắt</button>
+                                        <button class="flex-1 py-2 px-1 bg-white border border-blue-100 rounded-xl text-xs font-bold text-blue-700 hover:bg-blue-100 transition-all shadow-sm" onclick="${currentUser ? `sendToAI('Giải thích lại cho mình phần khó nhất')` : `requireLogin(event)`}">Giảng lại</button>
+                                        <button class="flex-1 py-2 px-1 bg-white border border-orange-100 rounded-xl text-xs font-bold text-orange-700 hover:bg-orange-100 transition-all shadow-sm" onclick="${currentUser ? `sendToAI('Đố mình 1 câu trắc nghiệm đi')` : `requireLogin(event)`}">Test mình</button>
+                                    </div>
+                                    <div id="ai-chat-history" class="flex-1 overflow-y-auto custom-scroll space-y-4 mb-4 pr-2"></div>
+                                    <div class="flex items-center gap-2 bg-white p-2 rounded-2xl shadow-sm border border-slate-200 shrink-0 focus-within:border-purple-400 focus-within:shadow-md transition-all">
+                                        <input type="text" id="ai-chat-input" placeholder="Hỏi Doly bất cứ điều gì..." onkeydown="if(currentUser) sendChatMessage(event); else if(event.key==='Enter') requireLogin(event);" class="flex-1 bg-transparent px-3 py-2 text-sm outline-none font-medium text-slate-700">
+                                        <button onclick="if(currentUser) sendChatMessage({type:'click'}); else requireLogin(event);" class="w-10 h-10 rounded-xl bg-gradient-to-r from-ai-purple to-blue-500 text-white flex items-center justify-center hover:opacity-90 transition-all shadow-md transform hover:scale-105"><i class="fas fa-paper-plane"></i></button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div id="micro-feedback-container" class="fixed top-20 left-1/2 transform -translate-x-1/2 z-[999999] flex flex-col items-center gap-2 pointer-events-none"></div>
+
+    <script>
+        // =======================================================================
+        // 1. DATA CỐT LÕI BÀI 32, 33, 34 
+        // =======================================================================
+        const dbLessons = {
+            32: {
+                id: 32, title: "Dinh dưỡng và Hệ tiêu hóa ở người", duration: "45 phút", 
+                keyPoints: ["Tiêu hóa: Cơ học & Hóa học", "Dạ dày: Tiêu hóa Protein", "Ruột non: Hấp thụ dinh dưỡng", "Vệ sinh ăn uống: Ăn chín uống sôi"],
+                hook: {
+                    img: "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?auto=format&fit=crop&w=800&q=80",
+                    q: "Tại sao ăn xong một bữa no nê, bạn lại thường có cảm giác buồn ngủ và lười vận động?",
+                    opts: ["A. Máu dồn về dạ dày để tiêu hóa", "B. Thức ăn chứa chất gây ngủ", "C. Dạ dày phình to chèn ép não"], correct: 0, xp: 20, conceptId: "l32_c0",
+                    explain: "Khi ăn no, cơ thể ưu tiên tập trung máu về hệ tiêu hóa để co bóp và xử lý thức ăn. Lượng máu lên não giảm nhẹ khiến ta thấy buồn ngủ!"
+                },
+                concepts: [
+                    {
+                        id: "l32_c1", title: "1. Quá trình tiêu hóa thức ăn",
+                        layers: {
+                            text: "<p class='mb-3 font-bold text-slate-800 text-base'>Tiêu hóa là quá trình biến đổi thức ăn thành các chất dinh dưỡng đơn giản mà cơ thể hấp thụ được vào máu.</p><p class='mb-2 text-slate-600'>Quá trình này gồm 2 loại tác động chính diễn ra song song:</p><ul class='list-disc pl-5 space-y-3 text-slate-700'><li><b>Tiêu hóa cơ học:</b> Là các hoạt động vật lý. Bắt đầu từ miệng với việc răng cắt, xé, nghiền nát thức ăn. Xuống dạ dày và ruột, cơ trơn liên tục co bóp, nhào trộn thức ăn thành một dạng sền sệt gọi là vị trấp. Mục đích là làm nhỏ kích thước để tăng diện tích tiếp xúc.</li><li><b>Tiêu hóa hóa học:</b> Sử dụng các Enzyme (men tiêu hóa) được tiết ra từ tuyến nước bọt, dạ dày, gan, tụy. Các enzyme này như những chiếc kéo siêu nhỏ, cắt đứt các đại phân tử (Tinh bột, Protein, Lipit) thành các tiểu phân tử (Đường đơn, Axit amin, Axit béo) mà tế bào có thể sử dụng.</li></ul>",
+                            slide: { title: "Tổng quan Hệ Tiêu Hóa", pages: 5 }, video: { url: "#", title: "Video: Hành trình của 1 miếng bánh mì" }, pdf: { title: "Sơ đồ tư duy Dinh Dưỡng.pdf", size: "1.2 MB" },
+                            model3d: { type: "stomach", icon: "fa-hamburger", color: "text-orange-500", name: "Mô hình Dạ dày & Ống tiêu hóa" }
+                        },
+                        realWorld: "Ông bà ta có câu \"Nhai kỹ no lâu\". Khi nhai kỹ, thức ăn được nghiền nát (cơ học tốt) và trộn đều với Enzyme Amylase trong nước bọt (hóa học), giúp tiêu hóa triệt để, dạ dày làm việc nhẹ nhàng, hấp thụ tối đa dinh dưỡng.",
+                        microQuiz: { q: "Enzyme Pepsin trong dạ dày chủ yếu tham gia tiêu hóa loại chất nào?", opts: ["Tinh bột (Cơm, gạo)", "Protein (Thịt, cá, trứng)", "Lipit (Mỡ, dầu ăn)"], correct: 1, xp: 30, explain: "Pepsin hoạt động cực tốt trong môi trường axit mạnh của dạ dày để cắt đứt các chuỗi Protein dài thành các chuỗi ngắn hơn." }
+                    },
+                    {
+                        id: "l32_c2", title: "2. Các cơ quan của Hệ tiêu hóa",
+                        layers: {
+                            text: "<p class='leading-relaxed text-slate-700 mb-3'>Hệ tiêu hóa dài khoảng 9 mét ở người trưởng thành, được chia thành 2 nhóm cơ quan chính:</p><div class='bg-slate-50 p-5 rounded-xl mt-3 mb-4 border border-slate-200 shadow-sm'><p class='text-slate-800'>🔥 <b>Ống tiêu hóa (Đường ống đi của thức ăn):</b><br><span class='text-slate-600 mt-2 block'>Miệng ➔ Thực quản ➔ Dạ dày ➔ Ruột non ➔ Ruột già ➔ Trực tràng ➔ Hậu môn.</span><br><ul class='list-disc pl-5 mt-2 text-sm text-slate-600'><li><b>Dạ dày:</b> Nơi phình to nhất, hình chữ J, nhào trộn và tiêu hóa Protein.</li><li><b>Ruột non:</b> Dài nhất (khoảng 6m). Đây là nơi quan trọng nhất diễn ra sự tiêu hóa hoàn toàn và <b>hấp thụ dinh dưỡng</b> vào máu nhờ hệ thống lông ruột dày đặc.</li><li><b>Ruột già:</b> Hấp thụ lại nước và tạo phân.</li></ul></p></div><div class='bg-slate-50 p-5 rounded-xl border border-slate-200 shadow-sm'><p class='text-slate-800'>🔥 <b>Tuyến tiêu hóa (Nhà máy sản xuất dịch/enzyme):</b><br><span class='text-slate-600 mt-2 block'>Tuyến nước bọt (ở miệng), Tuyến vị (dạ dày), Gan (tiết dịch mật), Tuyến tụy (tiết dịch tụy), Tuyến ruột. Dịch tiêu hóa được đổ vào ống tiêu hóa để xử lý thức ăn.</span></p></div>",
+                            slide: null, video: null, pdf: null,
+                            model3d: { type: "liver", icon: "fa-leaf", color: "text-green-500", name: "Mô hình Gan, Mật & Tụy" }
+                        },
+                        realWorld: "Gan hoàn toàn KHÔNG chứa thức ăn! Thức ăn không đi qua gan. Gan là một \"tuyến\" khổng lồ sản xuất ra dịch mật, đổ vào ruột non để giúp đánh tan (nhũ tương hóa) dầu mỡ giống như cách nước rửa bát đánh tan mỡ trên đĩa.",
+                        microQuiz: { q: "Cơ quan nào dài nhất và làm nhiệm vụ hấp thụ phần lớn chất dinh dưỡng?", opts: ["Dạ dày", "Ruột non", "Ruột già"], correct: 1, xp: 30, explain: "Ruột non người trưởng thành dài khoảng 6 mét! Bên trong có vô số nếp gấp, lông ruột và vi nhung mao giúp diện tích hấp thụ có thể bằng cả một sân tennis." }
+                    },
+                    {
+                        id: "l32_c3", title: "3. Vệ sinh hệ tiêu hóa",
+                        layers: {
+                            text: "<p class='text-slate-700'>Để hệ tiêu hóa khỏe mạnh, cần thiết lập thói quen tốt: <br><br>1. <b>Ăn uống hợp lý:</b> Ăn đúng giờ, không ăn quá no, nhai kỹ, bổ sung nhiều chất xơ (rau củ) để kích thích nhu động ruột, chống táo bón.<br><br>2. <b>An toàn thực phẩm:</b> Ăn chín uống sôi, rửa tay bằng xà phòng trước khi ăn để phòng tránh giun sán và vi khuẩn lây bệnh (như vi khuẩn HP, E.coli, tả, lị).<br><br>3. <b>Trạng thái tâm lý:</b> Hệ tiêu hóa có mạng lưới thần kinh riêng. Căng thẳng, lo âu, tức diễn sẽ ức chế tiết dịch vị và giảm nhu động ruột, gây chứng đầy bụng, khó tiêu và viêm loét.</p>",
+                            slide: null, video: null, pdf: null, model3d: null
+                        },
+                        realWorld: "Vừa ăn vừa cắm mặt vào điện thoại hoặc tivi sẽ khiến não bộ phân tâm. Lượng máu dồn về dạ dày ít đi, dẫn đến quá trình tiêu hóa chậm lại, lâu ngày gây bệnh đau dạ dày.",
+                        microQuiz: { q: "Vi khuẩn Helicobacter pylori (HP) lây qua đường ăn uống thường là thủ phạm gây ra bệnh lý gì?", opts: ["Viêm loét dạ dày", "Sỏi mật", "Viêm ruột thừa"], correct: 0, xp: 30, explain: "Vi khuẩn HP có thể sống sót trong môi trường axit mạnh của dạ dày và là nguyên nhân chính gây viêm loét, thậm chí ung thư dạ dày." }
+                    }
+                ],
+                memory: {
+                    flashcards: [
+                        { q: "Nơi tiêu hóa hóa học tinh bột chín đầu tiên?", a: "Khoang miệng (Nhờ Enzyme Amylase trong nước bọt)" }, 
+                        { q: "Chức năng chính của ruột già?", a: "Hấp thụ lại nước và tạo phân" },
+                        { q: "Dạ dày tiêu hóa chủ yếu chất gì?", a: "Protein (Có nhiều trong thịt, trứng, cá...)" },
+                        { q: "Cơ quan tiết ra dịch mật?", a: "Gan (Mật sau đó được lưu trữ ở Túi mật)" },
+                        { q: "Phần dài nhất của ống tiêu hóa?", a: "Ruột non (khoảng 6 mét)" },
+                        { q: "Cấu trúc nào trong ruột non giúp tăng diện tích hấp thụ?", a: "Lông ruột và vi nhung mao" }
+                    ],
+                    fillBlank: { text: "Dạ dày người có môi trường [input] rất mạnh (pH khoảng 2-3) giúp tiêu diệt phần lớn vi khuẩn và tạo điều kiện môi trường tối ưu cho enzyme [input] hoạt động để phân giải phân tử [input] thành các chuỗi ngắn hơn.", answers: ["axit", "pepsin", "protein"], xp: 50 },
+                    matchingGame: { title: "Nối Cơ quan với Chức năng tương ứng", left: [{id:"m1", text:"Dạ dày"}, {id:"m2", text:"Gan"}, {id:"m3", text:"Ruột non"}, {id:"m4", text:"Ruột già"}], right: [{id:"m3", text:"Hấp thụ phần lớn dinh dưỡng vào máu"}, {id:"m1", text:"Nhào trộn tạo vị trấp, tiêu hóa Protein"}, {id:"m2", text:"Tiết dịch mật để nhũ tương hóa Lipit"}, {id:"m4", text:"Hấp thụ lại nước, hình thành phân"}], xp: 50 },
+                    speedGame: { title: "Trắc nghiệm Tốc độ (Đúng/Sai)", xp: 50, questions: [
+                        { q: "Gan là nơi chứa thức ăn đang tiêu hóa và nhào trộn chúng.", isTrue: false },
+                        { q: "Ruột non là cơ quan chính hấp thụ chất dinh dưỡng vào máu.", isTrue: true },
+                        { q: "Enzyme Amylase trong nước bọt giúp phân giải trực tiếp Lipit (mỡ).", isTrue: false },
+                        { q: "Chất xơ không cung cấp năng lượng nhưng rất cần cho hệ tiêu hóa.", isTrue: true },
+                        { q: "Vi khuẩn HP là nguyên nhân phổ biến gây viêm loét dạ dày.", isTrue: true }
+                    ]}
+                },
+                practice: {
+                    easy: [
+                        { q: "Quá trình biến đổi vật lý làm nhỏ kích thước thức ăn mà không thay đổi bản chất hóa học gọi là gì?", opts: ["Tiêu hóa cơ học", "Tiêu hóa hóa học", "Hấp thụ dinh dưỡng"], correct: 0 },
+                        { q: "Cơ quan nào sau đây KHÔNG thuộc 'Ống tiêu hóa'?", opts: ["Thực quản", "Ruột non", "Tuyến tụy", "Dạ dày"], correct: 2 },
+                        { q: "Sản phẩm cuối cùng của quá trình tiêu hóa hoàn toàn Tinh bột là gì?", opts: ["Đường đơn (Glucose)", "Axit béo", "Axit amin"], correct: 0 }
+                    ],
+                    hard: [
+                        { q: "Tại sao khi một người bị phẫu thuật cắt bỏ túi mật, bác sĩ thường khuyên nên hạn chế ăn nhiều đồ chiên rán, dầu mỡ?", opts: ["Vì gan không còn sản xuất dịch mật nữa.", "Vì dịch mật chảy rỉ rả liên tục vào ruột, không có nơi tích trữ để bơm ra lượng lớn khi ăn nhiều mỡ.", "Vì dạ dày sẽ phải tiết nhiều axit hơn để làm tan mỡ thay cho túi mật."], correct: 1 },
+                        { q: "Khi nhai cơm hoặc bánh mì nướng thật lâu trong miệng, ta sẽ cảm thấy có vị ngọt ngào. Nguyên nhân là do?", opts: ["Cơm được nhào trộn với nước bọt làm tăng độ ẩm và vị giác", "Tinh bột trong cơm được enzyme amylase phân giải một phần thành đường maltose", "Tác động vật lý của răng giải phóng chất đường có sẵn bên trong hạt gạo"], correct: 1 },
+                        { q: "Sự hấp thụ các chất dinh dưỡng chủ yếu diễn ra ở ruột non mà không phải ở dạ dày vì:", opts: ["Ruột non có diện tích bề mặt cực lớn nhờ mạng lưới lông ruột dày đặc.", "Dạ dày chỉ chứa axit nên tiêu diệt luôn cả chất dinh dưỡng.", "Ruột non nằm gần hệ tuần hoàn mao mạch hơn dạ dày."], correct: 0 }
+                    ]
+                },
+                finalTest: {
+                    title: "Kiểm tra Tổng hợp: Bài 32", timeLimit: 300,
+                    questions: [
+                        { q: "Đâu là trình tự đúng của sự di chuyển thức ăn trong ống tiêu hóa ở người?", opts: ["Miệng ➔ Thực quản ➔ Dạ dày ➔ Ruột non ➔ Ruột già", "Miệng ➔ Dạ dày ➔ Gan ➔ Ruột non ➔ Ruột già", "Miệng ➔ Thực quản ➔ Dạ dày ➔ Tuyến tụy ➔ Ruột non"], correct: 0, conceptId: "l32_c2" },
+                        { q: "Hoạt động nào dưới đây thuộc loại Tiêu hóa Hóa Học?", opts: ["Răng nanh xé nhỏ miếng thịt bò", "Dạ dày co bóp nhào trộn thức ăn liên tục", "Enzyme Amylase trong nước bọt biến đổi tinh bột thành đường"], correct: 2, conceptId: "l32_c1" },
+                        { q: "Bề mặt bên trong của ruột non có đặc điểm cấu tạo nào giúp nó làm tốt nhiệm vụ hấp thụ dinh dưỡng?", opts: ["Bề mặt trơn láng để thức ăn trôi nhanh xuống ruột già", "Có hệ thống nếp gấp, lông ruột và vi nhung mao khổng lồ", "Thành cơ trơn rất dày để liên tục co bóp mạnh mẽ"], correct: 1, conceptId: "l32_c2" },
+                        { q: "Chất nào sau đây không được tiêu hóa mà đi thẳng xuống ruột già để thải ra ngoài (nhưng lại giúp chống táo bón)?", opts: ["Lipit (Dầu mỡ)", "Cellulose (Chất xơ)", "Protein"], correct: 1, conceptId: "l32_c3" },
+                        { q: "Enzyme Pepsin ở dạ dày muốn hoạt động mạnh mẽ để cắt đứt Protein thì bắt buộc phải có điều kiện môi trường nào?", opts: ["Môi trường Kiềm (pH cao)", "Môi trường Trung tính (pH = 7)", "Môi trường Axit mạnh (có HCl)"], correct: 2, conceptId: "l32_c1" }
+                    ]
+                },
+                qaData: [{ user: "Hải Đăng", avatar: "HĐ", q: "Thưa thầy, ợ chua, trào ngược là do đâu ạ?", a: "Chào Đăng, giữa thực quản và dạ dày có một cơ vòng (như cái van). Bình thường van này đóng kín. Khi van này bị yếu hoặc lỏng, dung dịch Axit HCl từ dạ dày bị trào ngược lên trên thực quản gây cảm giác nóng rát ngực, chua miệng. Em nên hạn chế ăn quá no hoặc nằm ngay sau khi ăn nhé." }]
+            },
+            
+            33: {
+                id: 33, title: "Máu và Hệ tuần hoàn cơ thể người", duration: "45 phút", 
+                keyPoints: ["Máu: Huyết tương (55%) + Tế bào máu (45%)", "Hồng cầu: Vận chuyển O2 và CO2", "Tim: 4 ngăn (2 tâm nhĩ, 2 tâm thất)", "Hệ mạch: Động mạch, Tĩnh mạch, Mao mạch", "Vòng tuần hoàn: Nhỏ (Phổi) & Lớn (Cơ thể)"],
+                hook: {
+                    img: "https://images.unsplash.com/photo-1530026405186-ed1f139313f8?auto=format&fit=crop&w=800&q=80",
+                    q: "Khi bạn chạy nước rút 100m, tim đập thình thịch liên hồi và nhịp thở gấp gáp. Tại sao cơ thể lại có sự phối hợp đồng bộ này?",
+                    opts: ["Để tạo ra nhiệt làm ấm cơ thể khi vận động mạnh", "Để bơm máu mang lượng lớn Oxy đi nuôi cơ bắp đang hoạt động", "Do phổi phình to ép vào lồng ngực khiến tim phải đập nhanh"], correct: 1, xp: 20, conceptId: "l33_c0",
+                    explain: "Khi chạy, cơ bắp cần đốt cháy năng lượng. Quá trình đốt cháy này cần nhiều Oxy. Phổi thở gấp để lấy Oxy vào, còn tim đập nhanh để bơm dòng máu chở lượng Oxy đó đến cơ bắp thật nhanh!"
+                },
+                concepts: [
+                    {
+                        id: "l33_c1", title: "1. Thành phần và Chức năng của Máu",
+                        layers: {
+                            text: "<p class='mb-2 text-slate-700'>Máu là một mô liên kết lỏng đặc biệt. Nếu lấy máu cho vào ống nghiệm và quay ly tâm, máu sẽ tách làm 2 phần rõ rệt:</p><ul class='list-disc pl-5 space-y-3 text-slate-700'><li><b>Huyết tương (55%):</b> Lớp chất lỏng màu vàng nhạt nổi ở trên. Chứa 90% là nước, còn lại là chất dinh dưỡng, kháng thể, hormone và các chất thải (như Ure).</li><li><b>Các tế bào máu (45%):</b> Lớp đặc màu đỏ lắng ở dưới, bao gồm: <br>- <b>Hồng cầu:</b> Chiếm số lượng đông đảo nhất, hình đĩa lõm 2 mặt, <b>không có nhân</b>. Chứa Hemoglobin giúp gắn kết và vận chuyển O2, CO2.<br>- <b>Bạch cầu:</b> Kích thước lớn, trong suốt, có nhân. Là 'đội quân bảo vệ' đi tuần tra tiêu diệt vi khuẩn, virus.<br>- <b>Tiểu cầu:</b> Những mảnh vỡ tế bào siêu nhỏ, kết dính lại với nhau để tạo cục máu đông bịt kín vết thương.</li></ul>",
+                            slide: { title: "Các tế bào máu & Miễn dịch", pages: 6 }, video: { url: "#", title: "Animation: Bạch cầu thực bào săn đuổi vi khuẩn" }, pdf: null,
+                            model3d: { type: "blood", icon: "fa-tint", color: "text-red-500", name: "Mô hình 3D Hồng Cầu & Mạch máu" }
+                        },
+                        realWorld: "Những người sống lâu năm trên vùng núi cao (như Tây Tạng, Sapa) thường có gò má rất hồng hào. Do không khí loãng (ít Oxy), cơ thể phải thích nghi bằng cách sản sinh ra lượng Hồng Cầu nhiều hơn bình thường để gom O2 hiệu quả.",
+                        microQuiz: { q: "Trong 3 loại tế bào máu, tế bào nào CÓ NHÂN và đóng vai trò như 'công an' bảo vệ cơ thể khỏi bệnh tật?", opts: ["Hồng cầu", "Bạch cầu", "Tiểu cầu"], correct: 1, xp: 30, explain: "Hồng cầu không nhân để lấy không gian chứa khí, Tiểu cầu chỉ là mảnh vỡ. Chỉ có Bạch cầu là tế bào hoàn chỉnh có nhân để thực hiện chức năng miễn dịch phức tạp." }
+                    },
+                    {
+                        id: "l33_c2", title: "2. Cấu tạo Tim và Hệ Mạch",
+                        layers: {
+                            text: "<p class='text-slate-800 leading-relaxed font-bold mb-2'>A. Tim (Cái máy bơm vĩ đại)</p><p class='text-slate-700 mb-3'>Tim người cấu tạo từ cơ tim, chia làm 4 ngăn: 2 Tâm nhĩ (ở trên, nhận máu về) và 2 Tâm thất (ở dưới, co bóp bơm máu đi). Giữa các ngăn có các <b>Van tim</b> đảm bảo máu chỉ chảy theo một chiều nhất định (không bị trào ngược).</p><p class='text-slate-800 leading-relaxed font-bold mb-2'>B. Hệ mạch (Hệ thống đường ống)</p><ul class='list-disc pl-5 text-slate-700'><li><b>Động mạch:</b> Dẫn máu <b>TỪ TIM đi ra</b> cơ thể. Thành mạch rất dày, nhiều lớp cơ trơn và sợi đàn hồi chịu áp lực cao.</li><li><b>Tĩnh mạch:</b> Dẫn máu từ các cơ quan <b>VỀ TIM</b>. Thành mỏng hơn. Trong lòng tĩnh mạch (nhất là ở chân) có các van một chiều để chống máu chảy ngược do trọng lực.</li><li><b>Mao mạch:</b> Mạng lưới mạch máu siêu nhỏ nối động mạch và tĩnh mạch. Thành mao mạch chỉ mỏng bằng 1 lớp tế bào, là nơi diễn ra sự <b>trao đổi chất và khí</b> trực tiếp với tế bào.</li></ul>",
+                            slide: null, video: null, pdf: null,
+                            model3d: { type: "heart", icon: "fa-heartbeat", color: "text-red-500", name: "Mô hình Quả Tim 3D (Mặt cắt)" }
+                        },
+                        realWorld: "Chỉ số huyết áp của bạn (Ví dụ: 120/80 mmHg) chính là đo áp lực của dòng máu tác dụng lên thành Động Mạch khi tim co (huyết áp tâm thu - 120) và khi tim giãn (huyết áp tâm trương - 80).",
+                        microQuiz: { q: "Ngăn nào của tim có thành cơ bắp dày nhất vì phải dùng sức bơm máu đi quãng đường rất xa (nuôi toàn bộ cơ thể)?", opts: ["Tâm nhĩ phải", "Tâm thất phải", "Tâm thất trái"], correct: 2, xp: 30, explain: "Tâm thất trái phải co bóp tạo lực cực mạnh để đẩy máu vào Động mạch chủ đi khắp các cơ quan từ đầu đến chân." }
+                    },
+                    {
+                        id: "l33_c3", title: "3. Vệ sinh & Bảo vệ hệ tuần hoàn",
+                        layers: {
+                            text: "<p class='text-slate-700'>Bệnh tim mạch là nguyên nhân gây tử vong hàng đầu thế giới. Để có một trái tim khỏe mạnh: <br><br>1. <b>Tập thể dục, rèn luyện thể thao:</b> Giúp cơ tim phát triển mạnh, tăng thể tích bơm máu (tim chỉ cần đập ít nhịp mà máu vẫn đi đều).<br><br>2. <b>Chế độ ăn uống:</b> Hạn chế ăn mặn (Natri giữ nước làm tăng huyết áp). Hạn chế dầu mỡ động vật giàu Cholesterol để tránh mỡ bám vào thành mạch gây xơ vữa động mạch.<br><br>3. <b>Không sử dụng chất kích thích:</b> Đặc biệt là khói thuốc lá. Nicotine làm tim đập nhanh quá mức, gây co thắt mạch máu và làm tăng huyết áp trầm trọng.</p>",
+                            slide: null, video: null, pdf: null, model3d: null
+                        },
+                        realWorld: "Bệnh \"Nhồi máu cơ tim\" (đột quỵ tim) vô cùng nguy hiểm xảy ra khi mạch vành (mạch máu nhỏ nằm ngay trên quả tim để nuôi cơ tim) bị tắc nghẽn bởi cục máu đông hoặc mảng bám mỡ, khiến một phần cơ tim bị chết do nghẹt thở (thiếu Oxy).",
+                        microQuiz: { q: "Ăn quá nhiều muối (Natri) thường xuyên và lâu dài có nguy cơ cao dẫn đến bệnh lý nào?", opts: ["Huyết áp cao (Tăng huyết áp)", "Bệnh máu khó đông", "Hở van tim"], correct: 0, xp: 30, explain: "Natri có tính hút nước. Ăn mặn làm tăng lượng nước trong máu, làm tăng thể tích máu và tạo áp lực lớn, căng phồng lên thành mạch gây bệnh cao huyết áp." }
+                    }
+                ],
+                memory: {
+                    flashcards: [
+                        { q: "Chức năng chính của Bạch cầu là gì?", a: "Miễn dịch, bảo vệ cơ thể, tiêu diệt vi khuẩn" },
+                        { q: "Tâm thất trái co bóp sẽ đẩy máu đi vào mạch máu nào?", a: "Động mạch chủ (mạch máu lớn nhất cơ thể)" },
+                        { q: "Tế bào nào giải phóng chất xúc tác giúp máu đông lại khi đứt tay?", a: "Tiểu cầu" },
+                        { q: "Máu có màu đỏ tươi là do chứa nhiều khí gì?", a: "Oxy (O2)" },
+                        { q: "Trong thành Tĩnh mạch ở chân có cấu trúc đặc biệt gì giúp máu đi ngược chiều trọng lực?", a: "Van một chiều" },
+                        { q: "Loại mạch máu nào có thành mỏng nhất?", a: "Mao mạch (Chỉ 1 lớp tế bào)" }
+                    ],
+                    fillBlank: { text: "Vòng tuần hoàn nhỏ bắt đầu khi máu từ [input] phải bơm lên tĩnh mạch phổi để thực hiện trao đổi khí. Máu nhường CO2 và nhận [input], chuyển từ màu đỏ thẫm sang màu [input] và trở về tâm nhĩ trái.", answers: ["tâm thất", "oxy", "đỏ tươi"], xp: 50 },
+                    matchingGame: { title: "Phân loại Mạch máu", left: [{id:"m1", text:"Động mạch"}, {id:"m2", text:"Tĩnh mạch"}, {id:"m3", text:"Mao mạch"}], right: [{id:"m2", text:"Dẫn máu từ cơ quan chảy về tim"}, {id:"m1", text:"Dẫn máu từ tim bơm đi các cơ quan"}, {id:"m3", text:"Mạng lưới nhỏ bé thực hiện trao đổi chất với tế bào"}], xp: 50 },
+                    speedGame: { title: "Trắc nghiệm Tốc độ (Đúng/Sai)", xp: 50, questions: [
+                        { q: "Hồng cầu là tế bào duy nhất trong máu có nhân siêu lớn.", isTrue: false },
+                        { q: "Động mạch có thành mạch dày dặn và đàn hồi tốt nhất.", isTrue: true },
+                        { q: "Van tim giúp máu có thể chảy tự do theo cả 2 chiều qua lại.", isTrue: false },
+                        { q: "Mao mạch là nơi O2 và dinh dưỡng thẩm thấu qua thành mạch vào tế bào.", isTrue: true },
+                        { q: "Huyết tương là phần chất lỏng chiếm 55% thể tích máu.", isTrue: true }
+                    ]}
+                },
+                practice: {
+                    easy: [
+                        { q: "Thành phần nào chiếm thể tích lớn nhất trong Máu người?", opts: ["Hồng cầu", "Huyết tương", "Bạch cầu"], correct: 1 },
+                        { q: "Tim người trưởng thành khỏe mạnh được chia làm bao nhiêu ngăn?", opts: ["2 ngăn", "3 ngăn", "4 ngăn", "5 ngăn"], correct: 2 },
+                        { q: "Người có nhóm máu O có thể truyền máu an toàn cho người mang nhóm máu nào?", opts: ["Chỉ truyền được cho nhóm O", "Truyền được cho tất cả các nhóm máu (A, B, AB, O)", "Chỉ truyền được cho nhóm AB"], correct: 1 }
+                    ],
+                    hard: [
+                        { q: "Vắc-xin phòng bệnh (ví dụ Vắc-xin Covid-19) hoạt động dựa trên cơ chế 'tập huấn' cho loại tế bào nào trong máu?", opts: ["Hồng cầu", "Bạch cầu", "Tiểu cầu"], correct: 1 },
+                        { q: "Trong cơ thể người, mạch máu nào có huyết áp cao nhất?", opts: ["Mao mạch ở ngón tay", "Tĩnh mạch chủ dưới", "Động mạch chủ (vừa ra khỏi tim)"], correct: 2 },
+                        { q: "Người bị xơ vữa động mạch thường do dư thừa chất nào trong máu bám vào thành mạch?", opts: ["Canxi", "Đường Glucose", "Mỡ xấu (Cholesterol)"], correct: 2 }
+                    ]
+                },
+                finalTest: {
+                    title: "Kiểm tra 15p: Bài 33", timeLimit: 300,
+                    questions: [
+                        { q: "Máu lưu thông trong hệ mạch bình thường ở cơ thể người theo chiều hướng nào sau đây?", opts: ["Động mạch ➔ Mao mạch ➔ Tĩnh mạch", "Tĩnh mạch ➔ Mao mạch ➔ Động mạch", "Mao mạch ➔ Động mạch ➔ Tĩnh mạch"], correct: 0, conceptId: "l33_c2" },
+                        { q: "Chất protein chứa sắt mang màu đỏ trong Hồng cầu, làm nhiệm vụ gắn kết O2 và CO2 có tên gọi là gì?", opts: ["Kháng thể", "Hemoglobin", "Melanin"], correct: 1, conceptId: "l33_c1" },
+                        { q: "Phát biểu nào sau đây là ĐÚNG về Tĩnh mạch?", opts: ["Có thành dày nhất, áp lực máu chảy rất cao", "Có thành mỏng hơn động mạch, lòng rộng hơn và thường có các van một chiều ở chi dưới", "Cấu tạo chỉ gồm một lớp tế bào nội mạc trong suốt"], correct: 1, conceptId: "l33_c2" },
+                        { q: "Khi một người đi hiến máu nhân đạo, lượng máu mất đi sẽ được cơ thể nhanh chóng phục hồi. Cơ quan nào đóng vai trò chính sản sinh ra tế bào máu mới?", opts: ["Trái tim", "Tủy xương đỏ", "Lá lách"], correct: 1, conceptId: "l33_c1" },
+                        { q: "Trong y tế, vì sao khi tiêm thuốc hoặc truyền nước (truyền dịch), bác sĩ/y tá thường cắm kim tiêm vào Tĩnh mạch chứ không phải Động mạch?", opts: ["Vì tĩnh mạch thường nằm nông dưới da dễ tìm, áp lực máu trong tĩnh mạch thấp nên an toàn, không bị phun máu ra.", "Vì tĩnh mạch có đường đi dẫn thuốc trực tiếp lên não nhanh hơn.", "Vì tĩnh mạch có thành cơ rất dày, tiêm không sợ bị bục mạch máu."], correct: 0, conceptId: "l33_c2" }
+                    ]
+                },
+                qaData: []
+            },
+
+            34: {
+                id: 34, title: "Hệ hô hấp ở người", duration: "45 phút", 
+                keyPoints: ["Hô hấp: Quá trình Lấy O2, thải CO2", "Đường dẫn khí: Mũi lọc, sưởi ấm khí", "Phế nang (Phổi): Nơi trao đổi khí thực sự", "Bảo vệ: Tránh bụi, không hút thuốc lá"],
+                hook: {
+                    img: "https://images.unsplash.com/photo-1599058917212-d750089bc07e?auto=format&fit=crop&w=800&q=80",
+                    q: "Hãy thử nín thở trong 10 giây. Cơ quan nào đang 'kêu gào' và phát tín hiệu bắt bạn phải hít vào ngay lập tức bằng mọi giá?",
+                    opts: ["A. Phổi (Vì nó bị xẹp lại thiếu khí)", "B. Não bộ (Khu vực Trung khu hô hấp)", "C. Trái tim (Vì tim thiếu máu O2)"], correct: 1, xp: 20, conceptId: "l34_c0",
+                    explain: "Khi nín thở, lượng khí độc CO2 trong máu tăng cao đột ngột. Trung khu hô hấp ở não bộ vô cùng nhạy cảm với sự tăng CO2 này, nó sẽ \"ra lệnh\" bắt các cơ ngực và cơ hoành phải hoạt động để hít thở tống CO2 ra ngoài."
+                },
+                concepts: [
+                    {
+                        id: "l34_c1", title: "1. Cấu tạo của hệ hô hấp",
+                        layers: {
+                            text: "<p class='text-slate-700 mb-2'>Hệ hô hấp của con người được chia làm 2 phần có chức năng khác nhau:</p><ul class='list-disc pl-5 text-slate-700 space-y-3'><li><b>Đường dẫn khí (Ống thở):</b> Gồm Mũi ➔ Họng ➔ Thanh quản ➔ Khí quản ➔ Phế quản.<br>Đây không chỉ là ống nhựa vô tri. Đặc biệt ở khoang mũi, niêm mạc có mạng lưới mao mạch dày đặc, nhiều lông mũi và tuyến tiết dịch nhầy. Nó đóng vai trò như chiếc điều hòa: <b>lọc sạch bụi bẩn, sưởi ấm không khí lạnh và làm ẩm không khí khô</b> trước khi đưa vào phổi.</li><li><b>Hai lá phổi (Nhà máy):</b> Được cấu tạo từ hàng trăm triệu túi khí siêu nhỏ gọi là <b>Phế nang</b>, bên ngoài các phế nang được bao bọc bởi mạng lưới mao mạch máu dày đặc.<br><i>Chức năng:</i> Là nơi duy nhất diễn ra sự trao đổi khí giữa cơ thể và môi trường.</li></ul>",
+                            slide: { title: "Giải phẫu Phổi & Đường dẫn khí", pages: 4 }, video: null, pdf: null,
+                            model3d: { type: "lungs", icon: "fa-lungs", color: "text-blue-400", name: "Mô hình 3D Hai Lá Phổi" }
+                        },
+                        realWorld: "Khuyên bạn luôn nên thở bằng MŨI thay vì thở bằng MIỆNG. Vì miệng không có chức năng 'lọc, sưởi ấm và làm ẩm'. Thở bằng miệng nhiều khi ngủ hay chơi thể thao ở xứ lạnh sẽ khiến bạn bị khô họng, viêm họng và dễ nhiễm bệnh hô hấp.",
+                        microQuiz: { q: "Bộ phận nào của đường dẫn khí được cấu tạo từ các vòng sụn hình chữ C, xếp chồng lên nhau giúp ống thở luôn mở rộng không bị xẹp lép?", opts: ["Thực quản", "Thanh quản", "Khí quản"], correct: 2, xp: 30, explain: "Khí quản là một ống cứng nhờ các vòng sụn khuyết (chữ C), đảm bảo không khí lưu thông dễ dàng. Phần khuyết chữ C nằm sát thực quản giúp thực quản có thể phình to ra khi ta nuốt thức ăn to." }
+                    },
+                    {
+                        id: "l34_c2", title: "2. Quá trình trao đổi khí",
+                        layers: {
+                            text: "<p class='text-slate-700 mb-3'>Hô hấp là một chuỗi hành động, diễn ra ở 2 cấp độ từ ngoài vào trong:</p><div class='bg-blue-50 p-5 rounded-xl my-3 border border-slate-200 shadow-sm'><p class='text-slate-800'><b>1. Trao đổi khí ở Phổi (Bơm khí vào máu):</b><br><span class='text-slate-600 block mt-1'>Máu nghèo O2 đến phổi. Khí Oxy từ các phế nang sẽ <b>khuếch tán</b> qua màng mỏng đi vào máu. Ngược lại, khí thải CO2 từ máu khuếch tán ra phế nang để chúng muốn thở ra ngoài.</span></p></div><div class='bg-pink-50 p-5 rounded-xl border border-slate-200 shadow-sm'><p class='text-slate-800'><b>2. Trao đổi khí ở Tế bào (Tế bào hô hấp):</b><br><span class='text-slate-600 block mt-1'>Máu chở Oxy đi khắp cơ thể. Oxy khuếch tán từ máu vào tận trong tế bào để ti thể dùng 'đốt cháy' chất dinh dưỡng tạo Năng Lượng. Chất thải sinh ra là CO2 lại khuếch tán từ tế bào ngược vào máu để chở về phổi.</span></p></div>",
+                            slide: null, video: null, pdf: null, model3d: null
+                        },
+                        realWorld: "Sự khuếch tán khí là một hiện tượng vật lý tự nhiên: Khí luôn tự động đi từ nơi có Nồng Độ CAO sang nơi có Nồng Độ THẤP. Máu ở phổi có ít O2, Phế nang đầy O2, nên O2 tự động ùa vào máu.",
+                        microQuiz: { q: "Cấu trúc nhỏ nhất, nơi TRỰC TIẾP diễn ra sự trao đổi khí O2 và CO2 ở phổi tên là gì?", opts: ["Khí quản", "Phế quản", "Phế nang"], correct: 2, xp: 30, explain: "Phổi người có khoảng 300 triệu phế nang. Trải phẳng tất cả ra, chúng có diện tích khoảng 70-90 m2 (bằng một căn hộ), giúp làm tăng cực đại khả năng trao đổi khí." }
+                    },
+                    {
+                        id: "l34_c3", title: "3. Bảo vệ hệ hô hấp",
+                        layers: {
+                            text: "<p class='text-slate-700'>Hệ hô hấp là hệ cơ quan mở, tiếp xúc trực tiếp 24/24 với môi trường ngoài nên rất dễ bị tổn thương, nhiễm trùng.</p><ul class='list-disc pl-5 mt-4 text-slate-700 space-y-2'><li><b>Tác nhân gây hại:</b> Bụi mịn PM2.5 (xuyên thẳng vào máu), vi khuẩn, virus (như Covid-19), và tàn phá nặng nề nhất là <b>Khói thuốc lá</b> (chứa Nicotine gây nghiện và hàng ngàn chất hóa học gây ung thư phổi, COPD).</li><li><b>Biện pháp bảo vệ:</b> Đeo khẩu trang khi ra đường, trồng nhiều cây xanh lọc bụi, tuyệt đối không hút thuốc lá (và tránh hút thuốc thụ động), giữ ấm cổ ngực khi trời lạnh. Tập hít thở sâu, bơi lội để tăng dung tích sống của phổi.</li></ul>",
+                            slide: null, video: null, pdf: null, model3d: null
+                        },
+                        realWorld: "Khói thuốc lá chứa các hóa chất làm Tê liệt và Tiêu diệt các lớp 'lông rung' trên niêm mạc khí quản. Các lông rung này vốn như những cây chổi liên tục quét đẩy bụi bẩn, đờm ra ngoài. Khi không còn chổi, người hút thuốc thường xuyên phải ho sù sụ, khạc nhổ để dùng lực cơ học đẩy đờm dãi chứa vi khuẩn ra ngoài.",
+                        microQuiz: { q: "Loại chất khí cực độc nào có trong khói thuốc lá (hoặc khói đốt than củi) có khả năng bám chặt vào Hồng cầu, tranh mất vị trí của Oxy làm cơ thể bị thiếu ngạt Oxy âm ỉ?", opts: ["Khí Cacbonic (CO2)", "Khí Cacbon monoxit (CO)", "Khí Metan (CH4)"], correct: 1, xp: 30, explain: "Khí độc CO (Cacbon monoxit) sinh ra do sự cháy không hoàn toàn. Khí này có sức hút với Hemoglobin mạnh gấp hơn 200 lần so với O2. Nó \"cướp\" chỗ và không chịu nhả ra, khiến hồng cầu vô dụng." }
+                    }
+                ],
+                memory: {
+                    flashcards: [
+                        { q: "Chức năng của lớp màng nhầy và lông trong khoang mũi?", a: "Cản bụi, lọc khuẩn và làm ẩm không khí hít vào" },
+                        { q: "Đơn vị cấu tạo nên phổi, nơi thực hiện trao đổi khí?", a: "Phế nang" },
+                        { q: "Quá trình hô hấp ở tế bào giúp tạo ra thứ gì cho cơ thể?", a: "Năng lượng (ATP)" },
+                        { q: "Cơ quan chứa dây thanh âm giúp con người phát ra tiếng nói?", a: "Thanh quản" },
+                        { q: "Khí thải ra trong quá trình hô hấp tế bào là gì?", a: "Cacbonic (CO2)" }
+                    ],
+                    fillBlank: { text: "Cơ chế thông khí ở phổi: Khi hít vào, cơ hoành [input] và hạ xuống dưới, thể tích lồng ngực [input] làm cho áp suất trong phổi giảm xuống thấp hơn bên ngoài, không khí tự động bị hút vào phổi. Khi thở ra thì ngược lại, cơ hoành [input] đẩy lên trên.", answers: ["co", "tăng", "dãn"], xp: 50 },
+                    matchingGame: { title: "Ghép nối bộ phận Hô hấp", left: [{id:"m1", text:"Mũi"}, {id:"m2", text:"Khí quản"}, {id:"m3", text:"Phế nang"}, {id:"m4", text:"Thanh quản"}], right: [{id:"m3", text:"Mạng lưới túi khí trao đổi khí"}, {id:"m1", text:"Cửa ngõ lọc và sưởi ấm không khí"}, {id:"m2", text:"Ống dẫn khí có sụn chữ C"}, {id:"m4", text:"Hộp phát âm thanh"}], xp: 50 },
+                    speedGame: { title: "Trắc nghiệm Tốc độ (Đúng/Sai)", xp: 50, questions: [
+                        { q: "Phổi người được tạo thành từ một túi khí duy nhất cực lớn như quả bóng bay.", isTrue: false },
+                        { q: "Sự trao đổi khí tuân theo cơ chế khuếch tán từ nồng độ cao sang thấp.", isTrue: true },
+                        { q: "Khí CO trong khói than, khói thuốc lá làm tê liệt hồng cầu gây ngạt.", isTrue: true },
+                        { q: "Cơ hoành (cơ nằm dưới phổi) dãn ra (nâng lên) khi ta hít vào.", isTrue: false },
+                        { q: "Hút thuốc lá thụ động (hít khói của người khác) không gây hại gì cho phổi.", isTrue: false }
+                    ]}
+                },
+                practice: { 
+                    easy: [
+                        { q: "Hệ hô hấp ở người gồm những phần chính nào?", opts: ["Miệng, thực quản, dạ dày", "Đường dẫn khí và hai lá phổi", "Tim và hệ mạch máu"], correct: 1 },
+                        { q: "Khi trao đổi khí ở phổi, chất khí nào khuếch tán từ phế nang vào mao mạch máu?", opts: ["Khí Oxy (O2)", "Khí Cacbonic (CO2)", "Khí Nitơ (N2)"], correct: 0 },
+                        { q: "Sự kiện vật lý nào xảy ra với cơ hoành khi ta thở ra bình thường?", opts: ["Cơ hoành co lại và hạ thấp xuống", "Cơ hoành dãn ra và nâng cao lên", "Lồng ngực tiếp tục nở rộng"], correct: 1 }
+                    ], 
+                    hard: [
+                        { q: "Khi có người bị ngộ độc khí CO (thường do sưởi ấm bằng cách đốt than trong phòng kín), nguyên nhân y học gây tử vong là gì?", opts: ["Khí CO nóng làm bỏng rát và phá hủy phế nang phổi", "Khí CO chiếm đoạt vị trí gắn kết của Oxy trên hồng cầu, khiến tế bào chết ngạt", "Khí CO làm hỏng trung khu não bộ trực tiếp gây co giật"], correct: 1 },
+                        { q: "Việc hút thuốc lá lâu năm có tác hại trực tiếp, nhìn thấy rõ nhất nào đến đường dẫn khí?", opts: ["Làm tê liệt và phá hủy hệ thống lông rung quét bụi, gây ho mãn tính đờm", "Làm thủng các vòng sụn khí quản", "Gây xơ vữa động mạch cổ họng"], correct: 0 }
+                    ] 
+                },
+                finalTest: {
+                    title: "Kiểm tra 15p: Bài 34", timeLimit: 300,
+                    questions: [
+                        { q: "Vì sao chúng ta không nên vừa ăn vừa cười đùa nói chuyện to?", opts: ["Vì làm mất lịch sự trên bàn ăn", "Vì nắp thanh quản sẽ vô tình mở ra, thức ăn dễ lọt vào đường thở (khí quản) gây sặc nguy hiểm", "Vì không khí lọt vào dạ dày làm chậm quá trình tiêu hóa hóa học"], correct: 1, conceptId: "l34_c1" },
+                        { q: "Sự trao đổi khí ở Tế bào diễn ra như thế nào?", opts: ["O2 từ tế bào đi vào máu, CO2 từ máu đi vào tế bào", "O2 từ máu khuếch tán vào tế bào, CO2 từ tế bào khuếch tán ra máu", "O2 từ phổi đi thẳng vào tế bào, CO2 từ máu ra phổi"], correct: 1, conceptId: "l34_c2" },
+                        { q: "Căn bệnh nào dưới đây có liên quan trực tiếp và có tỷ lệ cao nhất do tác hại của khói thuốc lá?", opts: ["Ung thư dạ dày", "Ung thư phổi và Viêm phế quản mãn tính", "Viêm gan B"], correct: 1, conceptId: "l34_c3" },
+                        { q: "Cấu tạo của lá phổi có đặc điểm gì giúp tăng diện tích bề mặt tiếp xúc không khí?", opts: ["Gồm 2 lớp màng, ở giữa có lớp dịch mỏng", "Phổi được tạo thành từ hàng triệu phế nang nhỏ li ti", "Phổi có thể co bóp như cơ tim"], correct: 1, conceptId: "l34_c1" },
+                        { q: "Ở một người bình thường đang ngồi nghỉ ngơi, 'nhịp hô hấp' được tính bằng gì?", opts: ["Số cử động hô hấp (1 lần hít vào + 1 lần thở ra) trong 1 phút", "Số nhịp đập của tim trong 1 phút", "Tổng lượng khí hít vào tối đa 1 lần"], correct: 0, conceptId: "l34_c2" }
+                    ]
+                },
+                qaData: []
+            }
+        };
+
+        // =======================================================================
+        // Load API data to supplement hardcoded lessons
+        // =======================================================================
+        document.addEventListener('DOMContentLoaded', function() {
+            loadSubjectsFromAPI();
+        });
+
+        function loadSubjectsFromAPI() {
+            DolyAPI.getSubjects()
+                .then(function(subjects) {
+                    if (!subjects || subjects.length === 0) return;
+                    var sidebar = document.getElementById('sidebar-lessons');
+                    if (!sidebar) return;
+                    // Add API subjects to sidebar as additional items
+                    var apiHtml = '';
+                    subjects.forEach(function(subj) {
+                        var subjName = subj.name || subj.subject_name || 'Mon hoc';
+                        var safeName = DolyAPI.esc(subjName);
+                        apiHtml += '<div class="flex items-center gap-4 p-3.5 rounded-2xl border border-slate-200 bg-white hover:bg-slate-50 cursor-pointer transition-colors" onclick="showMicroToast(\'' + safeName + ' - Dang phat trien\' , \'warning\')">' +
+                            '<div class="w-9 h-9 rounded-full bg-purple-50 border border-purple-100 text-ai-purple flex items-center justify-center shrink-0 text-xs"><i class="fas fa-book"></i></div>' +
+                            '<div class="flex-1"><h4 class="text-[11px] font-black leading-tight text-slate-700">' + safeName + '</h4></div>' +
+                        '</div>';
+                    });
+                    if (apiHtml) {
+                        sidebar.innerHTML += '<div class="w-full h-px bg-slate-100 my-3"></div>' + apiHtml;
+                    }
+                })
+                .catch(function() {
+                    // Silently fail - keep hardcoded lessons
+                });
+
+            // Also try to load lesson list for additional content
+            DolyAPI.getLessons()
+                .then(function(lessons) {
+                    if (!lessons || lessons.length === 0) return;
+                    // Add dynamic lesson entries if not in dbLessons
+                    // This is supplementary - main lessons use hardcoded dbLessons
+                })
+                .catch(function() { /* silent */ });
+        }
+
+        // =======================================================================
+        // 2. STATE MANAGEMENT & ENGINE CORE
+        // =======================================================================
+        
+        const defaultData = {
+            xp: 0, level: 1, currentLessonId: 32,
+            conceptMastery: {}, 
+            progress: {
+                // ĐÃ MỞ KHÓA TOÀN BỘ BÀI HỌC VÀ KHÔNG CHẶN MAX_CONCEPT
+                32: { theory: false, game: false, practice: false, testScore: null, unlocked: true, maxConceptIndex: 99, hookAnswered: false, viewedMaterials: {} },
+                33: { theory: false, game: false, practice: false, testScore: null, unlocked: true, maxConceptIndex: 99, hookAnswered: false, viewedMaterials: {} },
+                34: { theory: false, game: false, practice: false, testScore: null, unlocked: true, maxConceptIndex: 99, hookAnswered: false, viewedMaterials: {} }
+            }
+        };
+
+        let currentUser = null;
+        let userData = null;
+
+        // BUMP VERSION KEY (Thêm _v3) để ép trình duyệt xóa state cũ bị kẹt, giúp user trải nghiệm trang sạch và mở khóa hoàn toàn
+        function getUserDataKey() { return currentUser ? `doly_khtn8_data_${currentUser}_v3` : 'doly_khtn8_guest_v3'; }
+
+        function loadData() { 
+            const key = getUserDataKey();
+            userData = localStorage.getItem(key) ? JSON.parse(localStorage.getItem(key)) : JSON.parse(JSON.stringify(defaultData)); 
+        }
+
+        function saveData() { 
+            localStorage.setItem(getUserDataKey(), JSON.stringify(userData)); 
+            updateGlobalUI(); 
+        }
+
+        // =======================================================================
+        // 2.1. AUTHENTICATION LOGIC (ĐÃ ÉP ĐĂNG NHẬP)
+        // =======================================================================
+        window.onload = () => { checkAuthSession(); };
+
+        function checkAuthSession() {
+            // Lấy thông tin user từ DolyAPI session
+            var session = DolyAPI.loadSession();
+            if (session && session.full_name) {
+                currentUser = session.full_name;
+            } else if (session && session.email) {
+                currentUser = session.email.split('@')[0] || 'Hoc sinh';
+            } else {
+                currentUser = 'Khách';
+            }
+            
+            // Khởi chạy App
+            initApp();
+        }
+
+        function requireLogin(e) {
+            if(e) e.preventDefault();
+            showMicroToast('Vui lòng đăng nhập để trả lời câu hỏi và làm bài tập!', 'warning');
+        }
+
+        function devBypassAuth() {
+            sessionStorage.setItem('doly_current_session', 'HocSinhGiang');
+            checkAuthSession();
+            showMicroToast('Đăng nhập dưới quyền User (Dev Test)', 'success');
+        }
+
+        function handleLogout() {
+            DolyAPI.logout().catch(function(){}).finally(function(){
+                DolyAPI.clearSession();
+                currentUser = null;
+                showMicroToast('Đã đăng xuất.', 'success');
+                setTimeout(() => location.reload(), 1000);
+            });
+        }
+
+        function initApp() {
+            loadData();
+            if(currentUser) {
+                // Tự động cắt lấy 2 chữ cái đầu của tên (VD: Hoàng Nam -> HN, Hải Đăng -> HĐ)
+                const initials = currentUser.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+                
+                var navAvatar = document.getElementById('header-avatar');
+                if (navAvatar) navAvatar.textContent = initials;
+            }
+            loadLesson(userData.currentLessonId); 
+            updateGlobalUI();
+        }
+
+
+        // =======================================================================
+        // 3. MAIN CONTENT RENDERERS
+        // =======================================================================
+
+        function loadLesson(id) {
+            window.matchState = null;
+            userData.currentLessonId = parseInt(id); saveData();
+            const lesson = dbLessons[id];
+            if(!lesson) return;
+
+            document.getElementById('lesson-title').innerText = lesson.title;
+            document.getElementById('lesson-number-badge').innerText = id;
+            document.getElementById('lesson-duration').innerText = lesson.duration;
+
+            document.getElementById('tab-hoctap').innerHTML = buildHoctapTab(lesson);
+            document.getElementById('tab-game').innerHTML = buildGameTab(lesson);
+            document.getElementById('tab-luyentap').innerHTML = buildTestTab(lesson);
+            renderQATab(lesson.qaData);
+
+            openTab('hoctap');
+            renderSidebarLessons();
+            renderSidebarDashboard();
+        }
+
+        function buildHoctapTab(lesson) {
+            let html = '';
+            const id = userData.currentLessonId;
+            const state = userData.progress[id];
+            
+            if (state.hookAnswered === undefined) state.hookAnswered = false;
+            if (state.viewedMaterials === undefined) state.viewedMaterials = {};
+            
+            if(lesson.hook) {
+                const isHookAnswered = state.hookAnswered;
+                html += `
+                    <div class="bg-white p-6 md:p-8 rounded-[2rem] border border-slate-200 shadow-sm relative overflow-hidden group mb-10" id="concept-wrapper-hook">
+                        <div class="flex flex-col md:flex-row gap-8 items-center relative z-10">
+                            <div class="w-full md:w-1/3 aspect-video rounded-2xl overflow-hidden shadow-sm shrink-0 relative"><img src="${lesson.hook.img}" class="w-full h-full object-cover"></div>
+                            <div class="flex-1 w-full">
+                                <h3 class="font-black text-orange-600 mb-3 text-xs uppercase tracking-widest flex items-center gap-2"><div class="w-6 h-6 rounded-full bg-orange-50 border border-orange-100 flex items-center justify-center"><i class="fas fa-bolt text-orange-500"></i></div> Tình huống mở bài</h3>
+                                <p class="font-bold text-slate-800 text-lg md:text-xl mb-5 leading-relaxed">${lesson.hook.q}</p>
+                                <div class="space-y-3 mb-2" id="hook-opts" data-answered="${isHookAnswered}">
+                                    ${isHookAnswered 
+                                        ? lesson.hook.opts.map((opt, i) => {
+                                            let btnClass = i === lesson.hook.correct ? "bg-chem-green text-white border-transparent shadow-md" : "bg-slate-50 text-slate-400 border-slate-200 opacity-50";
+                                            return `<div class="w-full p-4 rounded-xl text-sm font-bold text-left border ${btnClass}">${opt}</div>`;
+                                          }).join('')
+                                        : lesson.hook.opts.map((opt, i) => `<button onclick="${currentUser ? `checkHook(this, ${id}, ${i === lesson.hook.correct})` : `requireLogin(event)`}" class="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-600 hover:border-orange-300 hover:text-orange-600 transition-all text-left relative overflow-hidden shadow-sm">${opt}</button>`).join('')}
+                                </div>
+                                <div id="hook-result" class="${isHookAnswered ? '' : 'hidden'} mt-4 p-4 rounded-xl text-sm font-medium leading-relaxed border bg-green-50 text-green-800 border-green-200">
+                                    <b>💡 Chính xác!</b> ${lesson.hook.explain}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            if(lesson.concepts) {
+                lesson.concepts.forEach((c, idx) => {
+                    const l = c.layers;
+                    
+                    if (!state.viewedMaterials[c.id]) state.viewedMaterials[c.id] = [];
+                    if (!state.viewedMaterials[c.id].includes('text') && l.text) state.viewedMaterials[c.id].push('text');
+                    let viewed = state.viewedMaterials[c.id];
+                    let totalMaterials = (l.text?1:0) + (l.slide?1:0) + (l.video?1:0) + (l.pdf?1:0) + (l.model3d?1:0);
+                    
+                    // CHỈNH SỬA: Luôn luôn hiển thị phần Lý Thuyết (không cần làm xong bài trước)
+                    const isVisible = true; 
+                    
+                    html += `<div id="concept-wrapper-${idx}" class="transition-all duration-700 ${isVisible ? '' : 'hidden'} mb-10">`;
+
+                    let btns = '';
+                    const getBtnHtml = (type, icon, label, colorClass) => {
+                        if(!l[type]) return '';
+                        const isViewed = viewed.includes(type);
+                        const isActive = type === 'text';
+                        const checkHtml = isViewed ? `<i class="fas fa-check-circle absolute -top-1 -right-1 text-green-500 bg-white rounded-full text-[14px] shadow-sm z-20"></i>` : '';
+                        const activeClass = isActive ? "bg-slate-50 border-2 border-ai-purple text-ai-purple" : "bg-white border border-slate-200 text-slate-500 hover:bg-slate-50";
+                        const iconColor = isActive ? "text-ai-purple" : colorClass;
+                        
+                        return `
+                            <button class="layer-tab-btn w-24 flex flex-col items-center justify-center p-3.5 rounded-2xl ${activeClass} shadow-sm transition-all gap-2 shrink-0 relative" onclick="switchConceptLayer(this, '${type}', '${c.id}', ${totalMaterials})">
+                                <div class="w-10 h-10 rounded-full bg-white shadow-sm border border-slate-200 flex items-center justify-center text-lg relative z-10">
+                                    <i class="fas ${icon} ${iconColor} layer-icon"></i>
+                                    ${checkHtml}
+                                </div>
+                                <span class="text-[10px] md:text-xs font-black uppercase tracking-wider relative z-10">${label}</span>
+                            </button>
+                        `;
+                    };
+
+                    btns += getBtnHtml('text', 'fa-book-open', 'Đọc', 'text-slate-400');
+                    btns += getBtnHtml('slide', 'fa-file-powerpoint', 'Slide', 'text-orange-400');
+                    btns += getBtnHtml('video', 'fa-play', 'Video', 'text-red-500');
+                    btns += getBtnHtml('pdf', 'fa-file-pdf', 'Tài liệu', 'text-red-500');
+                    btns += getBtnHtml('model3d', 'fa-cube', 'Mô Hình', 'text-blue-500');
+
+                    let pSlide = l.slide ? `<div id="layer-slide-${c.id}" class="concept-layer hidden mb-8"><div class="w-full aspect-video bg-slate-100 rounded-3xl border border-slate-300 flex flex-col items-center justify-center text-slate-500"><i class="fas fa-file-powerpoint text-6xl mb-4 text-orange-400"></i><p class="font-bold text-lg">${l.slide.title}</p><p class="text-sm mt-2">(${l.slide.pages} Slides - Click xem lớn)</p></div></div>` : '';
+                    let pVideo = l.video ? `<div id="layer-video-${c.id}" class="concept-layer hidden mb-8"><div class="w-full aspect-video bg-slate-900 rounded-3xl flex items-center justify-center text-white relative overflow-hidden shadow-md"><img src="https://images.unsplash.com/photo-1614064641913-6b71f3016345?w=800&q=80" class="absolute inset-0 w-full h-full object-cover opacity-50"><div class="w-16 h-16 bg-red-600 rounded-full flex items-center justify-center z-10 shadow-lg"><i class="fas fa-play text-2xl ml-1"></i></div><span class="absolute bottom-5 left-5 text-sm font-bold z-10 bg-slate-900/80 px-4 py-2 rounded-lg border border-slate-700">${l.video.title}</span></div></div>` : '';
+                    let pPdf = l.pdf ? `<div id="layer-pdf-${c.id}" class="concept-layer hidden mb-8"><div class="p-6 bg-red-50 border border-red-200 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-4"><div class="flex items-center gap-4"><i class="fas fa-file-pdf text-4xl text-red-500"></i><div><p class="font-black text-lg text-slate-800">${l.pdf.title}</p><p class="text-sm font-bold text-red-500 mt-1">${l.pdf.size}</p></div></div><button class="px-6 py-3 bg-red-500 hover:bg-red-600 text-white rounded-xl text-sm font-black shadow-sm transition-colors"><i class="fas fa-download mr-2"></i> Tải Xuống</button></div></div>` : '';
+                    let p3D = l.model3d ? `<div id="layer-model3d-${c.id}" class="concept-layer hidden mb-8"><div class="w-full aspect-video bg-slate-900 rounded-3xl flex flex-col items-center justify-center border border-slate-800 shadow-md"><i class="fas ${l.model3d.icon} text-[80px] ${l.model3d.color} animate-float"></i><p class="text-white font-black text-lg mt-6 bg-slate-800 px-6 py-2 rounded-full border border-slate-700"><i class="fas fa-cube mr-2 text-blue-400"></i> ${l.model3d.name}</p></div></div>` : '';
+
+                    html += `
+                        <div class="bg-white p-6 md:p-10 rounded-[2.5rem] border border-slate-200 shadow-sm relative overflow-hidden">
+                            <div class="absolute -left-1 top-8 w-10 h-10 bg-ai-purple text-white rounded-r-xl rounded-l-md flex items-center justify-center font-black text-lg shadow-sm">${idx+1}</div>
+                            
+                            <h3 class="font-black text-slate-800 text-2xl md:text-3xl ml-6 mb-6">${c.title}</h3>
+                            
+                            <div class="mb-8 ml-6">
+                                <p class="text-[11px] font-black text-slate-500 uppercase tracking-widest mb-3 flex items-center gap-2"><i class="fas fa-layer-group text-ai-purple"></i> Chọn học liệu bạn muốn xem:</p>
+                                <div class="flex overflow-x-auto custom-scroll gap-3 pb-3 pt-2 px-1">${btns}</div>
+                            </div>
+                            
+                            <div id="layer-text-${c.id}" class="concept-layer block mb-8 ml-0 md:ml-6">
+                                <div class="text-base text-slate-800 leading-relaxed bg-slate-50 p-6 md:p-8 rounded-3xl border border-slate-200">${l.text}</div>
+                            </div>
+                            <div class="ml-0 md:ml-6">${pSlide} ${pVideo} ${pPdf} ${p3D}</div>
+
+                            <div class="ml-0 md:ml-6 bg-purple-50 p-6 md:p-8 rounded-3xl border border-purple-200 mb-8">
+                                <p class="text-xs font-black text-ai-purple uppercase tracking-widest mb-3 flex items-center gap-2"><div class="w-6 h-6 rounded-full bg-purple-100 border border-purple-200 flex items-center justify-center text-yellow-600"><i class="fas fa-lightbulb"></i></div> Thực tế</p>
+                                <p class="text-base font-medium text-slate-800 leading-relaxed">${c.realWorld}</p>
+                            </div>
+                            `;
+                    
+                    const isQuizAnswered = state.maxConceptIndex > idx;
+                    // CHỈNH SỬA: Luôn luôn hiển thị bài Quiz
+                    let quizVisible = true; 
+                    
+                    html += `<div id="quiz-container-${c.id}" class="${quizVisible ? '' : 'hidden'} ml-0 md:ml-6 bg-slate-50 p-6 md:p-8 rounded-3xl border border-slate-200" data-answered="${isQuizAnswered}">
+                                <div class="flex items-center gap-2 mb-5">
+                                    <div class="w-8 h-8 rounded-xl bg-yellow-100 text-yellow-600 border border-yellow-200 flex items-center justify-center text-lg"><i class="fas fa-bolt"></i></div>
+                                    <p class="text-lg font-black text-slate-800">Quiz Nhanh <span class="text-xs font-bold bg-green-100 border border-green-200 text-green-700 px-2 py-1 rounded ml-2">+${c.microQuiz.xp} XP</span></p>
+                                </div>
+                                <p class="text-slate-800 font-bold mb-4 ml-1">${c.microQuiz.q}</p>
+                                <div class="grid sm:grid-cols-2 gap-3">`;
+
+                    if (isQuizAnswered) {
+                        html += c.microQuiz.opts.map((opt, i) => {
+                            let isCorrect = i === c.microQuiz.correct;
+                            let btnClass = isCorrect ? "bg-green-50 border-green-400 text-green-700 shadow-sm" : "bg-white border-slate-200 text-slate-400 opacity-50";
+                            let iconClass = isCorrect ? "bg-green-200 text-green-800" : "bg-slate-100 text-slate-400";
+                            return `<div class="p-4 border-2 rounded-2xl text-sm font-bold text-left flex items-center ${btnClass}"><span class="inline-block w-6 h-6 rounded-full text-center text-xs leading-6 mr-2 ${iconClass}">${String.fromCharCode(65+i)}</span> ${opt}</div>`;
+                        }).join('');
+                    } else {
+                        html += c.microQuiz.opts.map((opt, i) => `<button onclick="${currentUser ? `checkMicroQuiz(this, ${id}, ${idx}, ${i === c.microQuiz.correct})` : `requireLogin(event)`}" class="p-4 bg-white border border-slate-300 rounded-2xl text-sm font-bold text-slate-600 hover:border-doly-blue hover:text-doly-blue transition-all shadow-sm text-left group"><span class="inline-block w-6 h-6 rounded-full bg-slate-100 text-slate-500 group-hover:bg-blue-50 group-hover:text-blue-600 text-center text-xs leading-6 mr-2 transition-colors">${String.fromCharCode(65+i)}</span> ${opt}</button>`).join('');
+                    }
+
+                    html += `   </div>`;
+                    
+                    if (isQuizAnswered) {
+                        html += `<div class="explanation-box mt-4 p-5 text-sm font-medium rounded-xl leading-relaxed bg-green-50 text-green-800 border border-green-200"><b>Giải thích:</b> ${c.microQuiz.explain}</div>`;
+                    }
+
+                    html += `</div></div></div>`; 
+                });
+            }
+
+            // CHỈNH SỬA: Nút Sang phần Game luôn hiện ở cuối
+            const showFinish = true;
+            html += `<div id="finish-theory-btn" class="text-center mt-12 mb-6 ${showFinish ? '' : 'hidden'}"><button onclick="markTaskDone('theory', 'game')" class="px-10 py-5 bg-slate-800 hover:bg-ai-purple text-white text-sm font-black rounded-full shadow-md transition-colors btn-hover-lift">Sang phần Game <i class="fas fa-arrow-right ml-2"></i></button></div>`;
+            return html;
+        }
+
+        let fillBlankState = { answers: [], inputs: [], xp: 0 };
+        
+        function buildGameTab(lesson) {
+            let html = '';
+            if(!lesson.memory || (!lesson.memory.flashcards && !lesson.memory.fillBlank && !lesson.memory.matchingGame && !lesson.memory.speedGame)) 
+                return '<div class="text-center py-20"><div class="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4"><i class="fas fa-gamepad text-3xl text-slate-300"></i></div><p class="font-bold text-slate-500">Chưa có dữ liệu Game cho bài này.</p></div>';
+
+            if(lesson.memory.flashcards && lesson.memory.flashcards.length > 0) {
+                let fcs = lesson.memory.flashcards.map(fc => `
+                    <div class="h-32 perspective-1000 flashcard cursor-pointer">
+                        <div class="relative w-full h-full flashcard-inner rounded-2xl shadow-sm">
+                            <div class="flashcard-front bg-white border border-slate-200 rounded-2xl flex items-center justify-center p-5 relative overflow-hidden">
+                                <div class="absolute top-2 left-2 text-slate-200 text-3xl"><i class="fas fa-question-circle"></i></div>
+                                <h3 class="font-bold text-sm md:text-base text-slate-700 text-center relative z-10">${fc.q}</h3>
+                            </div>
+                            <div class="flashcard-back bg-ai-purple rounded-2xl flex items-center justify-center p-5 text-white shadow-md">
+                                <p class="text-sm md:text-base font-black text-center">${fc.a}</p>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+                html += `
+                    <div class="bg-white p-6 md:p-8 rounded-[2rem] border border-slate-200 mb-8 shadow-sm">
+                        <h3 class="font-black text-slate-800 text-lg uppercase tracking-widest mb-6 flex items-center gap-3"><div class="w-10 h-10 rounded-xl bg-purple-50 border border-purple-100 text-ai-purple flex items-center justify-center"><i class="fas fa-clone text-xl"></i></div> 1. Lật thẻ Ghi nhớ</h3>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">${fcs}</div>
+                    </div>`;
+            }
+
+            if(lesson.memory.fillBlank) {
+                const fb = lesson.memory.fillBlank;
+                fillBlankState.answers = fb.answers; fillBlankState.xp = fb.xp;
+                fillBlankState.inputs = [];
+                
+                let textWithInputs = fb.text.replace(/\[input\]/g, () => {
+                    const idx = fillBlankState.inputs.length; fillBlankState.inputs.push(idx);
+                    return `<span id="fb-drop-${idx}" class="fb-dropzone" data-word="" ondrop="${currentUser ? `dropFb(event, ${idx})` : `requireLogin(event)`}" ondragover="${currentUser ? `allowDropFb(event)` : `requireLogin(event)`}" onclick="${currentUser ? `returnWordFb(${idx})` : `requireLogin(event)`}"></span>`;
+                });
+
+                let words = [...fb.answers].sort(() => Math.random() - 0.5);
+                let wordsHtml = words.map((w, i) => `<span id="fb-word-${i}" class="fb-word inline-block bg-white border-2 border-slate-200 shadow-sm rounded-xl px-4 py-2 m-2 cursor-grab active:cursor-grabbing font-bold text-slate-700 hover:border-indigo-400 hover:text-indigo-600 transition-colors select-none" draggable="true" ondragstart="${currentUser ? `dragFb(event, '${w}')` : `requireLogin(event)`}">${w}</span>`).join('');
+
+                html += `
+                    <div class="bg-white p-6 md:p-8 rounded-[2rem] border border-slate-200 mb-8 shadow-sm">
+                        <div class="flex items-center justify-between mb-6">
+                            <h3 class="font-black text-slate-800 text-lg uppercase tracking-widest flex items-center gap-3"><div class="w-10 h-10 rounded-xl bg-indigo-50 border border-indigo-100 text-indigo-500 flex items-center justify-center"><i class="fas fa-i-cursor text-xl"></i></div> 2. Kéo thả từ còn thiếu</h3>
+                            <span class="bg-indigo-100 text-indigo-700 border border-indigo-200 text-xs font-black px-3 py-1.5 rounded-lg">+${fb.xp} XP</span>
+                        </div>
+                        <div class="bg-slate-50 p-6 md:p-8 rounded-2xl border border-slate-200 text-base md:text-lg font-medium text-slate-800 leading-loose text-center md:text-left mb-6 relative overflow-hidden">
+                            ${!currentUser ? `<div class="absolute inset-0 bg-white/20 z-20 cursor-pointer" onclick="requireLogin(event)"></div>` : ''}
+                            ${textWithInputs}
+                        </div>
+                        <div id="fb-word-bank" class="flex flex-wrap justify-center gap-2 mb-6 p-4 bg-indigo-50/50 rounded-2xl border border-indigo-100 min-h-[80px] relative">
+                            ${!currentUser ? `<div class="absolute inset-0 bg-white/20 z-20 cursor-pointer" onclick="requireLogin(event)"></div>` : ''}
+                            ${wordsHtml}
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <p class="text-xs font-bold text-slate-500"><i class="fas fa-info-circle mr-1"></i> Kéo từ phía trên thả vào ô trống. Click vào ô trống để bỏ chọn.</p>
+                            <button onclick="${currentUser ? `checkFillBlank()` : `requireLogin(event)`}" id="fb-check-btn" class="px-6 py-3 bg-indigo-500 text-white font-black text-sm rounded-xl hover:bg-indigo-600 shadow-sm transition-colors btn-hover-lift"><i class="fas fa-check-circle mr-2"></i> Chốt đáp án</button>
+                        </div>
+                    </div>
+                `;
+            }
+
+            if(lesson.memory.matchingGame) {
+                const mg = lesson.memory.matchingGame;
+                let shuffledRight = [...mg.right].sort(() => Math.random() - 0.5);
+                let leftHtml = mg.left.map(item => `<div class="match-item p-4 bg-white border border-slate-300 rounded-2xl text-sm font-bold text-slate-700 text-center mb-3 flex items-center justify-center min-h-[60px]" id="ml-${item.id}" onclick="${currentUser ? `selectMatch('left', '${item.id}')` : `requireLogin(event)`}">${item.text}</div>`).join('');
+                let rightHtml = shuffledRight.map(item => `<div class="match-item p-4 bg-white border border-slate-300 rounded-2xl text-sm font-bold text-slate-700 text-center mb-3 flex items-center justify-center min-h-[60px]" id="mr-${item.id}" onclick="${currentUser ? `selectMatch('right', '${item.id}')` : `requireLogin(event)`}">${item.text}</div>`).join('');
+                html += `
+                    <div class="bg-white p-6 md:p-8 rounded-[2rem] border border-slate-200 mb-8 shadow-sm" id="match-game-container">
+                        <div class="flex items-center justify-between mb-6">
+                            <h3 class="font-black text-slate-800 text-lg uppercase tracking-widest flex items-center gap-3"><div class="w-10 h-10 rounded-xl bg-blue-50 border border-blue-100 text-blue-500 flex items-center justify-center"><i class="fas fa-puzzle-piece text-xl"></i></div> 3. ${mg.title}</h3>
+                            <span class="bg-blue-100 border border-blue-200 text-blue-700 text-xs font-black px-3 py-1.5 rounded-lg">+${mg.xp} XP</span>
+                        </div>
+                        <div class="flex gap-4 md:gap-8 bg-slate-50 p-6 rounded-3xl border border-slate-200">
+                            <div class="flex-1">${leftHtml}</div>
+                            <div class="flex-1">${rightHtml}</div>
+                        </div>
+                        <div id="match-result" class="mt-6 text-center text-base font-black h-8"></div>
+                    </div>
+                `;
+            }
+
+            if(lesson.memory.speedGame) {
+                const sg = lesson.memory.speedGame;
+                window.speedGameState = { qs: sg.questions, current: 0, score: 0, xp: sg.xp };
+                html += `
+                    <div class="bg-white p-6 md:p-8 rounded-[2rem] border border-slate-200 mb-8 shadow-sm relative overflow-hidden" id="speed-game-container">
+                        <div class="flex items-center justify-between mb-6">
+                            <h3 class="font-black text-slate-800 text-lg uppercase tracking-widest flex items-center gap-3"><div class="w-10 h-10 rounded-xl bg-rose-50 border border-rose-100 text-rose-500 flex items-center justify-center"><i class="fas fa-fighter-jet text-xl"></i></div> 4. ${sg.title}</h3>
+                            <span class="bg-rose-100 border border-rose-200 text-rose-700 text-xs font-black px-3 py-1.5 rounded-lg">+${sg.xp} XP</span>
+                        </div>
+                        <div id="sg-play-area" class="bg-slate-50 p-6 rounded-3xl border border-slate-200">
+                            <div class="text-center mb-6">
+                                <span class="text-xs font-bold text-rose-600 bg-white px-4 py-1.5 rounded-full border border-rose-200 shadow-sm">Câu <span id="sg-current">1</span>/${sg.questions.length}</span>
+                            </div>
+                            <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-200 mb-6 min-h-[140px] flex items-center justify-center">
+                                <h4 class="text-xl md:text-2xl font-bold text-slate-800 text-center leading-relaxed" id="sg-question">${sg.questions[0].q}</h4>
+                            </div>
+                            <div class="flex gap-4">
+                                <button onclick="${currentUser ? `answerSpeedGame(true)` : `requireLogin(event)`}" class="flex-1 py-4 md:py-5 bg-chem-green hover:bg-emerald-600 text-white font-black text-lg rounded-2xl transition-colors shadow-sm btn-hover-lift"><i class="fas fa-check-circle mr-2"></i> ĐÚNG</button>
+                                <button onclick="${currentUser ? `answerSpeedGame(false)` : `requireLogin(event)`}" class="flex-1 py-4 md:py-5 bg-red-500 hover:bg-red-600 text-white font-black text-lg rounded-2xl transition-colors shadow-sm btn-hover-lift"><i class="fas fa-times-circle mr-2"></i> SAI</button>
+                            </div>
+                        </div>
+                        <div id="sg-result-area" class="hidden text-center py-10 bg-slate-50 rounded-3xl border border-slate-200 shadow-sm">
+                            <i class="fas fa-medal text-6xl text-yellow-400 mb-4"></i>
+                            <h4 class="text-2xl font-black text-slate-800 mb-2">Hoàn thành Thử thách!</h4>
+                            <p class="text-slate-600 font-medium mb-6">Số câu đúng: <span id="sg-score" class="text-rose-600 font-bold text-xl">0</span>/${sg.questions.length}</p>
+                            <div id="sg-reward-btn"></div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            html += `<div class="text-center mt-12 mb-6"><button onclick="${currentUser ? `markTaskDone('game', 'luyentap')` : `requireLogin(event)`}" class="px-10 py-5 bg-slate-800 hover:bg-ai-purple text-white text-sm font-black rounded-full shadow-sm transition-colors btn-hover-lift">Sang phần Luyện Tập <i class="fas fa-arrow-right ml-2"></i></button></div>`;
+            return html;
+        }
+
+        function buildTestTab(lesson) {
+            let html = '';
+            if(lesson.practice && (lesson.practice.easy.length > 0 || lesson.practice.hard.length > 0)) {
+                html += `<div class="mb-10"><h3 class="font-black text-slate-800 text-lg uppercase tracking-widest mb-6 flex items-center gap-3"><div class="w-10 h-10 rounded-xl bg-purple-50 border border-purple-100 text-ai-purple flex items-center justify-center"><i class="fas fa-dumbbell text-xl"></i></div> 1. Luyện tập (Cọ xát)</h3><div class="space-y-6">`;
+                
+                if(lesson.practice.easy.length > 0) {
+                    html += `<div class="bg-white border border-slate-200 rounded-[2rem] p-6 md:p-8 shadow-sm"><div class="inline-block bg-green-50 border border-green-200 px-3 py-1.5 rounded-lg mb-5"><h4 class="font-black text-xs text-green-700 uppercase tracking-wider">Mức độ: Nhận biết</h4></div>`;
+                    lesson.practice.easy.forEach((q, i) => {
+                        html += `<p class="text-base md:text-lg font-bold text-slate-800 mb-4">${i+1}. ${q.q}</p><div class="space-y-3 mb-6" data-answered="false">${q.opts.map((opt, oIdx) => `<button onclick="${currentUser ? `checkPractice(this, ${oIdx === q.correct})` : `requireLogin(event)`}" class="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-slate-600 hover:bg-white hover:border-green-400 transition-all text-left flex items-start gap-3 shadow-sm group"><span class="w-6 h-6 rounded-full bg-slate-200 flex items-center justify-center shrink-0 text-xs">${String.fromCharCode(65+oIdx)}</span><span class="mt-0.5">${opt}</span></button>`).join('')}</div>`;
+                    });
+                    html += `</div>`;
+                }
+                
+                if(lesson.practice.hard.length > 0) {
+                    html += `<div class="bg-white border border-slate-200 rounded-[2rem] p-6 md:p-8 shadow-sm mt-6"><div class="inline-block bg-red-50 border border-red-200 px-3 py-1.5 rounded-lg mb-5"><h4 class="font-black text-xs text-red-700 uppercase tracking-wider">Mức độ: Phân tích</h4></div>`;
+                    lesson.practice.hard.forEach((q, i) => {
+                        html += `<p class="text-base md:text-lg font-bold text-slate-800 mb-4">${i+1}. ${q.q}</p><div class="space-y-3 mb-6" data-answered="false">${q.opts.map((opt, oIdx) => `<button onclick="${currentUser ? `checkPractice(this, ${oIdx === q.correct})` : `requireLogin(event)`}" class="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-slate-600 hover:bg-white hover:border-red-400 transition-all text-left flex items-start gap-3 shadow-sm group"><span class="w-6 h-6 rounded-full bg-slate-200 flex items-center justify-center shrink-0 text-xs">${String.fromCharCode(65+oIdx)}</span><span class="mt-0.5">${opt}</span></button>`).join('')}</div>`;
+                    });
+                    html += `</div>`;
+                }
+                html += `</div></div>`;
+            }
+
+            if(lesson.finalTest) {
+                const ft = lesson.finalTest;
+                window.finalTestState = { data: ft, qIndex: 0, score: 0, timer: null, timeLeft: ft.timeLimit };
+                html += `
+                    <div class="bg-slate-900 p-8 md:p-12 rounded-[2.5rem] shadow-md text-white text-center relative overflow-hidden mt-8" id="final-test-container">
+                        <div id="test-intro" class="relative z-10 py-4">
+                            <div class="w-20 h-20 bg-slate-800 border border-slate-700 rounded-full flex items-center justify-center mx-auto mb-6"><i class="fas fa-stopwatch text-4xl text-purple-400"></i></div>
+                            <h3 class="font-black text-3xl md:text-4xl mb-4">${ft.title}</h3>
+                            <div class="flex items-center justify-center gap-4 mb-8 text-sm font-bold text-slate-400"><span><i class="fas fa-list-ol mr-1"></i> ${ft.questions.length} Câu</span> | <span><i class="far fa-clock mr-1"></i> ${Math.floor(ft.timeLimit/60)} Phút</span></div>
+                            <button onclick="${currentUser ? `startFinalTest()` : `requireLogin(event)`}" class="px-12 py-4 bg-ai-purple hover:bg-purple-600 text-white font-black text-base rounded-full btn-hover-lift transition-colors">BẮT ĐẦU THI</button>
+                        </div>
+                        
+                        <div id="test-play" class="hidden text-left relative z-10">
+                            <div class="flex justify-between items-center mb-8 bg-slate-800 border border-slate-700 p-4 rounded-2xl">
+                                <span class="font-black text-base text-purple-300">CÂU <span id="test-q-num" class="text-white text-xl">1</span><span class="text-slate-500">/${ft.questions.length}</span></span>
+                                <span class="font-black text-xl text-yellow-400" id="test-timer"><i class="far fa-clock mr-2"></i> 00:00</span>
+                            </div>
+                            <h4 class="text-xl md:text-2xl font-bold mb-8 leading-relaxed" id="test-question">?</h4>
+                            <div class="space-y-4" id="test-options"></div>
+                        </div>
+
+                        <div id="test-result" class="hidden relative z-10 py-6">
+                            <i class="fas fa-trophy text-7xl text-yellow-400 mb-6"></i>
+                            <h3 class="font-black text-3xl mb-3">ĐÃ NỘP BÀI</h3>
+                            <p class="text-lg font-bold text-purple-300 mb-8">ĐIỂM: <span id="test-final-score" class="text-white text-4xl ml-2">0</span>/10</p>
+                            <div id="test-feedback-msg" class="mb-8 text-lg"></div>
+                            <div id="test-action-btn"></div>
+                        </div>
+                    </div>
+                `;
+            }
+            return html;
+        }
+
+        function renderQATab(qaData) {
+            const list = document.getElementById('qa-community-list');
+            if(!list) return;
+            if(!qaData || qaData.length === 0) { list.innerHTML = '<p class="text-sm font-medium text-slate-500 mt-4">Chưa có câu hỏi nào từ lớp.</p>'; return; }
+            list.innerHTML = qaData.map(qa => `
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                    <div class="flex gap-3 items-start mb-3"><div class="w-8 h-8 rounded-full bg-blue-50 border border-blue-100 text-blue-600 flex items-center justify-center text-xs font-bold shrink-0">${qa.avatar}</div><div><p class="text-sm font-bold text-slate-800">${qa.q}</p><p class="text-[10px] text-slate-500">Bởi ${qa.user}</p></div></div>
+                    <div class="bg-slate-50 p-4 rounded-xl ml-11 border-l-4 border-chem-green"><p class="text-xs text-slate-700 leading-relaxed"><span class="font-bold text-chem-green">Thầy/Cô:</span> ${qa.a}</p></div>
+                </div>
+            `).join('');
+        }
+
+        // =======================================================================
+        // 4. SIDEBAR RENDERERS 
+        // =======================================================================
+        
+        function renderSidebarLessons() {
+            const container = document.getElementById('sidebar-lessons');
+            let html = '';
+            Object.keys(dbLessons).forEach(id => {
+                const lesson = dbLessons[id]; const state = userData.progress[id];
+                const isCurrent = parseInt(id) === userData.currentLessonId;
+                
+                let icon = !state.unlocked ? '<i class="fas fa-lock"></i>' : (isCurrent ? '<i class="fas fa-fire"></i>' : (state.completed ? '<i class="fas fa-check"></i>' : '<i class="fas fa-play"></i>'));
+                let bg = !state.unlocked ? 'bg-slate-50 opacity-60 border-transparent' : (isCurrent ? 'bg-white shadow-sm border-ai-purple ring-1 ring-ai-purple' : 'bg-white hover:bg-slate-50 border-slate-200 cursor-pointer');
+                let iconBg = !state.unlocked ? 'text-slate-400 bg-slate-200' : (isCurrent ? 'bg-ai-purple text-white shadow-sm' : (state.completed ? 'bg-chem-green text-white' : 'bg-purple-50 text-ai-purple border border-purple-100'));
+                
+                html += `<div class="flex items-center gap-4 p-3.5 rounded-2xl border transition-colors ${bg}" onclick="if(${state.unlocked}) loadLesson(${id})"><div class="w-9 h-9 rounded-full flex items-center justify-center shrink-0 text-xs ${iconBg}">${icon}</div><div class="flex-1"><h4 class="text-[11px] font-black leading-tight ${isCurrent ? 'text-ai-purple' : 'text-slate-700'}">Bài ${id}:<br>${lesson.title}</h4></div></div>`;
+            });
+            container.innerHTML = html;
+        }
+
+        function renderSidebarDashboard() {
+            const id = userData.currentLessonId; const state = userData.progress[id]; const lesson = dbLessons[id];
+            
+            let tasks = [state.theory, state.game, state.practice]; let done = tasks.filter(Boolean).length;
+            const percent = Math.round((done/3)*100);
+            document.getElementById('circular-progress').style.strokeDashoffset = 251.2 - (percent/100)*251.2;
+            document.getElementById('progress-text').innerText = `${percent}%`;
+
+            const checkUI = (isDone, txt) => `<div class="flex items-center gap-2"><div class="w-4 h-4 rounded-full ${isDone?'bg-chem-green text-white':'bg-slate-800 text-transparent border border-slate-700'} flex items-center justify-center text-[8px] transition-colors"><i class="fas fa-check ${isDone?'':'hidden'}"></i></div><span class="${isDone?'text-slate-400 line-through':'text-slate-200'} transition-colors">${txt}</span></div>`;
+            document.getElementById('checklist-container').innerHTML = checkUI(state.theory, "Kiến thức") + checkUI(state.game, "Củng cố") + checkUI(state.practice, "Kiểm tra");
+
+            let skillHtml = ''; let weakPoints = [];
+            if(lesson.concepts) {
+                lesson.concepts.forEach(c => {
+                    const mst = userData.conceptMastery[c.id] !== undefined ? userData.conceptMastery[c.id] : -1;
+                    
+                    let col = mst===2 ? 'bg-chem-green' : (mst===1 ? 'bg-amber-400' : (mst===0 ? 'bg-red-500' : 'bg-slate-600'));
+                    let txt = mst===2 ? 'Tốt' : (mst===1 ? 'Tạm' : (mst===0 ? 'Yếu' : 'Chưa học'));
+                    
+                    if(mst === 0) weakPoints.push(c.title);
+                    
+                    skillHtml += `<div class="flex justify-between items-center bg-slate-900 border border-slate-700 p-2.5 rounded-xl"><span class="text-[10px] font-bold text-slate-300 truncate w-2/3">${c.title}</span><div class="flex items-center gap-1.5"><span class="text-[9px] font-black text-slate-400 uppercase">${txt}</span><div class="w-2.5 h-2.5 rounded-full ${col} shadow-sm"></div></div></div>`;
+                });
+            }
+            document.getElementById('skill-tree-container').innerHTML = skillHtml || '<p class="text-xs text-slate-500 text-center py-2">Trống</p>';
+            
+            const wpBox = document.getElementById('weak-points-suggestion');
+            if(weakPoints.length > 0) { wpBox.innerHTML = `<p class="text-[10px] font-black text-red-400 uppercase mb-2"><i class="fas fa-exclamation-triangle"></i> Yếu điểm cần ôn lại:</p><ul class="text-[10px] text-slate-300 list-disc pl-4 space-y-1">${weakPoints.map(w=>`<li>${w}</li>`).join('')}</ul>`; wpBox.classList.remove('hidden'); } 
+            else { wpBox.classList.add('hidden'); }
+
+            document.getElementById('key-points-container').innerHTML = lesson.keyPoints ? lesson.keyPoints.map(p => `<li class="flex items-start gap-2 text-xs font-bold text-slate-800"><div class="mt-0.5 text-amber-500 text-[10px]"><i class="fas fa-star"></i></div> <span>${p}</span></li>`).join('') : '';
+        }
+
+        // =======================================================================
+        // CÁC HÀM XỬ LÝ SỰ KIỆN KÉO THẢ (DRAG & DROP)
+        // =======================================================================
+        function allowDropFb(ev) {
+            ev.preventDefault();
+        }
+
+        function dragFb(ev, word) {
+            ev.dataTransfer.setData("text/plain", word);
+            ev.dataTransfer.setData("sourceId", ev.target.id);
+        }
+
+        function dropFb(ev, idx) {
+            ev.preventDefault();
+            var word = ev.dataTransfer.getData("text/plain");
+            var sourceId = ev.dataTransfer.getData("sourceId");
+            if(!word) return;
+            
+            let dropzone = document.getElementById(`fb-drop-${idx}`);
+            if(dropzone.dataset.word) {
+                returnWordFb(idx);
+            }
+            
+            dropzone.innerText = word;
+            dropzone.classList.add('filled');
+            dropzone.dataset.word = word;
+            
+            if(sourceId && document.getElementById(sourceId)) {
+                document.getElementById(sourceId).style.display = "none";
+            }
+        }
+
+        function returnWordFb(idx) {
+            let dropzone = document.getElementById(`fb-drop-${idx}`);
+            let word = dropzone.dataset.word;
+            if(!word) return;
+            
+            let words = document.querySelectorAll('.fb-word');
+            for(let i=0; i<words.length; i++) {
+                if(words[i].innerText === word && words[i].style.display === 'none') {
+                    words[i].style.display = 'inline-block';
+                    break;
+                }
+            }
+            dropzone.innerText = ''; 
+            dropzone.dataset.word = ''; 
+            dropzone.classList.remove('filled', 'correct', 'incorrect');
+        }
+
+        function checkFillBlank() {
+            let allCorrect = true; 
+            const ans = fillBlankState.answers;
+            
+            for(let i=0; i<ans.length; i++) {
+                const dropzone = document.getElementById(`fb-drop-${i}`); 
+                if(!dropzone) continue;
+                
+                const val = (dropzone.dataset.word || "").trim().toLowerCase(); 
+                const correctAns = ans[i].toLowerCase();
+                
+                if(val === correctAns) { 
+                    dropzone.classList.remove('incorrect', 'shake'); 
+                    dropzone.classList.add('correct'); 
+                } 
+                else { 
+                    allCorrect = false; 
+                    dropzone.classList.add('incorrect', 'shake'); 
+                    setTimeout(()=> dropzone.classList.remove('shake'), 400); 
+                }
+            }
+            
+            if(allCorrect) { 
+                document.getElementById('fb-check-btn').classList.add('hidden'); 
+                document.getElementById('fb-word-bank').classList.add('hidden');
+                addXP(fillBlankState.xp); 
+                triggerConfetti(); 
+                showMicroToast(`Tuyệt vời! +${fillBlankState.xp} XP`, 'success');
+            } else {
+                showMicroToast(`Có chỗ chưa đúng, thử lại nhé!`, 'warning');
+            }
+        }
+
+
+        // =======================================================================
+        // 5. INTERACTION LOGIC & UNLOCK SYSTEM
+        // =======================================================================
+        
+        function switchConceptLayer(btn, layerType, conceptId, totalMaterials) {
+            const parent = btn.parentNode;
+            parent.querySelectorAll('.layer-tab-btn').forEach(b => { 
+                b.className = "layer-tab-btn w-24 flex flex-col items-center justify-center p-3.5 rounded-2xl bg-white border border-slate-200 text-slate-500 hover:bg-slate-50 transition-all gap-2 shrink-0 relative"; 
+                b.querySelector('div:not(.fa-check-circle)').className = "w-10 h-10 rounded-full bg-white shadow-sm border border-slate-200 flex items-center justify-center text-lg relative z-10";
+                
+                const icon = b.querySelector('.layer-icon');
+                if (icon.classList.contains('fa-file-powerpoint')) icon.className = "fas fa-file-powerpoint text-orange-400 layer-icon";
+                if (icon.classList.contains('fa-play')) icon.className = "fas fa-play text-red-500 layer-icon";
+                if (icon.classList.contains('fa-file-pdf')) icon.className = "fas fa-file-pdf text-red-500 layer-icon";
+                if (icon.classList.contains('fa-cube')) icon.className = "fas fa-cube text-blue-500 layer-icon";
+                if (icon.classList.contains('fa-book-open')) icon.className = "fas fa-book-open text-ai-purple layer-icon";
+            });
+            btn.className = "layer-tab-btn w-24 flex flex-col items-center justify-center p-3.5 rounded-2xl bg-slate-50 border-2 border-ai-purple text-ai-purple shadow-sm transition-all gap-2 shrink-0 relative";
+            btn.querySelector('div:not(.fa-check-circle)').className = "w-10 h-10 rounded-full bg-white shadow-sm border border-slate-200 flex items-center justify-center text-lg relative z-10 text-ai-purple";
+            
+            const container = parent.closest('.bg-white');
+            container.querySelectorAll('.concept-layer').forEach(l => l.classList.replace('block', 'hidden'));
+            const target = container.querySelector(`#layer-${layerType}-${conceptId}`);
+            if(target) target.classList.replace('hidden', 'block');
+
+            if(!currentUser) return; 
+
+            const id = userData.currentLessonId;
+            if (!userData.progress[id].viewedMaterials) userData.progress[id].viewedMaterials = {};
+            if (!userData.progress[id].viewedMaterials[conceptId]) userData.progress[id].viewedMaterials[conceptId] = [];
+
+            let viewed = userData.progress[id].viewedMaterials[conceptId];
+            
+            if (!viewed.includes(layerType)) {
+                viewed.push(layerType);
+                saveData();
+                
+                const iconContainer = btn.querySelector('div:not(.absolute)');
+                if(!iconContainer.querySelector('.fa-check-circle')) {
+                    iconContainer.innerHTML += `<i class="fas fa-check-circle absolute -top-1 -right-1 text-green-500 bg-white rounded-full text-[14px] shadow-sm z-20"></i>`;
+                }
+            }
+        }
+
+        function checkHook(btn, lessonId, isCorrect) {
+            const container = document.getElementById('hook-opts');
+            const res = document.getElementById('hook-result');
+            const lesson = dbLessons[lessonId];
+            const explain = lesson.hook.explain;
+            const xp = lesson.hook.xp;
+            const conceptId = lesson.hook.conceptId;
+            
+            if(isCorrect) {
+                container.dataset.answered = "true";
+                container.querySelectorAll('button').forEach(b => b.classList.add('pointer-events-none', 'opacity-50'));
+                btn.classList.remove('opacity-50', 'bg-slate-50', 'text-slate-600', 'border-slate-200');
+                btn.classList.add('bg-chem-green', 'text-white', 'border-transparent', 'shadow-md');
+                
+                res.classList.remove('hidden', 'bg-orange-50', 'text-orange-800', 'border-orange-200');
+                res.classList.add('bg-green-50', 'text-green-800', 'border-green-200');
+                res.innerHTML = `<b>💡 Chính xác!</b> ${explain}`;
+                
+                addXP(xp); updateConceptMastery(conceptId, 1); showMicroToast(`Tốt! +${xp} XP`, 'success');
+
+                const id = lessonId;
+                userData.progress[id].hookAnswered = true;
+                saveData();
+
+                const firstConcept = document.getElementById('concept-wrapper-0');
+                if (firstConcept) {
+                    setTimeout(() => {
+                        firstConcept.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        triggerConfetti();
+                    }, 500); 
+                }
+
+            } else {
+                btn.classList.add('pointer-events-none', 'bg-red-50', 'text-red-600', 'border-red-200');
+                res.classList.remove('hidden');
+                res.classList.add('bg-orange-50', 'text-orange-800', 'border-orange-200');
+                res.innerHTML = `<b>🤯 Chưa chính xác!</b> Hãy thử chọn đáp án khác xem sao.`;
+            }
+        }
+
+        function checkMicroQuiz(btn, lessonId, conceptIdx, isCorrect) {
+            const parent = btn.closest('[data-answered]');
+            if(parent.dataset.answered === "true") return;
+
+            const c = dbLessons[lessonId].concepts[conceptIdx];
+            const explain = c.microQuiz.explain;
+            const xp = c.microQuiz.xp;
+            const conceptId = c.id;
+
+            if(isCorrect) {
+                parent.dataset.answered = "true";
+                btn.className = "p-4 bg-green-50 border border-green-400 rounded-2xl text-sm font-bold text-green-700 transition-all text-left shadow-sm";
+                btn.querySelector('span').className = "inline-block w-6 h-6 rounded-full bg-green-200 text-green-800 text-center text-xs leading-6 mr-2";
+                
+                parent.querySelectorAll('button').forEach(b => {
+                    if (b !== btn) b.classList.add('opacity-50', 'pointer-events-none');
+                });
+                addXP(xp); updateConceptMastery(conceptId, 2);
+
+                const id = lessonId;
+                const isLastConcept = conceptIdx === dbLessons[id].concepts.length - 1;
+
+                if (isLastConcept) {
+                    setTimeout(() => {
+                        triggerConfetti();
+                        showMicroToast("Hoàn thành! Bạn có thể chuyển sang phần Củng Cố", "success");
+                    }, 600);
+
+                } else {
+                    showMicroToast(`Tuyệt vời! +${xp} XP`, "success"); 
+                    const nextIdx = conceptIdx + 1;
+                    const nextConcept = document.getElementById(`concept-wrapper-${nextIdx}`);
+                    
+                    if (nextConcept) {
+                        setTimeout(() => {
+                            nextConcept.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            triggerConfetti();
+                        }, 800);
+                    }
+                }
+            } else {
+                btn.className = "p-4 bg-red-50 border border-red-300 rounded-2xl text-sm font-bold text-red-700 transition-all text-left pointer-events-none";
+                btn.querySelector('span').className = "inline-block w-6 h-6 rounded-full bg-red-200 text-red-800 text-center text-xs leading-6 mr-2";
+                updateConceptMastery(conceptId, 0); 
+            }
+            
+            let expBox = parent.querySelector('.explanation-box');
+            if (!expBox) {
+                expBox = document.createElement('div');
+                expBox.className = `explanation-box mt-4 p-5 text-sm font-medium rounded-xl leading-relaxed border ${isCorrect ? 'bg-green-50 text-green-800 border-green-200' : 'bg-orange-50 text-orange-800 border-orange-200'}`;
+                parent.appendChild(expBox);
+            } else if (isCorrect) {
+                expBox.className = `explanation-box mt-4 p-5 text-sm font-medium rounded-xl leading-relaxed bg-green-50 text-green-800 border border-green-200`;
+            }
+            expBox.innerHTML = `<b>Giải thích:</b> ${explain}`;
+        }
+
+        function checkPractice(btn, isCorrect) {
+            const parent = btn.parentNode;
+            if(parent.dataset.answered === "true") return;
+            
+            if(isCorrect) { 
+                parent.dataset.answered = "true";
+                parent.querySelectorAll('button').forEach(b => b.classList.add('opacity-50', 'pointer-events-none'));
+                btn.classList.remove('opacity-50', 'bg-slate-50', 'border-slate-200', 'text-slate-600');
+                btn.classList.add('bg-green-50', 'border-green-400', 'text-green-700'); 
+                btn.querySelector('span').classList.replace('bg-slate-200', 'bg-green-200');
+                showMicroToast("Chính xác!", "success");
+            } else { 
+                btn.classList.remove('bg-slate-50', 'border-slate-200', 'text-slate-600');
+                btn.classList.add('bg-red-50', 'border-red-300', 'text-red-700', 'shake', 'pointer-events-none'); 
+                btn.querySelector('span').classList.replace('bg-slate-200', 'bg-red-200');
+            }
+        }
+
+        function answerSpeedGame(answer) {
+            const state = window.speedGameState;
+            const q = state.qs[state.current];
+            if (answer === q.isTrue) {
+                state.score++;
+                showMicroToast("Chính xác!", "success");
+            } else {
+                showMicroToast("Sai rồi!", "warning");
+            }
+            state.current++;
+            if (state.current < state.qs.length) {
+                document.getElementById('sg-current').innerText = state.current + 1;
+                document.getElementById('sg-question').innerText = state.qs[state.current].q;
+            } else {
+                document.getElementById('sg-play-area').classList.add('hidden');
+                const resArea = document.getElementById('sg-result-area');
+                resArea.classList.remove('hidden');
+                document.getElementById('sg-score').innerText = state.score;
+                
+                const btnBox = document.getElementById('sg-reward-btn');
+                if(state.score === state.qs.length) {
+                    btnBox.innerHTML = `<button class="px-8 py-3 bg-rose-500 text-white rounded-full font-bold text-sm shadow-sm pointer-events-none">Đã nhận +${state.xp} XP</button>`;
+                    addXP(state.xp);
+                    triggerConfetti();
+                } else {
+                    btnBox.innerHTML = `<button onclick="resetSpeedGame()" class="px-8 py-3 bg-white border border-slate-200 text-slate-600 rounded-full font-bold text-sm hover:bg-slate-50 transition-colors shadow-sm"><i class="fas fa-redo mr-2"></i> Chơi lại để nhận XP</button>`;
+                }
+            }
+        }
+
+        function resetSpeedGame() {
+            window.speedGameState.current = 0;
+            window.speedGameState.score = 0;
+            document.getElementById('sg-current').innerText = 1;
+            document.getElementById('sg-question').innerText = window.speedGameState.qs[0].q;
+            document.getElementById('sg-result-area').classList.add('hidden');
+            document.getElementById('sg-play-area').classList.remove('hidden');
+        }
+
+        function selectMatch(side, id) {
+            if(!window.matchState) window.matchState = { selectedLeft: null, selectedRight: null, matchedCount: 0, total: document.querySelectorAll('#match-game-container .match-item[id^="ml-"]').length, xp: 50 };
+            
+            const el = document.getElementById(`m${side.charAt(0)}-${id}`);
+            if(!el || el.classList.contains('matched')) return;
+
+            if(side === 'left') { 
+                if(window.matchState.selectedLeft) {
+                    const prev = document.getElementById(`ml-${window.matchState.selectedLeft}`);
+                    if(prev) prev.classList.remove('selected');
+                }
+                window.matchState.selectedLeft = id; 
+            } else { 
+                if(window.matchState.selectedRight) {
+                    const prev = document.getElementById(`mr-${window.matchState.selectedRight}`);
+                    if(prev) prev.classList.remove('selected');
+                }
+                window.matchState.selectedRight = id; 
+            }
+            el.classList.add('selected');
+
+            if(window.matchState.selectedLeft && window.matchState.selectedRight) {
+                const elLeft = document.getElementById(`ml-${window.matchState.selectedLeft}`);
+                const elRight = document.getElementById(`mr-${window.matchState.selectedRight}`);
+                const res = document.getElementById('match-result');
+
+                if(window.matchState.selectedLeft === window.matchState.selectedRight) {
+                    elLeft.classList.remove('selected'); elRight.classList.remove('selected');
+                    elLeft.classList.add('matched'); elRight.classList.add('matched');
+                    window.matchState.matchedCount++;
+                    res.innerHTML = `<span class="text-chem-green bg-green-50 border border-green-200 px-4 py-2 rounded-full">Ghép đúng!</span>`;
+                    
+                    if(window.matchState.matchedCount === window.matchState.total) {
+                        res.innerHTML = `<span class="text-ai-purple bg-purple-50 border border-purple-200 px-6 py-2 rounded-full">Hoàn thành! +${window.matchState.xp} XP</span>`;
+                        addXP(window.matchState.xp); triggerConfetti();
+                        window.matchState = null;
+                    } else {
+                        window.matchState.selectedLeft = null; window.matchState.selectedRight = null;
+                    }
+                } else {
+                    elLeft.classList.remove('selected'); elRight.classList.remove('selected');
+                    elLeft.classList.add('error'); elRight.classList.add('error');
+                    res.innerHTML = `<span class="text-red-600 bg-red-50 border border-red-200 px-4 py-2 rounded-full">Sai rồi!</span>`;
+                    
+                    setTimeout(() => { 
+                        if(elLeft) elLeft.classList.remove('error'); 
+                        if(elRight) elRight.classList.remove('error'); 
+                        res.innerHTML = ''; 
+                    }, 600);
+                    
+                    window.matchState.selectedLeft = null; window.matchState.selectedRight = null;
+                }
+            }
+        }
+
+        function startFinalTest() {
+            document.getElementById('test-intro').classList.add('hidden');
+            document.getElementById('test-play').classList.remove('hidden');
+            renderFinalTestQuestion();
+            const ft = window.finalTestState;
+            ft.timer = setInterval(() => {
+                ft.timeLeft--;
+                let m = Math.floor(ft.timeLeft / 60).toString().padStart(2, '0'); let s = (ft.timeLeft % 60).toString().padStart(2, '0');
+                document.getElementById('test-timer').innerHTML = `<i class="far fa-clock mr-2"></i> ${m}:${s}`;
+                if(ft.timeLeft <= 0) submitFinalTest();
+            }, 1000);
+        }
+
+        function renderFinalTestQuestion() {
+            const ft = window.finalTestState; const q = ft.data.questions[ft.qIndex];
+            document.getElementById('test-q-num').innerText = ft.qIndex + 1;
+            document.getElementById('test-question').innerText = q.q;
+            document.getElementById('test-options').innerHTML = q.opts.map((opt, i) => `<button onclick="answerFinalTest(${i})" class="w-full p-4 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-xl text-sm font-bold text-slate-200 transition-colors text-left flex items-center gap-3"><span class="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center shrink-0 text-xs text-slate-300 border border-slate-600">${String.fromCharCode(65+i)}</span><span>${opt}</span></button>`).join('');
+        }
+
+        function answerFinalTest(ansIdx) {
+            const ft = window.finalTestState; const q = ft.data.questions[ft.qIndex];
+            if(ansIdx === q.correct) { ft.score++; updateConceptMastery(q.conceptId, 2); } else { updateConceptMastery(q.conceptId, 0); }
+            ft.qIndex++;
+            if(ft.qIndex < ft.data.questions.length) renderFinalTestQuestion(); else submitFinalTest();
+        }
+
+        function submitFinalTest() {
+            clearInterval(window.finalTestState.timer);
+            document.getElementById('test-play').classList.add('hidden');
+            document.getElementById('test-result').classList.remove('hidden');
+            
+            const ft = window.finalTestState;
+            const score10 = Math.round((ft.score / ft.data.questions.length) * 10);
+            
+            document.getElementById('test-final-score').innerText = score10;
+            const msgEl = document.getElementById('test-feedback-msg');
+            const btnAction = document.getElementById('test-action-btn');
+            
+            if(score10 >= 8) { 
+                msgEl.innerHTML = "<span class='text-chem-green font-bold'>Xuất sắc! Bạn đã nắm vững kiến thức. Nhận +100 XP.</span>"; 
+                addXP(100); 
+                triggerConfetti(); 
+            } else if(score10 >= 5) { 
+                msgEl.innerHTML = "<span class='text-yellow-400 font-bold'>Khá tốt! Đã đạt tiêu chuẩn cơ bản. Nhận +50 XP.</span>"; 
+                addXP(50); 
+                triggerConfetti(); 
+            } else { 
+                msgEl.innerHTML = "<span class='text-red-400 font-bold'>Chưa đạt 5/10. Bạn cần ôn lại bài và làm lại kiểm tra nhé!</span>"; 
+            }
+            
+            if (score10 >= 5) {
+                btnAction.innerHTML = `<button onclick="markTaskDone('practice', null)" class="px-10 py-4 bg-chem-green hover:bg-emerald-600 text-white font-black rounded-full btn-hover-lift transition-colors shadow-sm">Hoàn Thành & Lưu Kết Quả</button>`;
+                userData.progress[userData.currentLessonId].testScore = score10; 
+                saveData();
+            } else {
+                btnAction.innerHTML = `<button onclick="retryFinalTest()" class="px-10 py-4 bg-slate-700 hover:bg-slate-600 text-white font-black rounded-full btn-hover-lift transition-colors shadow-sm"><i class="fas fa-redo mr-2"></i> Làm lại bài kiểm tra</button>`;
+            }
+        }
+
+        function retryFinalTest() {
+            document.getElementById('test-result').classList.add('hidden');
+            document.getElementById('test-intro').classList.remove('hidden');
+            window.finalTestState.qIndex = 0;
+            window.finalTestState.score = 0;
+            window.finalTestState.timeLeft = window.finalTestState.data.timeLimit;
+        }
+
+        function showUnlockOverlay(nextId, nextTitle) {
+            const overlay = document.getElementById('unlock-overlay');
+            document.getElementById('unlock-lesson-title').innerText = `Bài ${nextId}: ${nextTitle}`;
+            
+            overlay.classList.remove('hidden');
+            overlay.classList.add('flex');
+            triggerConfetti(); 
+            
+            setTimeout(() => { overlay.classList.remove('opacity-0'); }, 10);
+            
+            setTimeout(() => {
+                overlay.classList.add('opacity-0');
+                setTimeout(() => {
+                    overlay.classList.add('hidden');
+                    overlay.classList.remove('flex');
+                }, 300);
+            }, 4000);
+        }
+
+        // CHỨC NĂNG MỚI: Popup hoàn thành toàn bộ
+        function showCourseCompleteOverlay() {
+            const overlay = document.getElementById('course-complete-overlay');
+            overlay.classList.remove('hidden');
+            overlay.classList.add('flex');
+            triggerConfetti();
+            setTimeout(() => triggerConfetti(), 800);
+            setTimeout(() => triggerConfetti(), 1600);
+            setTimeout(() => { overlay.classList.remove('opacity-0'); }, 10);
+        }
+
+        function closeCourseComplete() {
+            const overlay = document.getElementById('course-complete-overlay');
+            overlay.classList.add('opacity-0');
+            setTimeout(() => {
+                overlay.classList.add('hidden');
+                overlay.classList.remove('flex');
+            }, 300);
+        }
+
+        function markTaskDone(task, nextTab) {
+            const id = parseInt(userData.currentLessonId);
+            if(!userData.progress[id][task]) { userData.progress[id][task] = true; saveData(); renderSidebarDashboard(); renderSidebarLessons(); }
+            
+            const state = userData.progress[id];
+            
+            if(state.theory && state.game && state.practice && !state.completed) {
+                state.completed = true; 
+                showMicroToast("Hoàn thành bài học!", "success");
+            }
+            if(nextTab) openTab(nextTab);
+        }
+
+        function updateConceptMastery(conceptId, level) {
+            if(!conceptId) return;
+            const currentLevel = userData.conceptMastery[conceptId] !== undefined ? userData.conceptMastery[conceptId] : -1;
+            if(level === 0 || level > currentLevel) { 
+                userData.conceptMastery[conceptId] = level; 
+                saveData(); 
+                renderSidebarDashboard(); 
+            }
+        }
+
+        function addXP(amount) {
+            userData.xp += amount; const newLevel = Math.floor(userData.xp / 1000) + 1;
+            if (newLevel > userData.level) { userData.level = newLevel; triggerConfetti(); }
+            saveData();
+        }
+
+        function updateGlobalUI() {
+            // Nav bar doesn't show XP/level - data still tracked in localStorage
+        }
+
+        function openTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(`tab-${tabName}`).classList.add('active');
+            document.getElementById(`btn-${tabName}`).classList.add('active');
+            
+            const mainContent = document.getElementById('main-content');
+            if (mainContent) {
+                mainContent.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
+
+        function showMicroToast(msg, type) {
+            const container = document.getElementById('micro-feedback-container'); const toast = document.createElement('div');
+            toast.className = `${type==='success'?'bg-chem-green':(type==='warning'?'bg-orange-500':'bg-red-500')} text-white px-6 py-3 rounded-full font-bold text-xs shadow-md transform transition-all duration-500 translate-y-4 opacity-0 border ${type==='warning'?'border-orange-400':''}`;
+            toast.innerHTML = `<i class="fas ${type==='success'?'fa-check-circle':(type==='warning'?'fa-exclamation-triangle':'fa-times-circle')} mr-2"></i> ${msg}`; 
+            container.appendChild(toast);
+            setTimeout(() => { toast.classList.remove('translate-y-4', 'opacity-0'); toast.classList.add('translate-y-0', 'opacity-100'); }, 50);
+            setTimeout(() => { toast.classList.replace('translate-y-0', '-translate-y-4'); toast.classList.replace('opacity-100', 'opacity-0'); setTimeout(() => toast.remove(), 500); }, 3000);
+        }
+
+        function toggleTheme() {
+            if (document.documentElement.classList.contains('dark')) {
+                document.documentElement.classList.remove('dark');
+                localStorage.setItem('doly-theme', 'light');
+            } else {
+                document.documentElement.classList.add('dark');
+                localStorage.setItem('doly-theme', 'dark');
+            }
+        }
+        
+        // Load saved theme
+        if (localStorage.getItem('doly-theme') === 'dark') {
+            document.documentElement.classList.add('dark');
+        }
+        
+        function triggerConfetti() { 
+            if(typeof confetti !== 'undefined') {
+                var duration = 2500;
+                var animationEnd = Date.now() + duration;
+                var defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 999999 };
+
+                function randomInRange(min, max) { return Math.random() * (max - min) + min; }
+
+                var interval = setInterval(function() {
+                    var timeLeft = animationEnd - Date.now();
+
+                    if (timeLeft <= 0) { return clearInterval(interval); }
+                    var particleCount = 50 * (timeLeft / duration);
+                    confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } }));
+                    confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } }));
+                }, 250);
+            } 
+        }
+
+        function sendToAI(text) { openTab('qa'); document.getElementById('ai-chat-input').value = text; sendChatMessage({type: 'click'}); }
+        function sendChatMessage(e) {
+            if(e.type === 'keydown' && e.key !== 'Enter') return;
+            const inputEl = document.getElementById('ai-chat-input'); const text = inputEl.value.trim(); if(!text) return;
+            const chatHistory = document.getElementById('ai-chat-history');
+            chatHistory.innerHTML += '<div class="flex gap-2 w-5/6 ml-auto justify-end mb-3"><div class="bg-ai-purple p-3 rounded-xl rounded-tr-none text-sm text-white">' + DolyAPI.esc(text) + '</div></div>';
+            chatHistory.scrollTop = chatHistory.scrollHeight; inputEl.value = '';
+            
+            // Show loading
+            const loadingId = 'ai-load-' + Date.now();
+            chatHistory.innerHTML += '<div id="' + loadingId + '" class="flex gap-3 w-5/6 mb-3"><div class="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center shrink-0 shadow-sm"><i class="fas fa-robot"></i></div><div class="bg-white border border-slate-200 p-4 rounded-xl rounded-tl-none text-sm text-slate-700 shadow-sm"><span class="flex gap-1 items-center">Doly đang suy nghĩ <i class="fas fa-circle text-[4px] animate-bounce"></i><i class="fas fa-circle text-[4px] animate-bounce" style="animation-delay:0.1s"></i><i class="fas fa-circle text-[4px] animate-bounce" style="animation-delay:0.2s"></i></span></div></div>';
+            chatHistory.scrollTop = chatHistory.scrollHeight;
+            
+            DolyAPI.chat(text, { lesson_id: userData.currentLessonId })
+                .then(function(result) {
+                    var loadingEl = document.getElementById(loadingId);
+                    if (loadingEl) {
+                        loadingEl.outerHTML = '<div class="flex gap-3 w-5/6 mb-3"><div class="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center shrink-0 shadow-sm"><i class="fas fa-robot"></i></div><div class="bg-white border border-slate-200 p-4 rounded-xl rounded-tl-none text-sm text-slate-700 shadow-sm">' + DolyAPI.esc(result.reply) + '</div></div>';
+                    }
+                    chatHistory.scrollTop = chatHistory.scrollHeight;
+                })
+                .catch(function(err) {
+                    var loadingEl = document.getElementById(loadingId);
+                    if (loadingEl) {
+                        loadingEl.outerHTML = '<div class="flex gap-3 w-5/6 mb-3"><div class="w-8 h-8 rounded-full bg-red-400 text-white flex items-center justify-center shrink-0 shadow-sm"><i class="fas fa-exclamation-circle"></i></div><div class="bg-red-50 border border-red-200 p-4 rounded-xl rounded-tl-none text-sm text-red-700 shadow-sm">Doly gặp lỗi: ' + DolyAPI.esc(err.message || 'Mất kết nối') + '</div></div>';
+                    }
+                    chatHistory.scrollTop = chatHistory.scrollHeight;
+                });
+        }
+    </script>
+</body>
+</html>

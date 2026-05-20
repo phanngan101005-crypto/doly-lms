@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="vi" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <title>Không gian Phụ huynh - DOLY LMS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="../api/client.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: { 
+                        'brand-blue': '#2563EB',      
+                        'brand-dark-blue': '#1E3A8A', 
+                        'bg-main': '#F8FAFC',
+                    },
+                    fontFamily: { 
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'soft': '0 2px 10px rgba(0, 0, 0, 0.02)',
+                        'hover-soft': '0 10px 25px -3px rgba(37, 99, 235, 0.1)',
+                        'floating': '0 20px 40px -10px rgba(37, 99, 235, 0.2)',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { background-color: #F8FAFC; overflow-x: hidden; }
+        .custom-scrollbar::-webkit-scrollbar { width: 5px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 10px; }
+        .text-bold-thick { -webkit-text-stroke: 0.7px #1E3A8A; }
+        .text-sub-thick { -webkit-text-stroke: 0.3px #94A3B8; }
+        
+        /* Hiệu ứng rung nhẹ cho nút AI để thu hút chú ý */
+        @keyframes pulse-ring {
+            0% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.4); }
+            70% { box-shadow: 0 0 0 15px rgba(37, 99, 235, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0); }
+        }
+        .ai-pulse { animation: pulse-ring 2s infinite; }
+    </style>
+</head>
+<body class="antialiased font-sans text-slate-800 relative">
+
+    <div class="flex min-h-screen">
+        
+        <!-- Sidebar Siêu Tối Giản -->
+        <aside class="w-72 bg-white border-r border-slate-200 hidden lg:flex flex-col sticky top-0 h-screen z-40 transition-all">
+            <div class="p-8">
+                <a href="#" class="flex items-center gap-3.5 hover:opacity-80 transition-opacity group">
+                    <div class="w-[42px] h-[42px] flex items-center justify-center shrink-0">
+                        <img src="../logodoly.png" alt="Doly Logo" class="w-full h-full object-contain" onerror="this.src='https://ui-avatars.com/api/?name=D&background=1E3A8A&color=fff'">
+                    </div>
+                    <div class="flex flex-col justify-center">
+                        <div class="text-[21px] font-black text-brand-dark-blue leading-none tracking-[-0.04em] text-bold-thick">DOLY LMS</div>
+                        <span class="text-[9px] font-black text-[#94A3B8] uppercase tracking-[0.18em] mt-1.5 text-sub-thick">PARENT PORTAL</span>
+                    </div>
+                </a>
+            </div>
+            
+            <nav class="flex-1 py-4 px-5 space-y-2 custom-scrollbar">
+                <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3 px-3">Theo dõi</p>
+                
+                <a href="#" class="flex items-center gap-3 px-4 py-4 rounded-2xl transition-all font-[900] text-base bg-blue-50 text-brand-blue shadow-sm shadow-blue-100 border border-blue-100">
+                    <i class="fa-solid fa-ranking-star text-xl w-6 text-center"></i> <span>Kết quả học tập</span>
+                </a>
+            </nav>
+
+            <div class="p-6">
+                <div class="relative">
+                    <div onclick="document.getElementById('user-dropdown').classList.toggle('hidden')" class="flex items-center gap-3 p-3 rounded-2xl border border-slate-100 bg-slate-50 hover:bg-slate-100 transition-colors cursor-pointer select-none">
+                        <img id="sidebar-parent-avatar" src="https://ui-avatars.com/api/?name=User&background=EFF6FF&color=2563EB" class="w-10 h-10 rounded-full">
+                        <div class="flex-1 min-w-0">
+                            <p id="sidebar-parent-name" class="text-[13px] font-extrabold text-brand-dark-blue truncate">Đang tải...</p>
+                            <p id="sidebar-parent-child" class="text-[11px] text-slate-500 font-bold truncate">Phụ huynh</p>
+                        </div>
+                        <i class="fa-solid fa-chevron-up text-[10px] text-slate-400"></i>
+                    </div>
+                    
+                    <div id="user-dropdown" class="hidden absolute bottom-full left-0 w-full mb-2 bg-white border border-slate-200 rounded-2xl shadow-hover-soft z-50 overflow-hidden">
+                        <!-- Menu kết nối học sinh mới ở Mobile/Sidebar -->
+                        <button onclick="document.getElementById('add-child-modal').classList.remove('hidden'); document.getElementById('user-dropdown').classList.add('hidden')" class="w-full flex items-center gap-3 px-4 py-3 text-sm font-bold text-brand-blue hover:bg-blue-50 transition-colors border-b border-slate-100 text-left">
+                            <i class="fa-solid fa-link w-4"></i> Nhập mã kết nối học sinh
+                        </button>
+                        <a href="#" onclick="handleLogout()" class="flex items-center gap-3 px-4 py-3 text-sm font-extrabold text-red-600 hover:bg-red-50 transition-colors">
+                            <i class="fa-solid fa-arrow-right-from-bracket w-4"></i> Đăng xuất
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 flex flex-col min-w-0">
+            <header class="h-20 bg-white/80 backdrop-blur-md border-b border-slate-200 flex items-center justify-between px-4 md:px-8 sticky top-0 z-30">
+                <div class="flex items-center gap-4">
+                    <button class="lg:hidden text-slate-500"><i class="fa-solid fa-bars text-xl"></i></button>
+                    
+                    <!-- Chuyển đổi con (Dropdown) -->
+                    <div class="flex items-center gap-2 relative" id="child-selector">
+                        <span class="hidden md:inline text-sm font-bold text-slate-500">Đang theo dõi:</span>
+                        <button onclick="document.getElementById('child-dropdown').classList.toggle('hidden')" class="flex items-center gap-2 bg-blue-50 border border-blue-100 px-3 py-1.5 md:py-2 rounded-xl hover:bg-blue-100 transition-colors">
+                            <div class="w-6 h-6 rounded-full bg-brand-blue text-white flex items-center justify-center text-[10px] font-bold shrink-0 shadow-sm">?</div>
+                            <span data-child-name class="text-[13px] md:text-sm font-extrabold text-brand-blue truncate max-w-[120px] md:max-w-none">Dang tai...</span>
+                            <i class="fa-solid fa-chevron-down text-brand-blue text-[10px] ml-1"></i>
+                        </button>
+                        
+                        <!-- Dropdown Chọn Bé -->
+                        <div id="child-dropdown" class="hidden absolute top-full left-0 md:left-auto mt-2 w-72 bg-white border border-slate-200 rounded-2xl shadow-floating z-50 overflow-hidden">
+                            <div id="child-dropdown-content" class="p-2 space-y-1">
+                                <div class="p-3 text-center text-sm text-slate-400 font-bold">Dang tai...</div>
+                            </div>
+                            <div class="p-2 border-t border-slate-100">
+                                <button onclick="document.getElementById('add-child-modal').classList.remove('hidden'); document.getElementById('child-dropdown').classList.add('hidden')" class="w-full flex items-center justify-center gap-2 p-2.5 rounded-xl bg-slate-50 hover:bg-blue-50 text-brand-blue font-extrabold text-sm transition-colors border border-dashed border-blue-200">
+                                    <i class="fa-solid fa-plus text-xs"></i> Thêm bé (Nhập mã)
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Nút bật AI trên Mobile -->
+                <button onclick="toggleAIChat()" class="md:hidden flex items-center gap-2 bg-brand-blue text-white px-3 py-1.5 rounded-xl font-bold text-sm shadow-sm">
+                    <img src="../logodoly.png" class="w-5 h-5 object-contain invert brightness-0" alt="Doly" onerror="this.src='https://ui-avatars.com/api/?name=D&background=1E3A8A&color=fff'"> AI
+                </button>
+            </header>
+
+            <div class="p-4 md:p-8 max-w-[1200px] mx-auto w-full space-y-6 md:space-y-8">
+                
+                        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div>
+                        <h1 class="text-2xl md:text-3xl font-extrabold text-brand-dark-blue uppercase tracking-wide [word-spacing:3px]">TÌNH HÌNH HỌC TẬP</h1>
+                        <p class="text-xs md:text-sm text-slate-500 font-bold mt-1">Cập nhật điểm số và bài tập mới nhất cua <span id="child-name-header" class="text-brand-blue">con</span>.</p>
+                    </div>
+                </div>
+
+                <!-- 2 Thẻ Thống kê Tối giản -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-gradient-to-br from-white to-blue-50/30 rounded-3xl p-6 md:p-7 border border-blue-100 shadow-soft flex items-center gap-6 relative overflow-hidden">
+                        <div class="absolute -right-4 -top-4 w-24 h-24 bg-blue-100 rounded-full opacity-50 blur-xl"></div>
+                        <div class="w-16 h-16 rounded-2xl bg-white border border-blue-100 text-brand-blue flex items-center justify-center text-3xl shrink-0 shadow-sm z-10"><i class="fa-solid fa-star"></i></div>
+                        <div class="z-10">
+                            <p class="text-[12px] md:text-[13px] font-bold text-slate-500 uppercase tracking-wider mb-1">Diem trung binh</p>
+                            <div class="flex items-end gap-3">
+                                <div id="child-avg-score" class="text-4xl font-black text-brand-dark-blue leading-none">--</div>
+                                <span id="child-score-status" class="text-[11px] font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded border border-emerald-100 flex items-center gap-1 mb-1">
+                                    <i class="fa-solid fa-arrow-trend-up"></i> Dang tai...
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-3xl p-6 md:p-7 border border-slate-200 shadow-soft flex items-center gap-6">
+                        <div class="w-16 h-16 rounded-2xl bg-slate-50 border border-slate-100 text-slate-600 flex items-center justify-center text-3xl shrink-0"><i class="fa-solid fa-clipboard-check"></i></div>
+                        <div>
+                            <p class="text-[12px] md:text-[13px] font-bold text-slate-500 uppercase tracking-wider mb-1">Tien do nop bai</p>
+                            <div class="text-4xl font-black text-brand-dark-blue leading-none"><span id="child-graded-count">--</span><span class="text-lg font-bold text-slate-400 mx-1">/</span><span class="text-2xl font-bold text-slate-400" id="child-total-count">--</span></div>
+                            <p id="child-progress-text" class="text-[11px] md:text-xs text-slate-500 font-medium mt-1">Dang tai du lieu...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bảng điểm chi tiết -->
+                <div class="bg-white rounded-3xl border border-slate-200 shadow-soft overflow-hidden">
+                    <div class="p-6 border-b border-slate-100">
+                        <h2 class="font-extrabold text-slate-800 text-[15px] md:text-lg flex items-center gap-2">
+                            <i class="fa-solid fa-list-ul text-brand-blue"></i> Chi tiết điểm các bài kiểm tra
+                        </h2>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm whitespace-nowrap min-w-[600px]">
+                            <thead class="bg-slate-50/80 border-b border-slate-200 text-slate-500 font-bold uppercase text-[11px] md:text-xs tracking-wider">
+                                <tr>
+                                    <th class="px-6 py-4">Tên bài tập / Kiểm tra</th>
+                                    <th class="px-6 py-4">Môn học</th>
+                                    <th class="px-6 py-4 text-center">Trạng thái</th>
+                                    <th class="px-6 py-4 text-center text-brand-dark-blue font-black">Điểm số</th>
+                                </tr>
+                            </thead>
+                            <tbody id="grades-tbody" class="divide-y divide-slate-100">
+                                <tr><td colspan="4" class="px-6 py-12 text-center text-slate-400 font-bold">Dang tai du lieu...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- ===== NÚT MỞ TRỢ LÝ AI (FLOATING - DOLY AVATAR) ===== -->
+    <button onclick="toggleAIChat()" class="hidden md:flex fixed bottom-8 right-8 z-50 w-16 h-16 bg-white border-4 border-brand-blue text-white rounded-full items-center justify-center shadow-floating ai-pulse hover:scale-110 transition-transform p-1 overflow-hidden">
+        <img src="../logodoly.png" class="w-full h-full object-contain" alt="Doly" onerror="this.src='https://ui-avatars.com/api/?name=D&background=1E3A8A&color=fff'">
+    </button>
+
+    <!-- ===== MODAL NHẬP MÃ KẾT NỐI ===== -->
+    <div id="add-child-modal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 hidden flex items-center justify-center opacity-100 transition-opacity p-4">
+        <div class="bg-white p-6 md:p-8 rounded-[2rem] shadow-2xl w-full max-w-md relative transform scale-100 transition-transform">
+            <button onclick="document.getElementById('add-child-modal').classList.add('hidden')" class="absolute top-5 right-5 text-slate-400 hover:text-slate-600 w-8 h-8 flex items-center justify-center bg-slate-50 hover:bg-slate-100 rounded-full transition-colors">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+            <div class="w-16 h-16 rounded-2xl bg-blue-50 text-brand-blue flex items-center justify-center text-2xl mb-4 border border-blue-100 shadow-sm">
+                <i class="fa-solid fa-link"></i>
+            </div>
+            <h2 class="text-2xl font-black text-brand-dark-blue uppercase mb-2">Kết nối hồ sơ</h2>
+            <p class="text-sm font-bold text-slate-500 mb-6">Vui lòng nhập mã kết nối do giáo viên cung cấp để theo dõi kết quả học tập của con.</p>
+            
+            <input type="text" id="parent-link-input" placeholder="VD: PH-A8X9K2..." class="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-[15px] font-bold text-slate-800 focus:bg-white focus:border-brand-blue focus:ring-4 focus:ring-blue-50 outline-none transition-all mb-6 uppercase tracking-widest text-center shadow-inner placeholder:normal-case placeholder:tracking-normal placeholder:font-medium">
+            
+            <button id="btn-connect-child" onclick="connectChild(this)" class="w-full py-4 bg-brand-blue text-white rounded-2xl font-black text-[15px] uppercase tracking-wide shadow-lg shadow-blue-200 hover:bg-blue-700 active:scale-[0.98] transition-all flex items-center justify-center gap-2">
+                Xác nhận kết nối
+            </button>
+        </div>
+    </div>
+
+    <!-- ===== KHUNG CHAT AI (TRƯỢT TỪ PHẢI SANG) ===== -->
+    <div id="ai-chat-panel" class="fixed inset-y-0 right-0 w-full md:w-[400px] bg-white shadow-2xl transform translate-x-full transition-transform duration-300 z-50 flex flex-col border-l border-slate-200">
+        
+        <!-- Header Chat -->
+        <div class="h-20 bg-brand-dark-blue flex items-center justify-between px-6 shrink-0 shadow-sm relative z-10">
+            <div class="flex items-center gap-3 text-white">
+                <div class="w-11 h-11 rounded-full bg-white flex items-center justify-center shadow-sm overflow-hidden p-1 shrink-0">
+                    <img src="../logodoly.png" class="w-full h-full object-contain" alt="Doly" onerror="this.src='https://ui-avatars.com/api/?name=D&background=1E3A8A&color=fff'">
+                </div>
+                <div>
+                    <h3 class="font-extrabold text-lg leading-tight">Trợ lý Doly</h3>
+                    <p class="text-[11px] text-blue-200 font-medium tracking-wide">Trực tuyến - Hỗ trợ phụ huynh</p>
+                </div>
+            </div>
+            <button onclick="toggleAIChat()" class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <!-- Nội dung Chat -->
+        <div id="ai-history" class="flex-1 overflow-y-auto p-6 space-y-4 bg-slate-50 custom-scrollbar">
+            <!-- Tin nhắn mẫu của AI -->
+            <div class="flex gap-3">
+                <div class="w-8 h-8 rounded-full bg-white flex items-center justify-center shrink-0 border border-slate-200 shadow-sm overflow-hidden p-0.5">
+                    <img src="../logodoly.png" class="w-full h-full object-contain" alt="Doly" onerror="this.src='https://ui-avatars.com/api/?name=D&background=1E3A8A&color=fff'">
+                </div>
+                <div class="bg-white border border-slate-200 p-3.5 rounded-2xl rounded-tl-none text-[14.5px] text-slate-700 shadow-sm leading-relaxed">
+                    Chào anh/chị, tôi là trợ lý AI của hệ thống. Dựa trên dữ liệu hiện tại, cháu Hoàng An đang học rất tốt môn KHTN. <br><br>
+                    Anh/chị có muốn tôi tóm tắt điểm mạnh, điểm yếu hay nhắc nhở lịch học của con không ạ?
+                </div>
+            </div>
+            
+            <!-- Gợi ý câu hỏi -->
+            <div class="flex flex-wrap gap-2 pl-11">
+                <button onclick="fillAndSend('Điểm yếu của con hiện tại là gì?')" class="text-xs font-bold text-brand-blue bg-blue-50 border border-blue-100 px-3 py-1.5 rounded-full hover:bg-blue-100 transition-colors">Điểm yếu của con?</button>
+                <button onclick="fillAndSend('Tuần tới con có bài kiểm tra nào không?')" class="text-xs font-bold text-brand-blue bg-blue-50 border border-blue-100 px-3 py-1.5 rounded-full hover:bg-blue-100 transition-colors">Lịch kiểm tra sắp tới?</button>
+            </div>
+        </div>
+
+        <!-- Khung nhập Chat -->
+        <div class="p-4 bg-white border-t border-slate-200 shrink-0">
+            <div class="flex items-center gap-2 bg-slate-100 p-1.5 rounded-2xl border border-slate-200 focus-within:border-brand-blue focus-within:bg-white transition-colors">
+                <input type="text" id="ai-input" placeholder="Hỏi Doly về tình hình của bé..." class="flex-1 bg-transparent border-none outline-none text-sm px-3 text-slate-800 font-medium placeholder:text-slate-400" onkeypress="if(event.key === 'Enter') sendMsg()">
+                <button onclick="sendMsg()" class="w-10 h-10 rounded-xl bg-brand-blue hover:bg-blue-700 text-white flex items-center justify-center transition-colors shadow-sm shrink-0">
+                    <i class="fa-solid fa-paper-plane text-sm"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lớp phủ tối mờ khi mở Chat/Dropdown trên Mobile -->
+    <div id="ai-overlay" onclick="toggleAIChat()" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-40 hidden opacity-0 transition-opacity"></div>
+
+    <script>
+        // Xử lý click ngoài để đóng các dropdown
+        document.addEventListener('click', function(event) {
+            // Dropdown user (Sidebar)
+            const userDropdown = document.getElementById('user-dropdown');
+            const userMenuBtn = userDropdown?.closest('.relative')?.querySelector('div');
+            if (userDropdown && userMenuBtn && !userMenuBtn.contains(event.target) && !userDropdown.contains(event.target)) {
+                userDropdown.classList.add('hidden');
+            }
+
+            // Dropdown chọn bé (Header)
+            const childDropdown = document.getElementById('child-dropdown');
+            const childMenuBtn = document.getElementById('child-selector')?.querySelector('button');
+            if (childDropdown && childMenuBtn && !childMenuBtn.contains(event.target) && !childDropdown.contains(event.target)) {
+                childDropdown.classList.add('hidden');
+            }
+        });
+
+        // Kết nối phụ huynh với học sinh (gọi API thật)
+        function connectChild(btn) {
+            var input = document.getElementById('parent-link-input');
+            var code = input ? input.value.trim().toUpperCase() : '';
+            if (!code) { alert('Vui long nhap ma ket noi!'); return; }
+            
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Dang xac thuc...';
+            btn.disabled = true;
+            btn.classList.add('opacity-80');
+            
+            DolyAPI.linkParent(code).then(function(result) {
+                btn.innerHTML = '<i class="fa-solid fa-check"></i> Ket noi thanh cong!';
+                btn.classList.replace('bg-brand-blue', 'bg-emerald-500');
+                btn.classList.replace('shadow-blue-200', 'shadow-emerald-200');
+                
+                setTimeout(function() {
+                    document.getElementById('add-child-modal').classList.add('hidden');
+                    btn.innerHTML = 'Xac nhan ket noi';
+                    btn.classList.replace('bg-emerald-500', 'bg-brand-blue');
+                    btn.classList.replace('shadow-emerald-200', 'shadow-blue-200');
+                    btn.disabled = false;
+                    btn.classList.remove('opacity-80');
+                    if (input) input.value = '';
+                    location.reload();
+                }, 1500);
+            }).catch(function(err) {
+                alert(err.message || 'Ma ket noi khong hop le!');
+                btn.innerHTML = 'Xac nhan ket noi';
+                btn.disabled = false;
+                btn.classList.remove('opacity-80');
+            });
+        }
+
+        // Toggle khung Chat AI
+        function toggleAIChat() {
+            const panel = document.getElementById('ai-chat-panel');
+            const overlay = document.getElementById('ai-overlay');
+            
+            panel.classList.toggle('translate-x-full');
+            
+            if(panel.classList.contains('translate-x-full')) {
+                // Đang đóng
+                overlay.classList.add('opacity-0');
+                setTimeout(() => overlay.classList.add('hidden'), 300);
+            } else {
+                // Đang mở
+                overlay.classList.remove('hidden');
+                setTimeout(() => overlay.classList.remove('opacity-0'), 10);
+            }
+        }
+
+        // Nhấn nút gợi ý AI
+        function fillAndSend(text) {
+            const input = document.getElementById('ai-input');
+            input.value = text;
+            sendMsg();
+        }
+
+        // Gửi tin nhắn mô phỏng AI (Đã update Doly Avatar)
+        function sendMsg() {
+            const input = document.getElementById('ai-input');
+            const history = document.getElementById('ai-history');
+            const text = input.value.trim();
+            if(!text) return;
+
+            // Html avatar của AI Doly
+            const aiAvatarHtml = `
+                <div class="w-8 h-8 rounded-full bg-white flex items-center justify-center shrink-0 border border-slate-200 shadow-sm overflow-hidden p-0.5">
+                    <img src="../logodoly.png" class="w-full h-full object-contain" alt="Doly" onerror="this.src='https://ui-avatars.com/api/?name=D&background=1E3A8A&color=fff'">
+                </div>
+            `;
+
+            // Xóa các nút gợi ý nếu có
+            const suggestionBox = history.querySelector('.flex-wrap.gap-2.pl-11');
+            if (suggestionBox) suggestionBox.remove();
+
+            // Tin nhắn của Phụ huynh
+            history.innerHTML += `
+                <div class="flex justify-end mb-4">
+                    <div class="bg-brand-blue text-white p-3.5 rounded-2xl rounded-tr-none text-[14.5px] shadow-sm max-w-[85%] font-medium">
+                        ${text}
+                    </div>
+                </div>
+            `;
+            input.value = '';
+            history.scrollTop = history.scrollHeight;
+
+            // Gọi API AI Chat
+            var loadingId = 'loading-' + Date.now();
+            history.innerHTML += `
+                <div id="${loadingId}" class="flex gap-3 mb-4">
+                    ${aiAvatarHtml}
+                    <div class="bg-white border border-slate-200 p-3.5 rounded-2xl rounded-tl-none text-[14.5px] text-slate-500 shadow-sm flex items-center gap-1.5">
+                        <i class="fa-solid fa-circle text-[5px] animate-bounce"></i>
+                        <i class="fa-solid fa-circle text-[5px] animate-bounce" style="animation-delay: 0.2s"></i>
+                        <i class="fa-solid fa-circle text-[5px] animate-bounce" style="animation-delay: 0.4s"></i>
+                    </div>
+                </div>
+            `;
+            history.scrollTop = history.scrollHeight;
+
+            DolyAPI.chat(text, { role: 'parent' }).then(function(response) {
+                var reply = response && (response.answer || response.message || response.text || 'Cảm ơn anh/chị!');
+                document.getElementById(loadingId).remove();
+                history.innerHTML += `
+                    <div class="flex gap-3 mb-4">
+                        ${aiAvatarHtml}
+                        <div class="bg-white border border-slate-200 p-3.5 rounded-2xl rounded-tl-none text-[14.5px] text-slate-700 shadow-sm leading-relaxed">
+                            ${reply}
+                        </div>
+                    </div>
+                `;
+                history.scrollTop = history.scrollHeight;
+            }).catch(function() {
+                document.getElementById(loadingId).remove();
+                history.innerHTML += `
+                    <div class="flex gap-3 mb-4">
+                        ${aiAvatarHtml}
+                        <div class="bg-white border border-slate-200 p-3.5 rounded-2xl rounded-tl-none text-[14.5px] text-red-500 shadow-sm leading-relaxed">
+                            Rất tiếc, đã có lỗi xảy ra. Vui lòng thử lại sau.
+                        </div>
+                    </div>
+                `;
+                history.scrollTop = history.scrollHeight;
+            });
+        }
+
+        // ========== Load Children & Data ==========
+        var activeChildId = null;
+
+        function populateChildDropdown(children) {
+            var dropdown = document.getElementById('child-dropdown-content');
+            if (!dropdown) return;
+            var html = '';
+            children.forEach(function(child, idx) {
+                var initial = (child.full_name || '?').charAt(0).toUpperCase();
+                var isActive = (idx === 0);
+                var activeClass = isActive ? 'bg-blue-50 border-blue-100' : 'hover:bg-slate-50 border-transparent';
+                var statusIcon = isActive ? '<i class="fa-solid fa-circle-check text-brand-blue text-sm"></i>' : '';
+                html += '<button onclick="switchChild(' + child.id + ', this)" class="w-full flex items-center gap-3 p-2 rounded-xl ' + activeClass + ' border text-left transition-colors">' +
+                    '<div class="w-9 h-9 rounded-full bg-brand-blue text-white flex items-center justify-center text-sm font-bold shrink-0 shadow-sm">' + DolyAPI.esc(initial) + '</div>' +
+                    '<div class="flex-1 min-w-0">' +
+                        '<p class="text-[13px] font-extrabold text-brand-dark-blue truncate">' + DolyAPI.esc(child.full_name || 'Khong ten') + '</p>' +
+                        '<p class="text-[11px] font-bold text-blue-500">' + (child.total_xp ? 'XP: ' + child.total_xp : 'Dang theo doi') + '</p>' +
+                    '</div>' +
+                    statusIcon +
+                '</button>';
+            });
+            dropdown.innerHTML = html;
+        }
+
+        function switchChild(childId, btnEl) {
+            var user = DolyAPI.loadSession();
+            if (!user) return;
+            var children = user._children_cache || [];
+            activeChildId = childId;
+            var child = children.find(function(c) { return c.id === childId; });
+            if (child) {
+                loadChildData(child);
+                populateChildDropdown(children);
+                var headerName = document.getElementById('child-name-header');
+                if (headerName) headerName.textContent = child.full_name || 'con';
+                var sidebarName = document.querySelector('#child-selector button span[data-child-name]');
+                if (sidebarName) sidebarName.textContent = child.full_name || 'Con';
+            }
+            var dd = document.getElementById('child-dropdown');
+            if (dd) dd.classList.add('hidden');
+        }
+
+        function loadChildData(child) {
+            // Stats
+            var avgScore = document.getElementById('child-avg-score');
+            var scoreStatus = document.getElementById('child-score-status');
+            var gradedCount = document.getElementById('child-graded-count');
+            var totalCount = document.getElementById('child-total-count');
+            var progressText = document.getElementById('child-progress-text');
+
+            var total = (child.recent_grades || []).length;
+            var graded = (child.recent_grades || []).filter(function(g) { return g.score !== null && g.max_score !== null; }).length;
+            var sum = 0, gradedCountNum = 0;
+            (child.recent_grades || []).forEach(function(g) {
+                if (g.score !== null && g.max_score !== null && g.max_score > 0) {
+                    sum += (g.score / g.max_score) * 10;
+                    gradedCountNum++;
+                }
+            });
+            var avg = gradedCountNum > 0 ? (sum / gradedCountNum).toFixed(1) : '--';
+
+            if (avgScore) avgScore.textContent = avg;
+            if (scoreStatus) {
+                if (avg !== '--' && parseFloat(avg) >= 7) {
+                    scoreStatus.innerHTML = '<i class="fa-solid fa-arrow-trend-up"></i> Tot';
+                    scoreStatus.className = 'text-[11px] font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded border border-emerald-100 flex items-center gap-1 mb-1';
+                } else if (avg !== '--') {
+                    scoreStatus.innerHTML = '<i class="fa-solid fa-arrow-trend-down"></i> Can co gang';
+                    scoreStatus.className = 'text-[11px] font-bold text-amber-600 bg-amber-50 px-2 py-1 rounded border border-amber-100 flex items-center gap-1 mb-1';
+                } else {
+                    scoreStatus.textContent = 'Chua co diem';
+                }
+            }
+            if (gradedCount) gradedCount.textContent = graded;
+            if (totalCount) totalCount.textContent = total;
+            if (progressText) {
+                if (total > 0) {
+                    progressText.textContent = 'Da cham ' + graded + '/' + total + ' bai.';
+                } else {
+                    progressText.textContent = 'Chua co bai tap nao.';
+                }
+            }
+
+            // Grades table
+            renderGradesTable(child.recent_grades || []);
+        }
+
+        function renderGradesTable(grades) {
+            var tbody = document.getElementById('grades-tbody');
+            if (!tbody) return;
+            if (!grades || grades.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" class="px-6 py-12 text-center text-slate-400 font-bold">Chua co bai kiem tra nao.</td></tr>';
+                return;
+            }
+            var html = '';
+            grades.forEach(function(g) {
+                var title = g.title || 'Bai tap';
+                var subject = g.subject_name || 'Chua phan mon';
+                var date = g.graded_at ? g.graded_at.split(' ')[0] : '';
+                var status, scoreDisplay;
+                if (g.score !== null && g.max_score !== null) {
+                    status = '<span class="bg-emerald-50 text-emerald-600 border border-emerald-100 text-[10px] md:text-[11px] font-bold px-2.5 py-1 rounded-md uppercase tracking-wide">Da cham</span>';
+                    scoreDisplay = (g.max_score > 0) ? ((g.score / g.max_score) * 10).toFixed(1) : '-';
+                } else {
+                    status = '<span class="bg-amber-50 text-amber-600 border border-amber-100 text-[10px] md:text-[11px] font-bold px-2.5 py-1 rounded-md uppercase tracking-wide">Cho cham</span>';
+                    scoreDisplay = '-';
+                }
+                html += '<tr class="hover:bg-slate-50 transition-colors">' +
+                    '<td class="px-6 py-4"><p class="font-bold text-slate-800 text-[14px] md:text-[15px]">' + DolyAPI.esc(title) + '</p>' +
+                        (date ? '<p class="text-[10px] md:text-[11px] text-slate-400 font-bold mt-1">Ngay: ' + DolyAPI.esc(date) + '</p>' : '') +
+                    '</td>' +
+                    '<td class="px-6 py-4 text-slate-600 font-bold text-xs md:text-sm">' + DolyAPI.esc(subject) + '</td>' +
+                    '<td class="px-6 py-4 text-center">' + status + '</td>' +
+                    '<td class="px-6 py-4 text-center font-black text-base md:text-lg ' + (g.score !== null ? 'text-emerald-600' : 'text-slate-400') + '">' + scoreDisplay + '</td>' +
+                '</tr>';
+            });
+            tbody.innerHTML = html;
+        }
+
+        function loadChildrenData() {
+            DolyAPI.getChildren().then(function(result) {
+                var children = result && result.children;
+                if (!children || children.length === 0) {
+                    var headerName = document.getElementById('child-name-header');
+                    if (headerName) headerName.textContent = '(chua ket noi)'; 
+                    document.getElementById('child-avg-score').textContent = '--';
+                    return;
+                }
+                // Cache for switch
+                var user = DolyAPI.loadSession();
+                if (user) user._children_cache = children;
+                activeChildId = children[0].id;
+
+                // Populate dropdown
+                populateChildDropdown(children);
+
+                // Set first child as active
+                var first = children[0];
+                var headerName = document.getElementById('child-name-header');
+                if (headerName) headerName.textContent = first.full_name || 'con';
+                var sidebarName = document.querySelector('#child-selector button span[data-child-name]');
+                if (sidebarName) sidebarName.textContent = first.full_name || 'Con';
+                var sidebarInitial = document.querySelector('#child-selector button div:first-child');
+                if (sidebarInitial) sidebarInitial.textContent = (first.full_name || '?').charAt(0).toUpperCase();
+
+                loadChildData(first);
+            }).catch(function() {
+                var headerName = document.getElementById('child-name-header');
+                if (headerName) headerName.textContent = '(loi tai du lieu)';
+            });
+        }
+
+        // Auth
+        document.addEventListener('DOMContentLoaded', function() {
+            var user = DolyAPI.loadSession();
+            if (!user) {
+                window.location.href = '../login.html';
+                return;
+            }
+            // Sidebar user info from session
+            var sidebarAvatar = document.getElementById('sidebar-parent-avatar');
+            if (sidebarAvatar && user.full_name) {
+                sidebarAvatar.src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(user.full_name) + '&background=EFF6FF&color=2563EB';
+            }
+            var sidebarName = document.getElementById('sidebar-parent-name');
+            if (sidebarName) sidebarName.textContent = user.full_name || 'Phu huynh';
+        
+            // Also update the avatar in sidebar if exists via other selector
+            var sidebarAvatarOld = document.querySelector('.flex.items-center.gap-3 img');
+            if (sidebarAvatarOld && !sidebarAvatarOld.id) {
+                sidebarAvatarOld.src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(user.full_name) + '&background=EFF6FF&color=2563EB';
+            }
+        
+            // Load children
+            loadChildrenData();
+        });
+        function handleLogout() {
+            DolyAPI.logout().catch(function(){}).finally(function(){
+                DolyAPI.clearSession();
+                window.location.href = '../login.html';
+            });
+        }
+    </script>
+</body>
+</html>

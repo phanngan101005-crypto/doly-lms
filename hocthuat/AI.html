@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doly AI - Gia sư siêu việt</title>
+    
+    <!-- Libraries -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="../api/client.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Quicksand:wght@500;600;700;800&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'doly-cream': '#F9FAFB',
+                        'doly-blue': '#2563EB',
+                        'doly-dark': '#0f172a',
+                        'doly-yellow': '#FBBF24',
+                        'doly-cyan': '#00E5FF',
+                    },
+                    fontFamily: {
+                        sans: ['Quicksand', 'sans-serif'],
+                        display: ['Montserrat', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'premium': '0 10px 40px -10px rgba(37, 99, 235, 0.08)',
+                        'neon-blue': '0 0 30px rgba(37, 99, 235, 0.4)',
+                        'chat-bubble': '0 4px 20px rgba(0,0,0,0.04)',
+                    },
+                    animation: {
+                        'float': 'float 6s ease-in-out infinite',
+                        'fade-in-up': 'fadeInUp 0.4s ease-out forwards',
+                    },
+                    keyframes: {
+                        'float': {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-10px)' }
+                        },
+                        'fadeInUp': {
+                            '0%': { opacity: 0, transform: 'translateY(15px)' },
+                            '100%': { opacity: 1, transform: 'translateY(0)' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { background-color: #f4f7fb; color: #1e293b; font-family: 'Quicksand', sans-serif; }
+        
+        /* Custom Scrollbar */
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        .custom-scrollbar:hover::-webkit-scrollbar-thumb { background: #94a3b8; }
+        
+        /* Hide scrollbar for layout areas but keep functionality */
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* VIBRANT AURORA BACKGROUND */
+        .aurora-bg { position: fixed; inset: 0; z-index: -2; background: #f0f5ff; overflow: hidden; pointer-events: none;}
+        .orb { position: absolute; border-radius: 50%; filter: blur(120px); opacity: 0.6; animation: floatOrb 25s infinite alternate ease-in-out; }
+        .orb-1 { width: 60vw; height: 60vw; background: #3b82f6; top: -10%; left: -10%; } 
+        .orb-2 { width: 50vw; height: 50vw; background: #c084fc; bottom: -10%; right: -10%; animation-delay: -5s; } 
+        .orb-3 { width: 45vw; height: 45vw; background: #22d3ee; top: 30%; left: 30%; animation-delay: -10s; mix-blend-mode: multiply; } 
+
+        @keyframes floatOrb {
+            0% { transform: translate(0, 0) scale(1) rotate(0deg); }
+            33% { transform: translate(10vw, -10vh) scale(1.05) rotate(120deg); }
+            66% { transform: translate(-10vw, 15vh) scale(0.95) rotate(240deg); }
+            100% { transform: translate(0, 0) scale(1) rotate(360deg); }
+        }
+        .dot-pattern { background-image: radial-gradient(rgba(37, 99, 235, 0.08) 1.5px, transparent 1.5px); background-size: 32px 32px; position: fixed; inset: 0; z-index: -1; pointer-events: none;}
+
+        /* PREMIUM GLASSMORPHISM */
+        .glass-premium {
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(24px) saturate(160%); 
+            -webkit-backdrop-filter: blur(24px) saturate(160%);
+            border: 1px solid rgba(255, 255, 255, 1);
+            box-shadow: 0 10px 30px -5px rgba(37, 99, 235, 0.08);
+        }
+
+        /* CHAT BUBBLES */
+        .chat-bubble-ai {
+            background: white;
+            border: 1px solid rgba(226, 232, 240, 0.8);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+            border-radius: 1.5rem;
+            border-top-left-radius: 0.25rem;
+        }
+        .chat-bubble-user {
+            background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%);
+            color: white;
+            box-shadow: 0 4px 20px rgba(37, 99, 235, 0.2);
+            border-radius: 1.5rem;
+            border-top-right-radius: 0.25rem;
+        }
+        
+        /* Markdown / Rich Text Simulation */
+        .prose-doly p { margin-bottom: 0.75rem; line-height: 1.6; }
+        .prose-doly p:last-child { margin-bottom: 0; }
+        .prose-doly ul { list-style-type: none; padding-left: 0; margin-bottom: 1rem; }
+        .prose-doly li { position: relative; padding-left: 1.5rem; margin-bottom: 0.5rem; }
+        .prose-doly li::before { content: '✦'; position: absolute; left: 0; color: #2563EB; font-size: 0.8em; top: 0.2em; }
+        .math-block { 
+            background: #f8fafc; padding: 0.75rem 1.25rem; border-radius: 1rem; 
+            border: 1px solid #e2e8f0; font-family: 'Courier New', Courier, monospace; 
+            font-size: 0.95rem; color: #1e293b; font-weight: bold; margin: 1rem 0;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
+        }
+
+        /* Typing Dot Animation */
+        .typing-dot { animation: typing 1.4s infinite ease-in-out both; }
+        .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+        .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+        @keyframes typing { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1); } }
+    </style>
+</head>
+<body class="h-screen w-screen overflow-hidden selection:bg-doly-blue selection:text-white flex flex-col relative">
+
+    <!-- Backgrounds -->
+    <div class="dot-pattern"></div>
+    <div class="aurora-bg">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <!-- Header Glass -->
+    <header class="h-[76px] shrink-0 w-full z-50 bg-white/70 backdrop-blur-2xl border-b border-white shadow-sm flex items-center px-6">
+        <div class="max-w-[1600px] w-full mx-auto flex justify-between items-center">
+            <!-- Logo & Breadcrumb -->
+            <div class="flex items-center gap-4">
+                <a href="../trang chủ/index.html" class="flex items-center gap-2 group transition-transform hover:scale-105">
+                    <img src="../logodoly.png" alt="Doly Logo" class="w-10 h-10 object-contain" onerror="this.src='https://cdn-icons-png.flaticon.com/512/3063/3063822.png'">
+                    <div class="flex flex-col leading-none hidden sm:flex">
+                        <span class="text-xl font-display font-black text-doly-blue tracking-tighter uppercase">DOLY<span class="text-doly-yellow">.</span></span>
+                    </div>
+                </a>
+                <div class="w-px h-6 bg-slate-300 mx-1 hidden md:block"></div>
+                <div class="hidden md:flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-slate-500">
+                    <a href="../hocthuat/hocthuat.html" class="hover:text-doly-blue transition">Học Thuật</a>
+                    <i class="fas fa-chevron-right text-[8px]"></i>
+                    <span class="text-doly-blue font-black flex items-center gap-1.5">
+                        <i class="fas fa-sparkles text-doly-yellow"></i> Doly AI Tutor
+                    </span>
+                </div>
+            </div>
+            
+            <!-- Stats & Avatar -->
+            <div class="flex items-center gap-3">
+                <div class="hidden lg:flex items-center gap-2 bg-white/90 backdrop-blur-md px-4 py-2 rounded-full shadow-sm border border-white cursor-pointer hover:shadow-md transition">
+                    <i class="fas fa-fire text-orange-500 text-sm"></i>
+                    <span class="text-xs font-bold text-slate-700">12 Days</span>
+                </div>
+                <button class="w-10 h-10 rounded-full bg-white overflow-hidden border-2 border-white shadow-md hover:scale-105 transition hover:shadow-neon-blue">
+                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=HoangNam" alt="User" class="w-full h-full object-cover">
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main App Layout -->
+    <main class="flex-1 flex overflow-hidden max-w-[1600px] w-full mx-auto p-4 gap-4 pb-6">
+        
+        <!-- ================= LỆNH (SIDEBAR TRÁI) ================= -->
+        <aside class="w-72 shrink-0 glass-premium rounded-[2rem] flex flex-col overflow-hidden hidden lg:flex relative z-10">
+            <!-- Nút Tạo Mới -->
+            <div class="p-5 border-b border-white/50 bg-white/30">
+                <button onclick="resetChat()" class="w-full py-3.5 bg-gradient-to-r from-doly-blue to-blue-500 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg shadow-blue-500/30 hover:scale-[1.02] transition-transform flex items-center justify-center gap-2">
+                    <i class="fas fa-pen-nib"></i> Chat Mới
+                </button>
+            </div>
+            
+            <!-- Lịch sử Chat -->
+            <div class="flex-1 overflow-y-auto p-3 custom-scrollbar">
+                
+                <h4 class="text-[9px] font-black text-slate-400 uppercase tracking-[0.15em] mx-3 mb-3 mt-2">Hôm nay</h4>
+                
+                <div class="px-4 py-3 bg-white shadow-sm rounded-2xl cursor-pointer border border-blue-100 mb-2 flex items-start gap-3 group relative overflow-hidden">
+                    <div class="absolute left-0 top-0 bottom-0 w-1 bg-doly-blue"></div>
+                    <i class="fas fa-heartbeat text-doly-blue mt-0.5 text-sm"></i>
+                    <div class="flex-1 overflow-hidden">
+                        <span class="text-sm font-bold text-slate-800 block truncate group-hover:text-doly-blue transition">Hỏi đáp Bài 32,33,34</span>
+                        <span class="text-[10px] font-bold text-slate-400 uppercase">KHTN 8 - Cơ thể người</span>
+                    </div>
+                </div>
+
+                <div class="px-4 py-3 hover:bg-white rounded-2xl cursor-pointer border border-transparent mb-2 flex items-start gap-3 transition group hover:shadow-sm">
+                    <i class="fas fa-map text-slate-400 mt-0.5 text-sm group-hover:text-orange-500 transition"></i>
+                    <div class="flex-1 overflow-hidden">
+                        <span class="text-sm font-bold text-slate-600 block truncate group-hover:text-slate-800 transition">Hướng dẫn tìm tài liệu PDF</span>
+                        <span class="text-[10px] font-bold text-slate-400 uppercase">Trợ giúp nền tảng</span>
+                    </div>
+                </div>
+
+                <h4 class="text-[9px] font-black text-slate-400 uppercase tracking-[0.15em] mx-3 mb-3 mt-6">7 Ngày Trước</h4>
+
+                <div class="px-4 py-3 hover:bg-white rounded-2xl cursor-pointer border border-transparent mb-2 flex items-start gap-3 transition group hover:shadow-sm">
+                    <i class="fas fa-cube text-slate-400 mt-0.5 text-sm group-hover:text-cyan-500 transition"></i>
+                    <div class="flex-1 overflow-hidden">
+                        <span class="text-sm font-bold text-slate-600 block truncate group-hover:text-slate-800 transition">Cách dùng Lab Dạ dày 3D/AR</span>
+                        <span class="text-[10px] font-bold text-slate-400 uppercase">Trợ giúp nền tảng</span>
+                    </div>
+                </div>
+                
+                <div class="px-4 py-3 hover:bg-white rounded-2xl cursor-pointer border border-transparent mb-2 flex items-start gap-3 transition group hover:shadow-sm">
+                    <i class="fas fa-chalkboard-teacher text-slate-400 mt-0.5 text-sm group-hover:text-emerald-500 transition"></i>
+                    <div class="flex-1 overflow-hidden">
+                        <span class="text-sm font-bold text-slate-600 block truncate group-hover:text-slate-800 transition">Tư vấn chọn gia sư KHTN</span>
+                        <span class="text-[10px] font-bold text-slate-400 uppercase">Tư vấn lộ trình</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- User Quota info -->
+            <div class="p-4 bg-white/40 border-t border-white/50 text-center">
+                <div class="bg-blue-50 border border-blue-100 rounded-xl p-3 flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <i class="fas fa-bolt text-doly-yellow"></i>
+                        <span class="text-[10px] font-black text-doly-dark uppercase">AI Premium</span>
+                    </div>
+                    <span class="text-[10px] font-bold text-slate-500">Vô hạn</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- ================= KHU VỰC TRUNG TÂM (CHAT GIAO DIỆN CHÍNH) ================= -->
+        <section class="flex-1 glass-premium rounded-[2.5rem] flex flex-col relative z-10 overflow-hidden shadow-2xl">
+            
+            <!-- Chat Header -->
+            <div class="h-[76px] shrink-0 border-b border-white/60 flex justify-between items-center px-6 md:px-8 bg-white/40 backdrop-blur-md">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-[1rem] bg-gradient-to-br from-cyan-400 to-blue-600 text-white flex items-center justify-center text-xl shadow-neon-blue relative">
+                        <i class="fas fa-robot"></i>
+                        <span class="absolute -bottom-1 -right-1 w-3.5 h-3.5 bg-emerald-500 border-2 border-white rounded-full"></span>
+                    </div>
+                    <div>
+                        <h2 class="text-lg font-display font-black text-doly-dark leading-tight">Doly AI Helper</h2>
+                        <div class="text-[10px] font-bold text-emerald-600 uppercase tracking-widest flex items-center gap-1 mt-0.5">
+                            Trợ lý học thuật & Hướng dẫn viên
+                        </div>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button class="w-10 h-10 rounded-xl hover:bg-white text-slate-400 hover:text-doly-blue hover:shadow-sm flex items-center justify-center transition" title="Lưu cuộc hội thoại">
+                        <i class="fas fa-download"></i>
+                    </button>
+                    <button class="w-10 h-10 rounded-xl hover:bg-white text-slate-400 hover:text-red-500 hover:shadow-sm flex items-center justify-center transition" title="Báo cáo lỗi">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Messages Area -->
+            <div class="flex-1 overflow-y-auto p-4 md:p-8 flex flex-col gap-6 custom-scrollbar bg-white/20" id="chat-container">
+                
+                <!-- Initial Welcome Screen (Sẽ ẩn khi bắt đầu chat) -->
+                <div id="welcome-screen" class="hidden flex flex-col items-center justify-center h-full text-center max-w-3xl mx-auto opacity-0 transition-opacity duration-500">
+                    <div class="w-28 h-28 bg-white rounded-[2rem] flex items-center justify-center text-6xl mb-6 shadow-xl border border-white animate-float relative">
+                        🐬
+                        <div class="absolute -top-2 -right-2 text-2xl animate-bounce">✨</div>
+                    </div>
+                    <h1 class="text-3xl md:text-4xl font-display font-black text-doly-dark mb-4 tracking-tight">Chào Hoàng Nam!</h1>
+                    <p class="text-slate-600 font-semibold mb-10 max-w-md text-sm leading-relaxed">Doly đã sẵn sàng hỗ trợ bạn giải bài, hoặc hướng dẫn bạn sử dụng mọi tính năng tuyệt vời trên Doly LMS.</p>
+                    
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full px-4">
+                        <button class="p-4 bg-white/70 backdrop-blur-md border border-white hover:border-doly-blue hover:shadow-lg rounded-3xl text-left transition-all duration-300 group flex items-start gap-4" onclick="document.getElementById('chat-input').value='Tóm tắt Bài 33: Máu và hệ tuần hoàn'; sendMessage()">
+                            <div class="w-10 h-10 shrink-0 rounded-xl bg-blue-50 text-doly-blue flex items-center justify-center group-hover:scale-110 transition-transform"><i class="fas fa-heartbeat text-lg"></i></div>
+                            <div>
+                                <h3 class="font-black text-slate-800 text-sm mb-0.5">Hỏi Bài KHTN 8</h3>
+                                <p class="text-[10px] font-bold text-slate-500">Bài 32, 33, 34 cơ thể người...</p>
+                            </div>
+                        </button>
+                        <button class="p-4 bg-white/70 backdrop-blur-md border border-white hover:border-purple-500 hover:shadow-lg rounded-3xl text-left transition-all duration-300 group flex items-start gap-4" onclick="document.getElementById('chat-input').value='Cách tải tài liệu Sinh học 8 ở đâu?'; sendMessage()">
+                            <div class="w-10 h-10 shrink-0 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center group-hover:scale-110 transition-transform"><i class="fas fa-file-pdf text-lg"></i></div>
+                            <div>
+                                <h3 class="font-black text-slate-800 text-sm mb-0.5">Tìm tài liệu học tập</h3>
+                                <p class="text-[10px] font-bold text-slate-500">Sổ tay, PDF, Mindmap 4K...</p>
+                            </div>
+                        </button>
+                        <button class="p-4 bg-white/70 backdrop-blur-md border border-white hover:border-cyan-500 hover:shadow-lg rounded-3xl text-left transition-all duration-300 group flex items-start gap-4" onclick="document.getElementById('chat-input').value='Làm sao để dùng Lab 3D/AR Thực hành?'; sendMessage()">
+                            <div class="w-10 h-10 shrink-0 rounded-xl bg-cyan-50 text-cyan-600 flex items-center justify-center group-hover:scale-110 transition-transform"><i class="fas fa-vr-cardboard text-lg"></i></div>
+                            <div>
+                                <h3 class="font-black text-slate-800 text-sm mb-0.5">Dùng Lab 3D/AR</h3>
+                                <p class="text-[10px] font-bold text-slate-500">Xoay 3D & Xem bằng Camera</p>
+                            </div>
+                        </button>
+                        <button class="p-4 bg-white/70 backdrop-blur-md border border-white hover:border-emerald-500 hover:shadow-lg rounded-3xl text-left transition-all duration-300 group flex items-start gap-4" onclick="document.getElementById('chat-input').value='Đặt lịch gia sư 1 kèm 1 như thế nào?'; sendMessage()">
+                            <div class="w-10 h-10 shrink-0 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center group-hover:scale-110 transition-transform"><i class="fas fa-chalkboard-teacher text-lg"></i></div>
+                            <div>
+                                <h3 class="font-black text-slate-800 text-sm mb-0.5">Tìm gia sư 1 kèm 1</h3>
+                                <p class="text-[10px] font-bold text-slate-500">Chọn giáo viên, xếp lịch học</p>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- ================== DUMMY CHAT DEMO KHTN 8 & ONBOARDING ================== -->
+                
+                <!-- User Message -->
+                <div class="flex justify-end mb-2 animate-fade-in-up">
+                    <div class="max-w-[85%] md:max-w-[70%] flex items-end gap-3">
+                        <div class="chat-bubble-user p-5 px-6 text-[15px] font-medium leading-relaxed">
+                            Doly ơi, mình đang ôn KHTN 8 (Bài 32, 33, 34). Doly tóm tắt giúp mình Bài 33 Vòng tuần hoàn máu nhé! Sẵn tiện chỉ mình cách tìm thêm tài liệu ôn tập và dùng tính năng Lab 3D/AR trên web với nha. Mình mới dùng web nên chưa rành 🥺
+                        </div>
+                        <div class="w-9 h-9 rounded-full bg-white border-2 border-white shadow-sm overflow-hidden shrink-0 mb-1">
+                             <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=HoangNam" alt="User" class="w-full h-full object-cover">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- AI Message -->
+                <div class="flex justify-start mb-6 animate-fade-in-up" style="animation-delay: 0.2s;">
+                    <div class="max-w-[95%] md:max-w-[85%] flex items-end gap-4">
+                        <div class="w-10 h-10 rounded-[1rem] bg-gradient-to-br from-cyan-400 to-blue-600 text-white flex items-center justify-center text-lg shrink-0 mb-1 shadow-md border border-white">
+                             <i class="fas fa-robot"></i>
+                        </div>
+                        <div class="chat-bubble-ai p-6 md:p-8 text-[14px] md:text-[15px] text-slate-700 prose-doly font-medium shadow-xl">
+                            <p>Chào Hoàng Nam! Chào mừng bạn đến với hệ sinh thái Doly LMS. Mình sẽ giúp bạn ôn bài và trở thành "master" khi sử dụng web ngay nhé! 🚀</p>
+                            
+                            <!-- Phần 1: Trả lời kiến thức -->
+                            <div class="bg-blue-50/50 p-5 rounded-2xl border border-blue-100 my-4">
+                                <h4 class="font-black text-doly-blue text-base mb-3 flex items-center gap-2">
+                                    <i class="fas fa-heartbeat"></i> 1. Tóm tắt Bài 33: Máu & Vòng tuần hoàn
+                                </h4>
+                                <p>Cơ thể người có 2 vòng tuần hoàn hoạt động liên tục:</p>
+                                <ul>
+                                    <li><strong class="text-red-500">Vòng tuần hoàn lớn (Nuôi cơ thể):</strong> Máu đỏ tươi (giàu O₂) từ <strong class="text-doly-dark">tâm thất trái</strong> bơm qua động mạch chủ đi nuôi các cơ quan. Máu nhường O₂, nhận CO₂ chuyển thành máu đỏ thẫm rồi theo tĩnh mạch chủ về <strong class="text-doly-dark">tâm nhĩ phải</strong>.</li>
+                                    <li><strong class="text-blue-500">Vòng tuần hoàn nhỏ (Trao đổi khí):</strong> Máu đỏ thẫm (giàu CO₂) từ <strong class="text-doly-dark">tâm thất phải</strong> bơm qua động mạch phổi lên phổi. Tại đây máu nhả CO₂, nhận O₂ thành máu đỏ tươi và theo tĩnh mạch phổi về <strong class="text-doly-dark">tâm nhĩ trái</strong>.</li>
+                                </ul>
+                            </div>
+
+                            <!-- Phần 2: Hướng dẫn sử dụng nền tảng Doly LMS -->
+                            <h4 class="font-black text-slate-800 text-base mb-3 mt-6">💡 2. Cẩm nang sử dụng Doly LMS cho Nam:</h4>
+                            
+                            <div class="space-y-4">
+                                <!-- Guide 1 -->
+                                <div class="flex gap-4 items-start">
+                                    <div class="w-8 h-8 rounded-xl bg-orange-100 text-orange-600 flex items-center justify-center shrink-0 mt-1"><i class="fas fa-file-pdf"></i></div>
+                                    <div>
+                                        <p class="font-bold text-slate-800">Tìm Tài Liệu & Mindmap 4K:</p>
+                                        <p class="text-sm text-slate-600">Tại thanh Menu ở trên cùng, bạn nhấn vào <strong class="text-doly-dark bg-slate-100 px-1 rounded">Học thuật > Tài liệu</strong>. Tại đây bạn có thể tải về "Sổ tay Sinh học 8" hoặc xem sơ đồ tư duy chất lượng cao cho các Bài 32 (Tiêu hóa), Bài 34 (Hô hấp).</p>
+                                        <a href="tailieu.html" class="inline-block mt-2 text-[11px] font-bold text-doly-blue hover:underline"><i class="fas fa-external-link-alt mr-1"></i> Chuyển đến trang Tài liệu</a>
+                                    </div>
+                                </div>
+                                
+                                <!-- Guide 2 -->
+                                <div class="flex gap-4 items-start">
+                                    <div class="w-8 h-8 rounded-xl bg-cyan-100 text-cyan-600 flex items-center justify-center shrink-0 mt-1"><i class="fas fa-vr-cardboard"></i></div>
+                                    <div>
+                                        <p class="font-bold text-slate-800">Cách sử dụng Phòng Lab 3D/AR:</p>
+                                        <p class="text-sm text-slate-600">Trong quá trình học <strong class="text-doly-dark bg-slate-100 px-1 rounded">Bài giảng (Video)</strong>, hệ thống sẽ tự động hiện nút "Vào Lab 3D/AR". Bạn có thể dùng chuột (trên PC) để xoay 360 độ trái tim, hoặc bấm nút <strong class="text-cyan-600 bg-cyan-50 px-1 rounded"><i class="fas fa-camera text-xs"></i> Xem AR</strong> bằng điện thoại để "đặt" thẳng quả tim lên mặt bàn học của mình luôn đó!</p>
+                                    </div>
+                                </div>
+
+                                <!-- Guide 3 -->
+                                <div class="flex gap-4 items-start">
+                                    <div class="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0 mt-1"><i class="fas fa-chalkboard-teacher"></i></div>
+                                    <div>
+                                        <p class="font-bold text-slate-800">Cần thầy cô giải đáp riêng (Gia sư 1-1)?</p>
+                                        <p class="text-sm text-slate-600">Nếu vẫn chưa hiểu bài, hãy chọn mục <strong class="text-doly-dark bg-slate-100 px-1 rounded">Gia sư</strong> ở Header. Doly AI sẽ match (ghép đôi) bạn với các thầy cô chuyên Sinh học 8 đang rảnh để học 1 kèm 1 qua video call nhé!</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Action buttons -->
+                            <div class="flex items-center gap-2 mt-8 pt-4 border-t border-slate-100/80">
+                                <button class="w-9 h-9 rounded-full bg-slate-50 border border-slate-100 text-slate-400 hover:text-doly-blue hover:bg-blue-50 flex items-center justify-center transition" title="Lưu ghi chú"><i class="far fa-bookmark"></i></button>
+                                <button class="w-9 h-9 rounded-full bg-slate-50 border border-slate-100 text-slate-400 hover:text-green-500 hover:bg-green-50 flex items-center justify-center transition" title="Hữu ích"><i class="far fa-thumbs-up"></i></button>
+                                <button class="w-9 h-9 rounded-full bg-slate-50 border border-slate-100 text-slate-400 hover:text-red-500 hover:bg-red-50 flex items-center justify-center transition" title="Chưa đúng"><i class="far fa-thumbs-down"></i></button>
+                                <button class="ml-auto text-[10px] font-black text-white uppercase tracking-widest bg-doly-dark px-4 py-2.5 rounded-full hover:bg-doly-blue hover:shadow-neon-blue transition transform hover:scale-105" onclick="window.location.href='baigiang.html'">
+                                    <i class="fas fa-play-circle mr-1"></i> Xem lại bài 33
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dấu chấm lửng khi AI đang gõ (Ẩn mặc định) -->
+                <div id="typing-indicator" class="hidden justify-start mb-2 animate-fade-in-up">
+                    <div class="max-w-[85%] flex items-end gap-3">
+                        <div class="w-8 h-8 rounded-[0.8rem] bg-gradient-to-br from-cyan-400 to-blue-500 text-white flex items-center justify-center text-sm shrink-0 mb-1 shadow-sm opacity-80">
+                             <i class="fas fa-robot"></i>
+                        </div>
+                        <div class="chat-bubble-ai px-4 py-3 flex gap-1 items-center h-[42px]">
+                            <div class="w-2 h-2 bg-slate-300 rounded-full typing-dot"></div>
+                            <div class="w-2 h-2 bg-slate-300 rounded-full typing-dot"></div>
+                            <div class="w-2 h-2 bg-slate-300 rounded-full typing-dot"></div>
+                        </div>
+                    </div>
+                </div>
+                <!-- End of messages -->
+            </div>
+
+            <!-- Input Area -->
+            <div class="p-4 md:p-6 bg-white/70 backdrop-blur-xl border-t border-white shadow-[0_-10px_30px_rgba(0,0,0,0.02)] shrink-0 z-20">
+                <div class="max-w-4xl mx-auto relative">
+                    
+                    <div class="bg-white border-2 border-slate-100 rounded-[2rem] p-2 pl-4 flex flex-col shadow-sm focus-within:shadow-lg focus-within:border-doly-blue transition-all duration-300">
+                        <textarea rows="1" id="chat-input" placeholder="Hỏi Doly về KHTN 8 hoặc cách dùng web... (VD: Chỉ mình cách làm Quiz Bài 32)" class="w-full max-h-32 bg-transparent resize-none outline-none py-3 text-[15px] font-bold text-slate-700 placeholder:text-slate-400 custom-scrollbar leading-relaxed" oninput="this.style.height = '';this.style.height = this.scrollHeight + 'px'" onkeypress="handleEnter(event)"></textarea>
+                        
+                        <div class="flex justify-between items-center mt-1 px-1 pb-1">
+                            <div class="flex gap-1 bg-slate-50 p-1 rounded-2xl border border-slate-100">
+                                <button class="w-9 h-9 rounded-xl hover:bg-white text-slate-500 hover:text-doly-blue hover:shadow-sm flex items-center justify-center transition" title="Đính kèm ảnh/PDF">
+                                    <i class="fas fa-paperclip"></i>
+                                </button>
+                                <button class="w-9 h-9 rounded-xl hover:bg-white text-slate-500 hover:text-emerald-500 hover:shadow-sm flex items-center justify-center transition" title="Chụp bài tập">
+                                    <i class="fas fa-camera"></i>
+                                </button>
+                                <div class="w-px h-5 bg-slate-200 self-center mx-1"></div>
+                                <button class="w-9 h-9 rounded-xl hover:bg-white text-slate-500 hover:text-red-500 hover:shadow-sm flex items-center justify-center transition" title="Nhập bằng giọng nói">
+                                    <i class="fas fa-microphone"></i>
+                                </button>
+                            </div>
+                            <button onclick="sendMessage()" class="w-12 h-12 bg-doly-dark text-white rounded-2xl shadow-lg hover:shadow-neon-blue hover:bg-doly-blue transition-all duration-300 flex items-center justify-center transform hover:scale-105" id="send-btn">
+                                <i class="fas fa-paper-plane text-lg ml-[-2px] mt-[2px]"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="text-center mt-3 flex justify-center items-center gap-2">
+                        <i class="fas fa-shield-alt text-slate-300 text-[10px]"></i>
+                        <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Doly AI luôn sẵn sàng hỗ trợ. Câu trả lời có thể cần kiểm chứng thêm.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= SIDEBAR PHẢI (CONTEXT & TOOLS) ================= -->
+        <aside class="w-[280px] shrink-0 bg-white/60 backdrop-blur-2xl border border-white rounded-[2.5rem] shadow-premium flex flex-col overflow-hidden hidden xl:flex relative z-10">
+            <div class="p-6 border-b border-white/60 bg-white/40">
+                <h3 class="font-display font-black text-doly-dark text-sm uppercase tracking-widest flex items-center gap-2">
+                    <i class="fas fa-layer-group text-doly-blue"></i> Trợ thủ đắc lực
+                </h3>
+            </div>
+            
+            <div class="p-5 flex-1 overflow-y-auto space-y-6 custom-scrollbar">
+                
+                <!-- Gợi ý từ AI (Dựa theo bài KHTN 8) -->
+                <div>
+                    <h4 class="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mb-3 ml-1">Đang học KHTN 8</h4>
+                    <a href="baigiang.html" class="block bg-white border border-slate-100 rounded-2xl p-4 hover:border-doly-blue hover:shadow-md transition cursor-pointer group">
+                        <div class="flex items-center gap-3 mb-2">
+                            <div class="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center text-doly-blue"><i class="fas fa-play text-xs ml-0.5"></i></div>
+                            <h5 class="text-xs font-bold text-slate-800 group-hover:text-doly-blue transition">Cần ôn lại Bài 32?</h5>
+                        </div>
+                        <p class="text-[10px] text-slate-500 font-medium leading-relaxed">Xem lại video bài giảng về cơ chế Dinh dưỡng và Tiêu hóa ở người.</p>
+                    </a>
+                </div>
+
+                <!-- Tài liệu liên quan -->
+                <div>
+                    <h4 class="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mb-3 ml-1">Sổ tay đính kèm</h4>
+                    <a href="tailieu.html" class="block bg-white border border-slate-100 rounded-2xl p-4 hover:border-red-400 hover:shadow-md transition cursor-pointer group flex items-center gap-3">
+                        <div class="w-10 h-10 bg-red-50 rounded-xl flex items-center justify-center text-red-500 shadow-sm shrink-0">
+                            <i class="fas fa-file-pdf"></i>
+                        </div>
+                        <div>
+                            <h5 class="text-xs font-bold text-slate-800 line-clamp-1 group-hover:text-red-500 transition">Mindmap Hệ Hô Hấp HD</h5>
+                            <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1">Ảnh A3 • Bài 34</p>
+                        </div>
+                    </a>
+                </div>
+
+                <!-- 3D/AR Lab Liên quan -->
+                <div>
+                    <h4 class="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mb-3 ml-1">Lab thực hành 3D/AR</h4>
+                    <div class="relative rounded-[1.5rem] overflow-hidden aspect-video bg-slate-800 shadow-sm group cursor-pointer border border-white" onclick="window.location.href='baigiang.html'">
+                        <img src="https://images.unsplash.com/photo-1559757175-5700dde675bc?auto=format&fit=crop&w=400&q=80" class="w-full h-full object-cover opacity-70 group-hover:scale-110 transition duration-700" alt="Tim 3D/AR">
+                        <div class="absolute inset-0 flex items-center justify-center bg-black/10 group-hover:bg-transparent transition gap-3">
+                            <div class="w-10 h-10 bg-white/30 backdrop-blur-md rounded-full flex items-center justify-center border border-white/50 group-hover:bg-cyan-500 group-hover:border-cyan-400 transition-colors shadow-lg" title="Xem 3D">
+                                <i class="fas fa-cube text-white text-sm"></i>
+                            </div>
+                            <div class="w-10 h-10 bg-white/30 backdrop-blur-md rounded-full flex items-center justify-center border border-white/50 group-hover:bg-purple-500 group-hover:border-purple-400 transition-colors shadow-lg" title="Xem AR qua Camera">
+                                <i class="fas fa-camera text-white text-sm"></i>
+                            </div>
+                        </div>
+                        <div class="absolute bottom-2 left-2">
+                            <span class="text-[9px] font-black text-white uppercase tracking-widest bg-doly-dark/60 backdrop-blur px-2 py-1 rounded shadow">Giải phẫu tim 3D/AR</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Kết nối Gia sư người thật -->
+                <div class="bg-gradient-to-br from-slate-800 to-doly-dark rounded-[1.5rem] p-5 text-white shadow-xl relative overflow-hidden mt-8 border border-slate-700">
+                    <div class="absolute -right-4 -bottom-4 w-24 h-24 bg-doly-yellow/20 rounded-full blur-2xl"></div>
+                    <div class="relative z-10">
+                        <h5 class="text-sm font-black mb-2 flex items-center gap-2">
+                            <i class="fas fa-headset text-doly-yellow"></i> Chưa hiểu rõ Vòng tuần hoàn?
+                        </h5>
+                        <p class="text-[10px] text-slate-300 font-bold leading-relaxed mb-4">Cô Mai Lan (Gia sư Sinh Học) đang rảnh. Đặt lịch 1-1 ngay nhé.</p>
+                        <button onclick="window.location.href='giasu.html'" class="w-full py-2.5 bg-doly-yellow text-doly-dark font-black text-[10px] uppercase tracking-[0.15em] rounded-xl hover:bg-yellow-400 hover:shadow-neon-gold transition">
+                            Gọi Gia Sư
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+    </main>
+
+    <!-- JS Logic cho Chat -->
+    <script>
+        const chatContainer = document.getElementById('chat-container');
+        const chatInput = document.getElementById('chat-input');
+        const typingIndicator = document.getElementById('typing-indicator');
+
+        // Hàm cuộn xuống cuối cùng
+        function scrollToBottom() {
+            chatContainer.scrollTo({
+                top: chatContainer.scrollHeight,
+                behavior: 'smooth'
+            });
+        }
+
+        // Xử lý khi ấn Enter
+        function handleEnter(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        }
+
+        // Tạo UI bong bóng người dùng
+        function createUserBubble(text) {
+            const div = document.createElement('div');
+            div.className = "flex justify-end mb-4 animate-fade-in-up";
+            div.innerHTML = `
+                <div class="max-w-[85%] md:max-w-[70%] flex items-end gap-3">
+                    <div class="chat-bubble-user p-4 px-5 text-[15px] font-medium leading-relaxed">
+                        ${text.replace(/\n/g, '<br>')}
+                    </div>
+                    <div class="w-8 h-8 rounded-full bg-white border-2 border-white shadow-sm overflow-hidden shrink-0 mb-1">
+                         <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=HoangNam" alt="User" class="w-full h-full object-cover">
+                    </div>
+                </div>
+            `;
+            return div;
+        }
+
+        // Tạo UI bong bóng AI (Phản hồi từ API)
+        function createAIBubble(replyText) {
+            const div = document.createElement('div');
+            div.className = "flex justify-start mb-6 animate-fade-in-up";
+            div.innerHTML = `
+                <div class="max-w-[95%] md:max-w-[85%] flex items-end gap-3">
+                    <div class="w-10 h-10 rounded-[1rem] bg-gradient-to-br from-cyan-400 to-blue-600 text-white flex items-center justify-center text-lg shrink-0 mb-1 shadow-md border border-white">
+                         <i class="fas fa-robot"></i>
+                    </div>
+                    <div class="chat-bubble-ai p-5 md:p-6 text-[14px] md:text-[15px] text-slate-700 prose-doly font-medium shadow-lg">
+                        <p>' + (replyText || 'Cảm ơn bạn! Doly AI luôn sẵn sàng hỗ trợ bạn.') + '</p>
+                    </div>
+                </div>
+            `;
+            return div;
+        }
+
+        // Gửi tin nhắn
+        function sendMessage() {
+            const text = chatInput.value.trim();
+            if (!text) return;
+
+            // 1. Thêm tin nhắn user
+            chatContainer.insertBefore(createUserBubble(text), typingIndicator);
+            
+            // 2. Clear input
+            chatInput.value = '';
+            chatInput.style.height = 'auto'; // reset height
+            
+            // 3. Hiển thị typing indicator
+            typingIndicator.classList.remove('hidden');
+            typingIndicator.classList.add('flex');
+            scrollToBottom();
+
+            // 4. Cẩn thận ẩn màn hình Welcome nếu có
+            const welcome = document.getElementById('welcome-screen');
+            if(welcome && !welcome.classList.contains('hidden')){
+                welcome.classList.add('hidden');
+            }
+
+            // 5. Gọi API chatbot thật
+            DolyAPI.chat(text)
+                .then(function(result) {
+                    typingIndicator.classList.add('hidden');
+                    typingIndicator.classList.remove('flex');
+                    var reply = result && (result.reply || result.answer || result.message || result.text) || 'Cảm ơn bạn! Doly đã nhận được câu hỏi.';
+                    var aiBubble = createAIBubble(reply);
+                    chatContainer.insertBefore(aiBubble, typingIndicator);
+                    scrollToBottom();
+                })
+                .catch(function(err) {
+                    typingIndicator.classList.add('hidden');
+                    typingIndicator.classList.remove('flex');
+                    var aiBubble = createAIBubble('⚠️ Doly gặp lỗi: ' + (err.message || 'Mất kết nối. Vui lòng thử lại sau.'));
+                    chatContainer.insertBefore(aiBubble, typingIndicator);
+                    scrollToBottom();
+                });
+        }
+
+        // Giả lập làm mới chat
+        function resetChat() {
+            // Xóa hết các bong bóng chat trừ màn hình welcome và typing
+            const children = Array.from(chatContainer.children);
+            children.forEach(child => {
+                if (child.id !== 'welcome-screen' && child.id !== 'typing-indicator') {
+                    child.remove();
+                }
+            });
+            
+            // Hiển thị lại Welcome screen
+            const welcome = document.getElementById('welcome-screen');
+            welcome.classList.remove('hidden');
+            setTimeout(() => {
+                welcome.classList.remove('opacity-0');
+                welcome.classList.add('opacity-100');
+            }, 10);
+        }
+
+        // Cuộn xuống cuối ngay khi trang load
+        window.onload = function() {
+            scrollToBottom();
+        }
+    </script>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var user = DolyAPI.loadSession();
+        if (user && user.full_name) {
+            var avatarEl = document.querySelector('[data-avatar]');
+            if (avatarEl) {
+                avatarEl.textContent = user.full_name.split(' ').map(function(w){return w[0];}).join('').substring(0,2).toUpperCase();
+            }
+        }
+    });
+    function handleLogout() {
+        DolyAPI.logout().catch(function(){}).finally(function(){
+            DolyAPI.clearSession();
+            window.location.href = '../login.html';
+        });
+    }
+    </script>
+</body>
+</html>

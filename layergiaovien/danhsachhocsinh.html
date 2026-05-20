@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="vi" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lớp học của tôi - DOLY LMS</title>
+    <script src="../api/client.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: { 
+                        'brand-blue': '#2563EB',      
+                        'brand-dark-blue': '#1E3A8A', 
+                        'bg-main': '#F8FAFC',
+                    },
+                    fontFamily: { 
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'soft': '0 2px 10px rgba(0, 0, 0, 0.02)',
+                        'hover-soft': '0 10px 25px -3px rgba(37, 99, 235, 0.1)',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { background-color: #F8FAFC; }
+        .custom-scrollbar::-webkit-scrollbar { width: 5px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 10px; }
+        .sidebar-item:hover { background-color: #F1F5F9; color: #2563EB; }
+        .sidebar-item.active { background-color: #EFF6FF; color: #2563EB; }
+        
+        .text-bold-thick {
+            -webkit-text-stroke: 0.7px #1E3A8A;
+        }
+        .text-sub-thick {
+            -webkit-text-stroke: 0.3px #94A3B8;
+        }
+
+        .copy-feedback {
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+        .copy-feedback.show {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body class="antialiased font-sans text-slate-800">
+
+    <div class="flex min-h-screen">
+        
+        <!-- Menu bên trái (Sidebar) -->
+        <aside class="w-72 bg-white border-r border-slate-200 hidden lg:flex flex-col sticky top-0 h-screen z-40 transition-all">
+            <div class="p-8">
+                <!-- LOGO -->
+                <a href="tongquan.html" class="flex items-center gap-3.5 hover:opacity-80 transition-opacity group">
+                    <div class="w-[42px] h-[42px] flex items-center justify-center shrink-0">
+                        <img src="../logodoly.png" alt="Doly Logo" class="w-full h-full object-contain" onerror="this.src='https://ui-avatars.com/api/?name=D&background=1E3A8A&color=fff'">
+                    </div>
+                    <div class="flex flex-col justify-center">
+                        <div class="text-[21px] font-black text-brand-dark-blue leading-none tracking-[-0.04em] text-bold-thick">
+                            DOLY LMS
+                        </div>
+                        <span class="text-[9px] font-black text-[#94A3B8] uppercase tracking-[0.18em] mt-1.5 text-sub-thick">
+                            TEACHER WORKSPACE
+                        </span>
+                    </div>
+                </a>
+            </div>
+            
+            <nav class="flex-1 py-4 px-5 space-y-2 custom-scrollbar">
+                <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3 px-3">Quản lý chung</p>
+                
+                <a href="tongquan.html" class="sidebar-item flex items-center gap-3 px-4 py-4 rounded-2xl transition-all font-bold text-base text-slate-500 hover:text-brand-blue">
+                    <i class="fa-solid fa-house text-xl w-6 text-center"></i> 
+                    <span>Bảng điều khiển</span>
+                </a>
+                <a href="./lophoccuatoi.html" class="sidebar-item active flex items-center gap-3 px-4 py-4 rounded-2xl transition-all font-[900] text-base shadow-sm shadow-blue-100">
+                    <i class="fa-solid fa-users text-xl w-6 text-center"></i> 
+                    <span>Lớp học</span>
+                </a>
+                <a href="chamdiem.html" class="sidebar-item flex items-center gap-3 px-4 py-4 rounded-2xl transition-all font-bold text-base text-slate-500 hover:text-brand-blue">
+                    <i class="fa-solid fa-marker text-xl w-6 text-center"></i> 
+                    <span>Chấm và trả điểm</span>
+                </a>
+               
+            </nav>
+
+            <div class="p-6">
+                <div class="relative">
+                    <div onclick="document.getElementById('user-dropdown').classList.toggle('hidden')" class="flex items-center gap-3 p-3 rounded-2xl border border-slate-100 bg-slate-50 hover:bg-slate-100 transition-colors cursor-pointer select-none">
+                        <img id="user-avatar" src="https://ui-avatars.com/api/?name=User&background=1E3A8A&color=fff" class="w-10 h-10 rounded-full">
+                        <div class="flex-1">
+                            <p id="user-name" class="text-sm font-extrabold text-brand-dark-blue">Đang tải...</p>
+                            <p id="user-role" class="text-[11px] text-slate-500 font-bold">Giáo viên</p>
+                        </div>
+                        <i class="fa-solid fa-chevron-up text-[10px] text-slate-400"></i>
+                    </div>
+                    
+                    <div id="user-dropdown" class="hidden absolute bottom-full left-0 w-full mb-2 bg-white border border-slate-200 rounded-2xl shadow-hover-soft z-50 overflow-hidden">
+                        <a href="#" onclick="handleLogout()" class="flex items-center gap-3 px-4 py-3 text-sm font-extrabold text-red-600 hover:bg-red-50 transition-colors">
+                            <i class="fa-solid fa-arrow-right-from-bracket"></i> Đăng xuất
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Nội dung chính -->
+        <main class="flex-1 flex flex-col min-w-0">
+            
+            <header class="h-20 bg-white border-b border-slate-200 flex items-center justify-between px-8 sticky top-0 z-30">
+                <div class="flex items-center gap-4">
+                    <button class="lg:hidden text-slate-500"><i class="fa-solid fa-bars text-xl"></i></button>
+                    
+                    <!-- Breadcrumbs -->
+                    <div class="hidden md:flex items-center gap-2 text-sm font-bold text-slate-500">
+                        <a href="lophoccuatoi.html" class="hover:text-brand-blue transition-colors">Lớp học</a>
+                        <i class="fa-solid fa-chevron-right text-[10px] text-slate-300"></i>
+                        <span class="text-brand-dark-blue font-extrabold">KHTN lớp 8 (8A2)</span>
+                    </div>
+                </div>
+                
+                <div class="flex items-center gap-3">
+                   
+                </div>
+            </header>
+
+            <div class="p-8 max-w-[1200px] mx-auto w-full space-y-6">
+                
+                <!-- Header Lớp Học -->
+                <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-6">
+                    <div class="flex items-center gap-5">
+                        <div class="w-20 h-20 rounded-2xl bg-brand-blue text-white flex items-center justify-center font-bold text-3xl shrink-0">
+                            8A2
+                        </div>
+                        <div>
+                            <h1 class="text-2xl font-black text-brand-dark-blue tracking-[0.05em] uppercase mb-2">KHOA HỌC TỰ NHIÊN LỚP 8</h1>
+                            <div class="flex flex-wrap items-center gap-4 text-sm font-medium text-slate-600">
+                                <div class="flex items-center gap-2">
+                                    <i class="fa-solid fa-users text-slate-400"></i>
+                                    <span>Sĩ số: <span class="font-bold text-slate-800">30</span></span>
+                                </div>
+                                <span class="text-slate-300">|</span>
+                                <div class="flex items-center gap-2">
+                                    <i class="fa-solid fa-key text-slate-400"></i>
+                                    <span>Mã lớp:</span>
+                                    <span class="text-brand-dark-blue font-bold tracking-widest bg-slate-100 px-2 py-0.5 rounded">A8X9K2</span>
+                                    <button class="text-slate-400 hover:text-brand-blue transition-colors ml-1 relative" onclick="copyCode('A8X9K2', this)">
+                                        <i class="fa-regular fa-copy"></i>
+                                        <span class="copy-feedback absolute -top-8 left-1/2 -translate-x-1/2 bg-slate-800 text-white text-[10px] px-2 py-1 rounded font-bold whitespace-nowrap pointer-events-none">Đã chép</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-3">
+                        <button class="px-4 py-2.5 bg-white border border-slate-200 text-slate-700 rounded-lg text-sm font-bold hover:bg-slate-50 transition-all">
+                            <i class="fa-solid fa-gear mr-1"></i> Cài đặt
+                        </button>
+                        <a href="giaobai.html" class="px-5 py-2.5 bg-brand-blue text-white rounded-lg text-sm font-bold hover:bg-blue-700 transition-all">
+                            <i class="fa-solid fa-plus mr-1"></i> Giao bài
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Tabs Navigation -->
+                <div class="flex items-center gap-2 border-b border-slate-200 overflow-x-auto no-scrollbar">
+                   
+                    <a href="danhsachhocsinh.html" class="px-6 py-3 border-b-2 border-brand-blue text-brand-blue font-bold text-sm whitespace-nowrap block">
+                        Danh sách học sinh
+                    </a>
+                    <a href="bangdiem.html" class="px-6 py-3 border-b-2 border-transparent text-slate-500 font-medium hover:text-brand-dark-blue hover:border-slate-300 text-sm whitespace-nowrap transition-all block">
+                        Bảng điểm
+                    </a>
+                </div>
+
+                <!-- Main Content Area: Danh sách học sinh -->
+                <div class="space-y-4">
+                    
+                    <!-- Toolbar: Tìm kiếm & Nút chức năng -->
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-2">
+                        <div class="relative max-w-md w-full">
+                            <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                            <input type="text" placeholder="Tìm kiếm tên, mã học sinh..." class="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-lg text-sm font-medium focus:outline-none focus:border-brand-blue focus:ring-1 focus:ring-brand-blue transition-all bg-white">
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <button class="px-4 py-2.5 bg-white border border-slate-200 text-slate-700 text-sm font-bold rounded-lg hover:bg-slate-50 transition-colors shadow-sm">
+                                <i class="fa-solid fa-file-excel mr-1 text-emerald-600"></i> Xuất Excel
+                            </button>
+                            <button class="px-4 py-2.5 bg-brand-blue text-white text-sm font-bold rounded-lg hover:bg-blue-700 transition-colors shadow-sm">
+                                <i class="fa-solid fa-user-plus mr-1"></i> Thêm học sinh
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Table hiển thị danh sách -->
+                    <div class="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
+                        <div class="overflow-x-auto h-[600px] overflow-y-auto custom-scrollbar relative">
+                            <table class="w-full text-left text-sm relative">
+                                <thead class="bg-slate-50 border-b border-slate-200 text-slate-500 font-bold sticky top-0 z-10 shadow-sm">
+                                    <tr>
+                                        <th class="px-6 py-4 w-16 text-center">STT</th>
+                                        <th class="px-6 py-4">Học sinh</th>
+                                        <th class="px-6 py-4">Mã HS</th>
+                                        <th class="px-6 py-4">Ngày sinh</th>
+                                        <th class="px-6 py-4 text-center">Tùy chọn</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="student-table-body" class="divide-y divide-slate-100">
+                                    <tr><td colspan="5" class="text-center py-12"><div class="flex justify-center"><div class="w-8 h-8 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div></div></td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                       
+
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <script>
+        function handleLogout() {
+            DolyAPI.logout().catch(function(){}).then(function(){
+                DolyAPI.clearSession();
+                window.location.href = '../login.html';
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            var session = DolyAPI.loadSession();
+            if (!session || session.role !== 'teacher') {
+                window.location.href = '../login.html';
+                return;
+            }
+            var user = session.user || {};
+            var nameEl = document.getElementById('user-name');
+            var avatarEl = document.getElementById('user-avatar');
+            if (nameEl) nameEl.textContent = user.full_name || 'Giáo viên';
+            if (avatarEl) avatarEl.src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(user.full_name || 'Teacher') + '&background=1E3A8A&color=fff';
+
+            // Load class info and student list
+            var params = new URLSearchParams(window.location.search);
+            var classId = params.get('class_id');
+            if (classId) {
+                loadClassInfo(classId);
+                DolyAPI.getClassMembers(classId).then(function(members) {
+                    renderStudents(members || []);
+                }).catch(function() {
+                    document.getElementById('student-table-body').innerHTML = '<tr><td colspan="5" class="text-center py-8 text-slate-400 font-bold">Không thể tải danh sách học sinh</td></tr>';
+                });
+            } else {
+                // Fallback: load first class
+                DolyAPI.getClasses().then(function(classes) {
+                    if (!classes || classes.length === 0) {
+                        document.getElementById('student-table-body').innerHTML = '<tr><td colspan="5" class="text-center py-8 text-slate-400 font-bold">Chưa có lớp học</td></tr>';
+                        return;
+                    }
+                    var firstClassId = classes[0].id;
+                    loadClassInfo(firstClassId);
+                    return DolyAPI.getClassMembers(firstClassId);
+                }).then(function(members) {
+                    renderStudents(members || []);
+                }).catch(function() {
+                    document.getElementById('student-table-body').innerHTML = '<tr><td colspan="5" class="text-center py-8 text-slate-400 font-bold">Không thể tải danh sách học sinh</td></tr>';
+                });
+            }
+        });
+
+        function loadClassInfo(classId) {
+            DolyAPI.getClasses().then(function(classes) {
+                if (!classes || classes.length === 0) return;
+                var cls = classes.find(function(c) { return String(c.id) === String(classId); });
+                if (!cls) return;
+
+                var nameDisplay = cls.name || cls.class_name || '';
+                var codeDisplay = cls.class_code || cls.code || '';
+                var subjectDisplay = cls.subject || 'KHOA HOC TU NHIEN';
+                var studentCount = cls.student_count || cls.member_count || '';
+
+                var iconEl = document.querySelector('.bg-white.rounded-2xl.p-6 .w-20.h-20');
+                if (iconEl) iconEl.textContent = nameDisplay.replace(/[^0-9A-Z]/g, '').substring(0, 3) || 'L';
+                var titleEl = document.querySelector('.bg-white.rounded-2xl.p-6 h1');
+                if (titleEl) titleEl.textContent = subjectDisplay.toUpperCase() + ' LOP ' + (nameDisplay.replace(/[^0-9]/g, '') || '');
+
+                var countEl = document.querySelector('.fa-users + span');
+                if (countEl && studentCount) countEl.innerHTML = 'Sĩ số: <span class="font-bold text-slate-800">' + studentCount + '</span>';
+                var codeEl = document.querySelector('.tracking-widest');
+                if (codeEl && codeDisplay) codeEl.textContent = codeDisplay;
+                var copyBtn = document.querySelector('[onclick*="copyCode"]');
+                if (copyBtn && codeDisplay) {
+                    var oldMatch = copyBtn.getAttribute('onclick').match(/\'([^\']+)\'/);
+                    if (oldMatch) copyBtn.setAttribute('onclick', copyBtn.getAttribute('onclick').replace(oldMatch[1], codeDisplay));
+                }
+
+                var breadcrumbEl = document.querySelector('.hidden.md\\:flex .text-brand-dark-blue');
+                if (breadcrumbEl) breadcrumbEl.textContent = subjectDisplay + ' (' + nameDisplay + ')';
+
+                // Update tab links with class_id
+                var bdTab = document.querySelector('a[href^="bangdiem.html"]');
+                if (bdTab) bdTab.href = 'bangdiem.html?class_id=' + classId;
+            }).catch(function() {});
+        }
+
+        function renderStudents(students) {
+            var tbody = document.getElementById('student-table-body');
+            if (!students || students.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="text-center py-8 text-slate-400 font-bold">Chưa có học sinh trong lớp</td></tr>';
+                return;
+            }
+            var html = '';
+            students.forEach(function(s, idx) {
+                var name = s.full_name || s.name || 'Học sinh';
+                var code = s.student_code || s.id || '';
+                var dob = s.date_of_birth || s.dob || '';
+                if (dob) {
+                    var d = new Date(dob);
+                    dob = d.toLocaleDateString('vi-VN');
+                }
+                html += '<tr class="student-row hover:bg-slate-50 transition-colors group">' +
+                    '<td class="px-6 py-4 text-center font-bold text-slate-400">' + (idx + 1) + '</td>' +
+                    '<td class="px-6 py-4"><div class="flex items-center gap-3">' +
+                        '<img src="https://ui-avatars.com/api/?name=' + encodeURIComponent(name) + '&background=EFF6FF&color=2563EB" class="w-9 h-9 rounded-full object-cover">' +
+                        '<span class="font-bold text-slate-800">' + DolyAPI.esc(name) + '</span>' +
+                    '</div></td>' +
+                    '<td class="px-6 py-4 text-slate-600 font-medium">' + DolyAPI.esc(code) + '</td>' +
+                    '<td class="px-6 py-4 text-slate-600">' + DolyAPI.esc(dob) + '</td>' +
+                    '<td class="px-6 py-4 text-center">' +
+                        '<div class="flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">' +
+                            '<button class="w-8 h-8 rounded text-slate-400 hover:text-brand-blue hover:bg-blue-50 transition-colors" title="Chỉnh sửa"><i class="fa-solid fa-pen-to-square"></i></button>' +
+                            '<button class="w-8 h-8 rounded text-slate-400 hover:text-red-500 hover:bg-red-50 transition-colors" title="Xóa học sinh"><i class="fa-solid fa-trash-can"></i></button>' +
+                        '</div>' +
+                    '</td>' +
+                '</tr>';
+            });
+            tbody.innerHTML = html;
+        }
+
+        document.addEventListener('click', function(event) {
+            const dropdown = document.getElementById('user-dropdown');
+            const menuBtn = dropdown?.closest('.relative')?.querySelector('div');
+            if (dropdown && menuBtn && !menuBtn.contains(event.target) && !dropdown.contains(event.target)) {
+                dropdown.classList.add('hidden');
+            }
+        });
+
+        // Xử lý nút Xem thêm học sinh
+        const studentRows = document.querySelectorAll('.student-row');
+        const loadMoreBtn = document.getElementById('load-more-btn');
+        const loadMoreRow = document.getElementById('load-more-row');
+        const displayCount = document.getElementById('display-count');
+
+        // Ẩn các học sinh từ thứ 16 trở đi
+        studentRows.forEach((row, index) => {
+            if (index >= 15) {
+                row.classList.add('hidden');
+            }
+        });
+
+        // Click xem thêm
+        if (loadMoreBtn) {
+            loadMoreBtn.addEventListener('click', () => {
+                studentRows.forEach((row) => {
+                    row.classList.remove('hidden');
+                });
+                if(loadMoreRow) loadMoreRow.classList.add('hidden'); // Ẩn hàng chứa nút xem thêm
+                if(displayCount) displayCount.textContent = '30'; // Cập nhật số đếm
+            });
+        }
+
+        // Hàm copy mã lớp học
+        function copyCode(code, buttonElement) {
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(code);
+            } else {
+                let textArea = document.createElement("textarea");
+                textArea.value = code;
+                textArea.style.position = "fixed";
+                textArea.style.left = "-9999px";
+                document.body.appendChild(textArea);
+                textArea.select();
+                try { document.execCommand('copy'); } catch (err) {}
+                textArea.remove();
+            }
+
+            const tooltip = buttonElement.querySelector('.copy-feedback');
+            if (tooltip) {
+                tooltip.classList.add('show');
+                setTimeout(() => tooltip.classList.remove('show'), 1500);
+            }
+            
+            const icon = buttonElement.querySelector('i');
+            icon.classList.replace('fa-copy', 'fa-check');
+            icon.classList.add('text-emerald-500');
+            setTimeout(() => {
+                icon.classList.replace('fa-check', 'fa-copy');
+                icon.classList.remove('text-emerald-500');
+            }, 1500);
+        }
+    </script>
+</body>
+</html>

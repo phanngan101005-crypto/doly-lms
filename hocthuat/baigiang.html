@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="vi" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KHTN 8: Cơ thể người - DOLY LMS</title>
+    
+    <!-- Libraries -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="../api/client.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'doly-cream': '#F9FAFB',
+                        'doly-blue': '#2563EB',
+                        'doly-dark': '#0f172a',
+                        'doly-yellow': '#FBBF24',
+                    },
+                    fontFamily: {
+                        sans: ['Quicksand', 'sans-serif'],
+                        display: ['Montserrat', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'premium': '0 20px 40px -15px rgba(0,0,0,0.08)',
+                        'premium-hover': '0 30px 60px -15px rgba(37,99,235,0.15)',
+                        'neon-blue': '0 0 30px rgba(37, 99, 235, 0.4)',
+                        'neon-cyan': '0 0 30px rgba(0, 229, 255, 0.4)',
+                        'chat-bubble': '0 4px 20px rgba(0,0,0,0.06)',
+                        'glow-border': '0 0 0 2px rgba(37, 99, 235, 0.2), 0 10px 30px rgba(37, 99, 235, 0.15)',
+                    },
+                    animation: {
+                        'gradient-x': 'gradient-x 4s ease infinite',
+                        'float-slow': 'float 6s ease-in-out infinite',
+                        'float-med': 'float 4s ease-in-out infinite',
+                        'float-fast': 'float 3s ease-in-out infinite',
+                        'pulse-glow': 'pulse-glow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    },
+                    keyframes: {
+                        'gradient-x': {
+                            '0%, 100%': {
+                                'background-size': '200% 200%',
+                                'background-position': 'left center'
+                            },
+                            '50%': {
+                                'background-size': '200% 200%',
+                                'background-position': 'right center'
+                            }
+                        },
+                        'float': {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-15px)' }
+                        },
+                        'pulse-glow': {
+                            '0%, 100%': { opacity: 1, filter: 'brightness(1)' },
+                            '50%': { opacity: .7, filter: 'brightness(1.2)' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* CSS Core */
+        body { background-color: #f4f7fb; color: #1e293b; overflow-x: hidden; font-family: 'Quicksand', sans-serif; }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #2563EB; }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* CUSTOM CURSOR */
+        .cursor-dot { width: 8px; height: 8px; background: linear-gradient(45deg, #00E5FF, #2563EB); position: fixed; z-index: 9999; border-radius: 50%; pointer-events: none; transform: translate(-50%, -50%); box-shadow: 0 0 10px rgba(0,229,255,0.8);}
+        .cursor-outline { width: 40px; height: 40px; border: 1.5px solid rgba(37,99,235,0.5); position: fixed; z-index: 9998; border-radius: 50%; pointer-events: none; transform: translate(-50%, -50%); transition: all 0.15s ease-out; }
+        body:hover .cursor-outline { width: 50px; height: 50px; background: rgba(37,99,235,0.03); }
+
+        /* VIBRANT AURORA BACKGROUND */
+        .aurora-bg { position: fixed; inset: 0; z-index: -2; background: #f0f5ff; overflow: hidden; }
+        .orb { position: absolute; border-radius: 50%; filter: blur(120px); opacity: 0.6; animation: floatOrb 25s infinite alternate ease-in-out; }
+        .orb-1 { width: 60vw; height: 60vw; background: #3b82f6; top: -10%; left: -10%; } 
+        .orb-2 { width: 50vw; height: 50vw; background: #c084fc; bottom: -10%; right: -10%; animation-delay: -5s; } 
+        .orb-3 { width: 45vw; height: 45vw; background: #22d3ee; top: 30%; left: 30%; animation-delay: -10s; mix-blend-mode: multiply; } 
+        .orb-4 { width: 45vw; height: 45vw; background: #fbbf24; top: 10%; right: 20%; animation-delay: -15s; opacity: 0.2; } 
+
+        @keyframes floatOrb {
+            0% { transform: translate(0, 0) scale(1) rotate(0deg); }
+            33% { transform: translate(10vw, -10vh) scale(1.05) rotate(120deg); }
+            66% { transform: translate(-10vw, 15vh) scale(0.95) rotate(240deg); }
+            100% { transform: translate(0, 0) scale(1) rotate(360deg); }
+        }
+        
+        .dot-pattern { background-image: radial-gradient(rgba(37, 99, 235, 0.1) 1.5px, transparent 1.5px); background-size: 32px 32px; position: fixed; inset: 0; z-index: -1; pointer-events: none;}
+
+        /* PARTICLES (Đốm sáng lấp lánh) */
+        .particles-container { position: fixed; inset: 0; z-index: -1; pointer-events: none; overflow: hidden; }
+        .particle { position: absolute; background: white; border-radius: 50%; box-shadow: 0 0 10px rgba(255,255,255,0.8); animation: particleFloat 10s infinite linear; }
+        @keyframes particleFloat { 0% { transform: translateY(100vh) scale(0); opacity: 0; } 50% { opacity: 0.8; } 100% { transform: translateY(-100px) scale(1); opacity: 0; } }
+
+        /* PREMIUM GLASSMORPHISM */
+        .glass-premium {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(24px) saturate(160%); 
+            -webkit-backdrop-filter: blur(24px) saturate(160%);
+            border: 1px solid rgba(255, 255, 255, 1);
+            box-shadow: 0 15px 35px -5px rgba(37, 99, 235, 0.08), inset 0 1px 0 rgba(255,255,255,0.9);
+        }
+        
+        /* HOLOGRAPHIC CARD (Lab 3D) */
+        .holographic-card {
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.9) 0%, rgba(30, 58, 138, 0.8) 50%, rgba(88, 28, 135, 0.8) 100%);
+            backdrop-filter: blur(30px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 20px 50px rgba(15, 23, 42, 0.5), inset 0 0 20px rgba(255, 255, 255, 0.05);
+            position: relative; overflow: hidden;
+        }
+        .holographic-card::before {
+            content: ''; position: absolute; inset: 0;
+            background: linear-gradient(120deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transform: translateX(-100%); transition: transform 0.6s;
+        }
+        .holographic-card:hover::before { transform: translateX(100%); }
+
+        /* Accordion Styles */
+        .chapter-content { max-height: 0; overflow: hidden; transition: max-height 0.4s cubic-bezier(0, 1, 0, 1); }
+        .chapter-content.open { max-height: 2000px; transition: max-height 0.6s ease-in-out; }
+        .chapter-icon { transition: transform 0.3s ease; }
+        .chapter-header.active .chapter-icon { transform: rotate(180deg); }
+        
+        .lesson-item { transition: all 0.3s ease; }
+        .lesson-item:hover { background: rgba(255, 255, 255, 0.95); transform: translateX(6px); box-shadow: 0 10px 25px rgba(37,99,235,0.1); border-color: rgba(37,99,235,0.3); }
+
+        /* MỚI: Animated Gradient Text */
+        .text-gradient-animated {
+            background: linear-gradient(to right, #2563EB, #9D00FF, #00E5FF, #2563EB);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: gradient-x 4s linear infinite;
+        }
+
+        .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    </style>
+</head>
+<body class="antialiased selection:bg-doly-blue selection:text-white relative">
+
+    <!-- Custom Cursor -->
+    <div class="cursor-dot hidden md:block"></div>
+    <div class="cursor-outline hidden md:block"></div>
+
+    <!-- Backgrounds -->
+    <div class="dot-pattern"></div>
+    <div class="aurora-bg">
+        <div class="orb orb-1"></div><div class="orb orb-2"></div>
+        <div class="orb orb-3"></div><div class="orb orb-4"></div>
+    </div>
+    
+    <!-- Particles lấp lánh (Wow Factor) -->
+    <div class="particles-container">
+        <div class="particle" style="left: 10%; width: 4px; height: 4px; animation-duration: 8s; animation-delay: 0s;"></div>
+        <div class="particle" style="left: 30%; width: 6px; height: 6px; animation-duration: 12s; animation-delay: 2s;"></div>
+        <div class="particle" style="left: 50%; width: 3px; height: 3px; animation-duration: 7s; animation-delay: 4s;"></div>
+        <div class="particle" style="left: 70%; width: 5px; height: 5px; animation-duration: 15s; animation-delay: 1s;"></div>
+        <div class="particle" style="left: 90%; width: 7px; height: 7px; animation-duration: 10s; animation-delay: 3s;"></div>
+    </div>
+
+    <!-- Header Glass -->
+    <header class="fixed top-0 left-0 w-full z-50 transition-all duration-300 bg-white/60 backdrop-blur-2xl border-b border-white shadow-sm">
+        <div class="px-6 py-3">
+            <div class="max-w-7xl mx-auto flex justify-between items-center">
+                <!-- Breadcrumb -->
+                <div class="flex items-center gap-4">
+                    <a href="../hocthuat/hocthuat.html" class="w-10 h-10 rounded-full bg-white shadow-sm flex items-center justify-center text-slate-400 hover:text-doly-blue hover:shadow-md transition border border-white">
+                        <i class="fas fa-arrow-left"></i>
+                    </a>
+                    <div class="hidden sm:block">
+                        <div class="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-0.5">
+                            <a href="../hocthuat.html" class="hover:text-doly-blue transition">Lộ trình học</a>
+                            <i class="fas fa-chevron-right text-[8px]"></i>
+                            <span class="text-doly-blue font-bold">KHTN 8 (KNTT)</span>
+                        </div>
+                        <h1 class="text-base font-display font-black text-doly-dark leading-none">Chương VII: Sinh học cơ thể người</h1>
+                    </div>
+                </div>
+                
+                <!-- Stats & Avatar -->
+                <div class="flex items-center gap-4">
+                    <div class="hidden md:flex items-center gap-2 bg-white/90 backdrop-blur-md px-4 py-2 rounded-full shadow-sm border border-white">
+                        <i class="fas fa-fire text-orange-500 text-sm"></i>
+                        <span class="text-xs font-bold text-slate-700">12 Days</span>
+                    </div>
+                    <div class="hidden md:flex items-center gap-2 bg-white/90 backdrop-blur-md px-4 py-2 rounded-full shadow-sm border border-white">
+                        <i class="fas fa-star text-doly-yellow text-sm drop-shadow-sm"></i>
+                        <span class="text-xs font-bold text-slate-700">2,150 EXP</span>
+                    </div>
+                    <button class="w-10 h-10 rounded-full bg-white overflow-hidden border-2 border-white shadow-md hover:scale-105 transition hover:shadow-[0_0_15px_rgba(37,99,235,0.4)]">
+                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" alt="User" class="w-full h-full object-cover">
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="pt-[100px] pb-24 min-h-screen relative z-10">
+        <div class="container mx-auto px-4 max-w-7xl">
+            
+            <!-- ================= HERO SECTION: ĐIỂM NHẤN 3D RỰC RỠ ================= -->
+            <section class="glass-premium rounded-[3rem] p-8 md:p-12 mb-14 flex flex-col md:flex-row items-center justify-between gap-10 border border-white relative overflow-hidden shadow-[0_20px_50px_rgba(37,99,235,0.1)]" data-aos="fade-up">
+                
+                <!-- Nền trang trí rực rỡ bên trong thẻ -->
+                <div class="absolute right-0 top-0 w-[500px] h-[500px] bg-gradient-to-bl from-blue-300/30 via-cyan-300/20 to-transparent rounded-full blur-[60px] pointer-events-none"></div>
+
+                <div class="relative z-10 md:w-[55%]">
+                    <div class="inline-flex items-center gap-2 px-4 py-2 bg-white/90 backdrop-blur-md text-doly-blue rounded-full text-[10px] font-bold uppercase tracking-widest mb-6 border border-white shadow-sm hover:shadow-md transition">
+                        <i class="fas fa-book-reader text-sm"></i> Sách Kết Nối Tri Thức
+                    </div>
+                    
+                    <h1 class="text-2xl md:text-3xl font-display font-black text-slate-700 tracking-tight mb-2">
+                        Khoa Học Tự Nhiên 8
+                    </h1>
+                    <!-- Tiêu đề Gradient Động -->
+                    <h2 class="text-[2.8rem] md:text-[3.5rem] lg:text-[4rem] font-display font-black leading-[1.1] tracking-tighter mb-6 text-gradient-animated pb-2 drop-shadow-sm">
+                        Sinh Học Cơ Thể
+                    </h2>
+                    
+                    <p class="text-slate-600 text-sm font-semibold mb-8 max-w-lg leading-relaxed bg-white/50 p-4 rounded-2xl backdrop-blur-md border border-white shadow-sm">
+                        Khám phá cấu tạo và chức năng cơ thể người. Bao gồm <strong>Hệ tiêu hóa (Bài 32), Hệ tuần hoàn (Bài 33) và Hệ hô hấp (Bài 34)</strong>.
+                    </p>
+                    
+                    <!-- Progress Bar Rực rỡ -->
+                    <div class="bg-white/80 backdrop-blur-xl rounded-2xl p-5 border border-white shadow-[0_10px_30px_rgba(0,0,0,0.05)] max-w-md transform hover:-translate-y-1 transition duration-300">
+                        <div class="flex justify-between items-end mb-3">
+                            <span class="text-xs font-bold text-slate-500 uppercase tracking-widest">Tiến độ chương VII</span>
+                            <span class="font-display font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-cyan-500 text-xl">45%</span>
+                        </div>
+                        <div class="w-full h-3 bg-slate-100 rounded-full overflow-hidden shadow-inner">
+                            <div class="h-full bg-gradient-to-r from-blue-500 via-cyan-400 to-blue-500 bg-[length:200%_auto] animate-gradient-x rounded-full relative" style="width: 45%;">
+                                <div class="absolute right-0 top-0 bottom-0 w-6 bg-white/40 blur-[2px] animate-pulse"></div>
+                            </div>
+                        </div>
+                        <div class="flex justify-between mt-3">
+                            <p class="text-[10px] font-bold text-slate-500"><i class="fas fa-clock mr-1"></i> Đã học: 5h 20m</p>
+                            <p class="text-[10px] font-bold text-doly-blue bg-blue-50 px-2 py-0.5 rounded-full"><i class="fas fa-bolt mr-1"></i> Còn lại: ~6h</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cụm Đồ họa 3D lơ lửng -->
+                <div class="relative z-10 md:w-[45%] flex justify-center md:justify-end w-full mt-10 md:mt-0">
+                    <div class="relative w-full max-w-[320px] aspect-square">
+                        
+                        <!-- Lớp kính lơ lửng 1 (Kính hiển vi) -->
+                        <div class="absolute top-0 right-0 w-24 h-24 bg-white/80 backdrop-blur-xl rounded-[1.5rem] shadow-premium flex items-center justify-center border border-white animate-float-slow z-30 transform rotate-12 hover:scale-110 transition-transform">
+                            <i class="fas fa-microscope text-4xl text-purple-500 drop-shadow-md"></i>
+                        </div>
+                        
+                        <!-- Lớp kính lơ lửng 2 (Trái tim) -->
+                        <div class="absolute bottom-10 -left-6 w-20 h-20 bg-white/80 backdrop-blur-xl rounded-[1.2rem] shadow-premium flex items-center justify-center border border-white animate-float-fast z-30 transform -rotate-12 hover:scale-110 transition-transform">
+                            <i class="fas fa-heartbeat text-3xl text-red-500 drop-shadow-md"></i>
+                        </div>
+
+                        <!-- Card chính (Tiếp tục học - Phát sáng) -->
+                        <div class="absolute inset-0 top-10 left-4 right-4 bg-white/95 backdrop-blur-2xl rounded-[2.5rem] p-4 shadow-[0_20px_50px_rgba(37,99,235,0.15)] border border-white transform hover:-translate-y-2 transition duration-500 group cursor-pointer z-20 animate-float-med ring-4 ring-white/50">
+                            <!-- Thumbnail -->
+                            <div class="w-full h-36 rounded-2xl overflow-hidden relative bg-slate-800 shadow-inner">
+                                <img src="https://images.unsplash.com/photo-1559757175-5700dde675bc?auto=format&fit=crop&w=600&q=80" alt="Hệ tuần hoàn" class="w-full h-full object-cover opacity-90 group-hover:opacity-100 group-hover:scale-110 transition duration-700">
+                                
+                                <!-- Play Button Nhịp đập -->
+                                <div class="absolute inset-0 flex items-center justify-center">
+                                    <div class="w-14 h-14 bg-white/30 backdrop-blur-md rounded-full flex items-center justify-center border border-white/60 group-hover:bg-red-500 group-hover:border-red-500 transition-all shadow-[0_0_20px_rgba(255,255,255,0.5)] transform group-hover:scale-110 animate-pulse-glow">
+                                        <i class="fas fa-play text-white ml-1 text-xl drop-shadow-md"></i>
+                                    </div>
+                                </div>
+                                <div class="absolute top-2 left-2 bg-gradient-to-r from-cyan-500 to-blue-500 text-white text-[10px] font-black uppercase px-2 py-1 rounded shadow-md">
+                                    Lab 3D
+                                </div>
+                            </div>
+                            
+                            <!-- Text -->
+                            <div class="pt-4 px-2 text-center">
+                                <span class="text-[10px] font-bold text-red-500 uppercase tracking-widest bg-red-50 px-3 py-1 rounded-full mb-2 inline-block border border-red-100">Đang học Bài 33</span>
+                                <h3 class="text-base font-display font-black text-doly-dark mb-3 line-clamp-1 group-hover:text-doly-blue transition">Máu và Hệ Tuần Hoàn</h3>
+                                <button class="w-full py-3 bg-gradient-to-r from-blue-600 to-cyan-500 text-white rounded-xl font-bold text-xs uppercase tracking-widest shadow-neon-blue hover:shadow-[0_0_30px_rgba(0,229,255,0.5)] transition-all">
+                                    Tiếp tục học ngay
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ================= MAIN LAYOUT: CHIA CỘT 2:1 ================= -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-10">
+                
+                <!-- CỘT TRÁI: LỘ TRÌNH (Timeline) -->
+                <div class="lg:col-span-2 flex flex-col gap-6">
+                    <div class="flex items-center justify-between mb-2 px-2">
+                        <h2 class="text-2xl font-display font-black text-doly-dark tracking-tight flex items-center gap-3">
+                            <i class="fas fa-map-signs text-doly-blue"></i> Lộ trình học tập
+                        </h2>
+                        <span class="text-xs font-bold text-doly-blue bg-blue-50 px-4 py-1.5 rounded-full border border-blue-100 shadow-sm">Chương VII • 8 Bài học</span>
+                    </div>
+
+                    <!-- Chương VII (Active) -->
+                    <div class="glass-premium rounded-[2.5rem] overflow-hidden shadow-sm">
+                        <!-- Header -->
+                        <div class="chapter-header active bg-white/90 backdrop-blur-md p-8 flex justify-between items-center cursor-pointer border-b border-slate-100" onclick="toggleChapter(this)">
+                            <div>
+                                <p class="text-[10px] font-bold uppercase tracking-[0.2em] text-doly-blue mb-1">Chương VII</p>
+                                <h3 class="text-2xl font-display font-black text-slate-800">Sinh học cơ thể người</h3>
+                            </div>
+                            <div class="flex items-center gap-5">
+                                <span class="text-sm font-bold text-slate-500 bg-slate-100 px-3 py-1 rounded-full">2/8 Bài</span>
+                                <div class="w-10 h-10 rounded-full bg-blue-50 text-doly-blue flex items-center justify-center chapter-icon transition-transform border border-blue-100 shadow-inner">
+                                    <i class="fas fa-chevron-down"></i>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Timeline Bài Học -->
+                        <div class="chapter-content open bg-white/40 backdrop-blur-sm relative">
+                            <!-- Đường Timeline lấp lánh -->
+                            <div class="absolute left-[54px] top-10 bottom-12 w-1 bg-gradient-to-b from-emerald-400 via-blue-400 to-slate-200 z-0 hidden sm:block rounded-full opacity-50"></div>
+
+                            <div class="p-6 flex flex-col gap-6 relative z-10">
+                                
+                                <!-- Bài 31 (Hoàn thành) -->
+                                <div class="lesson-item bg-white/95 backdrop-blur-md p-5 rounded-[1.5rem] border border-slate-100 flex items-center justify-between group cursor-pointer shadow-sm ml-0 sm:ml-4">
+                                    <div class="flex items-center gap-5">
+                                        <div class="w-12 h-12 rounded-full bg-emerald-500 text-white flex items-center justify-center text-lg shadow-[0_0_15px_rgba(16,185,129,0.4)] ring-4 ring-white shrink-0 z-10 -ml-0 sm:-ml-10">
+                                            <i class="fas fa-check"></i>
+                                        </div>
+                                        <div>
+                                            <h4 class="font-bold text-slate-800 text-base group-hover:text-emerald-600 transition">Bài 31: Hệ vận động ở người</h4>
+                                            <div class="flex items-center gap-3 mt-1.5 text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+                                                <span><i class="fas fa-play-circle mr-1 text-slate-400"></i> Video 12p</span>
+                                                <span class="text-slate-300">•</span>
+                                                <span class="text-emerald-500"><i class="fas fa-check-square mr-1"></i> Quiz 10/10</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="hidden sm:flex w-8 h-8 rounded-full bg-slate-50 items-center justify-center text-slate-400 group-hover:bg-emerald-50 group-hover:text-emerald-500 transition"><i class="fas fa-redo text-xs"></i></div>
+                                </div>
+
+                                <!-- Bài 32 (Hoàn thành) -->
+                                <div class="lesson-item bg-white/95 backdrop-blur-md p-5 rounded-[1.5rem] border border-slate-100 flex items-center justify-between group cursor-pointer shadow-sm ml-0 sm:ml-4">
+                                    <div class="flex items-center gap-5">
+                                        <div class="w-12 h-12 rounded-full bg-emerald-500 text-white flex items-center justify-center text-lg shadow-[0_0_15px_rgba(16,185,129,0.4)] ring-4 ring-white shrink-0 z-10 -ml-0 sm:-ml-10">
+                                            <i class="fas fa-check"></i>
+                                        </div>
+                                        <div>
+                                            <h4 class="font-bold text-slate-800 text-base group-hover:text-emerald-600 transition">Bài 32: Dinh dưỡng và tiêu hóa</h4>
+                                            <div class="flex items-center gap-3 mt-1.5 text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+                                                <span><i class="fas fa-book-open mr-1 text-slate-400"></i> Lý thuyết</span>
+                                                <span class="text-slate-300">•</span>
+                                                <span class="text-emerald-500"><i class="fas fa-vr-cardboard mr-1"></i> Lab Dạ dày</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="hidden sm:flex w-8 h-8 rounded-full bg-slate-50 items-center justify-center text-slate-400 group-hover:bg-emerald-50 group-hover:text-emerald-500 transition"><i class="fas fa-redo text-xs"></i></div>
+                                </div>
+
+                                <!-- Bài 33 (Đang học - HIỆU ỨNG PHÁT SÁNG NỔI BẬT) -->
+                                <div class="lesson-item bg-white p-5 rounded-[1.5rem] border-0 flex items-center justify-between group cursor-pointer shadow-glow-border transform scale-[1.03] ml-0 sm:ml-4 relative overflow-hidden">
+                                    <!-- Nền gradient chạy nhẹ nhẹ -->
+                                    <div class="absolute inset-0 bg-gradient-to-r from-blue-50 via-white to-cyan-50 opacity-50 pointer-events-none"></div>
+                                    
+                                    <div class="flex items-center gap-5 relative z-10">
+                                        <div class="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-cyan-400 text-white flex items-center justify-center text-xl ring-4 ring-white shrink-0 -ml-0 sm:-ml-10 shadow-neon-blue">
+                                            <i class="fas fa-play ml-1"></i>
+                                            <span class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 border-2 border-white rounded-full animate-ping opacity-70"></span>
+                                            <span class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 border-2 border-white rounded-full"></span>
+                                        </div>
+                                        <div>
+                                            <div class="flex items-center gap-2 mb-1.5">
+                                                <span class="text-[9px] font-bold text-white uppercase tracking-widest bg-doly-blue px-2.5 py-0.5 rounded shadow-sm">Đang học dở</span>
+                                            </div>
+                                            <h4 class="font-display font-black text-doly-blue text-lg">Bài 33: Máu và hệ tuần hoàn</h4>
+                                            <div class="flex items-center gap-3 mt-1.5 text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+                                                <span class="text-red-500 bg-red-50 px-2 py-1 rounded"><i class="fas fa-heartbeat mr-1"></i> Mới: Lab Tim co bóp</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <button class="hidden md:block text-xs font-bold text-white bg-doly-dark hover:bg-doly-blue transition-colors px-6 py-3 rounded-full shadow-lg uppercase tracking-wider relative z-10">Tiếp tục</button>
+                                </div>
+
+                                <!-- Bài 34 (Khóa) -->
+                                <div class="lesson-item bg-white/40 backdrop-blur-sm p-5 rounded-[1.5rem] border border-white flex items-center justify-between opacity-70 cursor-not-allowed ml-0 sm:ml-4">
+                                    <div class="flex items-center gap-5">
+                                        <div class="w-12 h-12 rounded-full bg-slate-200 text-slate-400 flex items-center justify-center text-lg ring-4 ring-white/50 shrink-0 z-10 border border-slate-300 -ml-0 sm:-ml-10">
+                                            <i class="fas fa-lock"></i>
+                                        </div>
+                                        <div>
+                                            <h4 class="font-bold text-slate-500 text-base">Bài 34: Hệ hô hấp ở người</h4>
+                                            <div class="flex items-center gap-3 mt-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                                                <span><i class="fas fa-play-circle mr-1"></i> Video</span>
+                                                <span class="text-slate-300">•</span>
+                                                <span><i class="fas fa-lungs mr-1"></i> Lab Hô hấp</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Chương VIII (Khóa) -->
+                    <div class="glass-premium rounded-[2.5rem] overflow-hidden border border-white shadow-sm opacity-80 mt-2">
+                        <div class="chapter-header bg-white/60 p-8 flex justify-between items-center cursor-pointer" onclick="toggleChapter(this)">
+                            <div>
+                                <p class="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-500 mb-1">Chương VIII</p>
+                                <h3 class="text-2xl font-display font-black text-slate-700">Sinh thái học và Môi trường</h3>
+                            </div>
+                            <div class="flex items-center gap-5">
+                                <span class="text-sm font-bold text-slate-400 bg-white px-3 py-1 rounded-full">0/6 Bài</span>
+                                <div class="w-10 h-10 rounded-full bg-white text-slate-400 flex items-center justify-center chapter-icon border border-slate-100 shadow-sm">
+                                    <i class="fas fa-chevron-down"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="chapter-content bg-white/30 backdrop-blur-sm">
+                            <div class="p-6 text-center text-sm font-bold text-slate-500 bg-white/60 m-5 rounded-2xl border border-white shadow-sm">
+                                <i class="fas fa-lock mb-2 text-2xl text-slate-300 block"></i>
+                                Vui lòng hoàn thành Chương VII để mở khóa nội dung này.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ================= GÓC THẢO LUẬN LỚP HỌC (Lấp đầy khoảng trống) ================= -->
+                    <div class="flex items-center justify-between mt-4 px-2" data-aos="fade-up">
+                        <h2 class="text-2xl font-display font-black text-doly-dark tracking-tight flex items-center gap-3">
+                            <i class="fas fa-comments text-doly-blue"></i> Thảo luận lớp học
+                        </h2>
+                        <span class="text-xs font-bold text-slate-500 bg-white/60 px-4 py-1.5 rounded-full border border-white shadow-sm">124 bình luận</span>
+                    </div>
+
+                    <div class="glass-premium rounded-[2.5rem] p-6 md:p-8 border border-white shadow-sm" data-aos="fade-up">
+                        <!-- Khung nhập bình luận -->
+                        <div class="flex gap-3 md:gap-4 mb-8 bg-white/50 p-4 rounded-[1.5rem] border border-white shadow-inner">
+                            <div class="w-10 h-10 rounded-full overflow-hidden shrink-0 border-2 border-white shadow-sm bg-white">
+                                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" alt="User" class="w-full h-full object-cover">
+                            </div>
+                            <div class="flex-1 relative">
+                                <input type="text" placeholder="Bạn đang thắc mắc điều gì? Hỏi ngay..." class="w-full bg-white/70 backdrop-blur-sm border border-slate-200 text-slate-800 px-5 py-3 rounded-xl text-sm font-bold focus:outline-none focus:border-doly-blue focus:bg-white transition-all shadow-sm">
+                                <button class="absolute right-2 top-2 bottom-2 bg-doly-blue text-white px-5 rounded-lg text-[10px] font-black uppercase tracking-widest shadow-md hover:bg-blue-700 transition">Gửi</button>
+                            </div>
+                        </div>
+
+                        <!-- Danh sách bình luận -->
+                        <div class="space-y-6">
+                            <!-- Comment 1 -->
+                            <div class="flex gap-4">
+                                <div class="w-10 h-10 rounded-full overflow-hidden shrink-0 border border-slate-200 bg-white">
+                                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Mai" alt="User" class="w-full h-full object-cover">
+                                </div>
+                                <div class="flex-1">
+                                    <div class="bg-white/80 backdrop-blur-sm p-4 rounded-2xl rounded-tl-sm border border-white shadow-sm">
+                                        <div class="flex justify-between items-center mb-1">
+                                            <h5 class="font-bold text-slate-800 text-sm">Hạnh Nguyên</h5>
+                                            <span class="text-[10px] text-slate-400 font-bold">2 giờ trước</span>
+                                        </div>
+                                        <p class="text-sm text-slate-600 font-medium leading-relaxed">Mọi người ơi, tại sao tâm thất trái lại có thành cơ dày hơn tâm thất phải vậy ạ? Mình xem video bài 33 đoạn đầu chưa hiểu lắm.</p>
+                                    </div>
+                                    <div class="flex gap-4 mt-2 ml-2 text-xs font-bold text-slate-500">
+                                        <button class="hover:text-red-500 transition"><i class="far fa-heart"></i> Thích (12)</button>
+                                        <button class="hover:text-doly-blue transition"><i class="far fa-comment"></i> Trả lời</button>
+                                    </div>
+                                    
+                                    <!-- Nested Reply -->
+                                    <div class="flex gap-4 mt-4">
+                                        <div class="w-8 h-8 rounded-full overflow-hidden shrink-0 border border-slate-200 bg-white">
+                                            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Hanh" alt="Teacher" class="w-full h-full object-cover">
+                                        </div>
+                                        <div class="flex-1">
+                                            <div class="bg-blue-50/80 backdrop-blur-sm p-4 rounded-2xl rounded-tl-sm border border-blue-100 shadow-sm">
+                                                <div class="flex justify-between items-center mb-1">
+                                                    <div class="flex items-center gap-2">
+                                                        <h5 class="font-bold text-doly-dark text-sm">Cô Phương Tuấn</h5>
+                                                        <span class="bg-doly-blue text-white text-[8px] font-black uppercase px-2 py-0.5 rounded shadow-sm">Giáo viên</span>
+                                                    </div>
+                                                    <span class="text-[10px] text-slate-400 font-bold">1 giờ trước</span>
+                                                </div>
+                                                <p class="text-sm text-slate-700 font-medium leading-relaxed">Chào Mai, vì tâm thất trái phải bơm máu đi nuôi toàn bộ cơ thể (vòng tuần hoàn lớn) nên cần lực co bóp mạnh hơn, do đó thành cơ phải dày hơn tâm thất phải (chỉ bơm máu lên phổi) em nhé!</p>
+                                            </div>
+                                            <div class="flex gap-4 mt-2 ml-2 text-[11px] font-bold text-slate-500">
+                                                <button class="text-red-500 transition"><i class="fas fa-heart"></i> Thích (5)</button>
+                                                <button class="hover:text-doly-blue transition"><i class="far fa-comment"></i> Trả lời</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- CỘT PHẢI: TRỢ LÝ AI & LAB 3D HOLOGRAPHIC -->
+                <div class="lg:col-span-1 flex flex-col gap-6" data-aos="fade-left" data-aos-delay="100">
+                    
+                    <!-- THẺ LAB 3D HOLOGRAPHIC (Wow Factor) -->
+                    <div class="holographic-card rounded-[2.5rem] p-8 text-white group cursor-pointer">
+                        <div class="flex justify-between items-start mb-6 relative z-10">
+                            <div class="w-14 h-14 bg-white/10 backdrop-blur-md rounded-2xl flex items-center justify-center text-3xl border border-white/20 shadow-lg group-hover:scale-110 transition-transform">
+                                <i class="fas fa-vr-cardboard text-cyan-300"></i>
+                            </div>
+                            <span class="bg-cyan-500/30 text-cyan-100 border border-cyan-400/50 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest shadow-[0_0_10px_rgba(0,229,255,0.3)] animate-pulse-glow">HOT</span>
+                        </div>
+                        <h3 class="text-2xl font-display font-black mb-2 relative z-10 drop-shadow-md">Phòng Lab Sinh Học Ảo</h3>
+                        <p class="text-sm text-blue-100 font-medium mb-6 relative z-10 opacity-90 line-clamp-2">Bóc tách cơ thể, quan sát tim co bóp 3D chân thực, an toàn tuyệt đối.</p>
+                        <button class="w-full py-3.5 bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/30 rounded-xl text-xs font-black uppercase tracking-widest transition relative z-10 shadow-sm">
+                            Vào Lab Ngay <i class="fas fa-arrow-right ml-1"></i>
+                        </button>
+                    </div>
+
+                    <!-- AI TUTOR WIDGET -->
+                    <div class="glass-premium flex-1 flex flex-col overflow-hidden rounded-[2.5rem] shadow-premium relative">
+                        
+                        <!-- Header Chat -->
+                        <div class="p-6 border-b border-slate-100/60 flex justify-between items-center bg-white/90 backdrop-blur-md relative z-10">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-[#00E5FF] to-[#00B4D8] text-white flex items-center justify-center shadow-neon-cyan">
+                                    <i class="fas fa-robot text-lg"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-display font-black text-slate-800 text-lg leading-tight">Doly AI</h3>
+                                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Trợ lý học thuật</p>
+                                </div>
+                            </div>
+                            <span class="flex items-center gap-1.5 text-[10px] font-bold text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-full border border-emerald-100 shadow-sm">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Online
+                            </span>
+                        </div>
+
+                        <!-- Chat Area -->
+                        <div class="p-6 flex-1 flex flex-col gap-6 overflow-y-auto bg-white/30 backdrop-blur-sm h-[350px] relative z-10">
+                            
+                            <!-- BONG BÓNG NGƯỜI DÙNG -->
+                            <div class="self-end max-w-[85%] bg-doly-blue text-white p-4 md:p-5 rounded-[1.5rem] rounded-br-sm shadow-chat-bubble font-semibold text-[14px] leading-relaxed">
+                                Doly ơi, hệ tuần hoàn lớn và vòng tuần hoàn nhỏ khác nhau thế nào? Mình đang học bài 33 mà hơi lú.
+                                <div class="bg-black/10 px-3 py-2 rounded-xl mt-3 inline-block font-mono font-bold text-[11px] border border-white/10">
+                                    <i class="fas fa-paperclip mr-1 opacity-70"></i> Bài 33: Máu & Hệ tuần hoàn
+                                </div>
+                            </div>
+                            
+                            <!-- BONG BÓNG AI -->
+                            <div class="self-start max-w-[95%] flex gap-3">
+                                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-[#00E5FF] to-[#00B4D8] text-white flex items-center justify-center text-lg shrink-0 shadow-sm border-2 border-white">
+                                    <i class="fas fa-robot"></i>
+                                </div>
+                                <div class="bg-white text-slate-700 p-5 rounded-[1.5rem] rounded-tl-sm text-[14px] border border-white shadow-chat-bubble leading-relaxed font-semibold flex-1">
+                                    Chào bạn! Cơ thể người có 2 vòng tuần hoàn: <br><br>
+                                    <strong class="text-doly-dark bg-blue-50 px-1 rounded">1. Vòng lớn:</strong> Dẫn máu giàu O2 từ tâm thất trái đến các cơ quan, rồi đưa máu nghèo O2 về tâm nhĩ phải.<br><br>
+                                    <strong class="text-doly-dark bg-blue-50 px-1 rounded">2. Vòng nhỏ:</strong> Dẫn máu nghèo O2 từ tâm thất phải lên phổi để trao đổi khí, rồi đưa máu giàu O2 về tâm nhĩ trái.
+                                </div>
+                            </div>
+
+                            <!-- TYPING INDICATOR -->
+                            <div class="self-start flex gap-3">
+                                <div class="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center text-slate-400 text-xs shrink-0"><i class="fas fa-robot"></i></div>
+                                <div class="bg-white px-4 py-3 rounded-full border border-white shadow-sm flex items-center gap-1">
+                                    <div class="w-1.5 h-1.5 bg-slate-300 rounded-full animate-bounce"></div>
+                                    <div class="w-1.5 h-1.5 bg-slate-300 rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
+                                    <div class="w-1.5 h-1.5 bg-slate-300 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <!-- Input Area -->
+                        <div class="p-5 bg-white/90 backdrop-blur-xl border-t border-slate-100/60 relative z-10">
+                            <div class="w-full bg-slate-50 border border-slate-200 text-slate-400 px-5 py-4 rounded-full text-xs font-bold uppercase tracking-widest flex items-center gap-4 cursor-text hover:border-doly-blue hover:shadow-md transition-all shadow-inner group">
+                                <i class="fas fa-camera text-doly-blue text-xl group-hover:scale-110 transition"></i>
+                                <span class="opacity-70 mt-0.5">THỬ HỎI MỘT CÂU NGAY...</span>
+                                <i class="fas fa-microphone text-slate-300 ml-auto hover:text-doly-blue transition"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Giảng viên & Tài liệu -->
+                    <div class="glass-premium p-6 rounded-[2.5rem] border border-white shadow-sm">
+                        <h3 class="font-display font-black text-doly-dark text-base mb-4 px-2">Hỗ trợ môn học</h3>
+                        <div class="flex items-center gap-4 bg-white/60 p-4 rounded-2xl border border-white mb-3 shadow-sm">
+                            <div class="w-12 h-12 rounded-full overflow-hidden border-2 border-white shadow-sm shrink-0">
+                                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Hanh" alt="Cô Hạnh" class="w-full h-full object-cover">
+                            </div>
+                            <div>
+                                <p class="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-0.5">Giáo viên KHTN</p>
+                                <h4 class="font-bold text-slate-800 text-sm">Th.S Lê Phương Hạnh</h4>
+                            </div>
+                        </div>
+                        <a href="#" class="flex items-center gap-4 bg-orange-50/80 hover:bg-orange-100 transition p-4 rounded-2xl border border-orange-100 cursor-pointer shadow-sm">
+                            <div class="w-10 h-10 rounded-full bg-white text-orange-500 flex items-center justify-center text-lg shadow-sm"><i class="fas fa-file-pdf"></i></div>
+                            <div>
+                                <h4 class="font-bold text-slate-800 text-sm">Tài liệu Chương VII</h4>
+                                <p class="text-[10px] font-bold text-orange-500 uppercase tracking-widest mt-1">Sổ tay Sinh học 8</p>
+                            </div>
+                        </a>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Script điều khiển Accordion -->
+    <script>
+        function toggleChapter(headerElement) {
+            const content = headerElement.nextElementSibling;
+            document.querySelectorAll('.chapter-content').forEach(el => {
+                if(el !== content) {
+                    el.classList.remove('open');
+                    el.previousElementSibling.classList.remove('active');
+                }
+            });
+            content.classList.toggle('open');
+            headerElement.classList.toggle('active');
+        }
+    </script>
+
+    <!-- Footer -->
+    <footer class="py-10 mt-10 relative z-10">
+        <div class="container mx-auto px-6 text-center">
+            <p class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">&copy; 2026 DOLY LMS - HỆ SINH THÁI KHTN TOÀN DIỆN</p>
+        </div>
+    </footer>
+
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script>
+        AOS.init({ once: true, offset: 30, duration: 600, easing: 'ease-out-cubic' });
+
+        // Custom Cursor
+        const cursorDot = document.querySelector('.cursor-dot');
+        const cursorOutline = document.querySelector('.cursor-outline');
+        window.addEventListener('mousemove', (e) => {
+            cursorDot.style.left = `${e.clientX}px`; cursorDot.style.top = `${e.clientY}px`;
+            cursorOutline.style.left = `${e.clientX}px`; cursorOutline.style.top = `${e.clientY}px`;
+        });
+
+        // Auth
+        document.addEventListener('DOMContentLoaded', function() {
+            var user = DolyAPI.loadSession();
+            if (user && user.full_name) {
+                var avatarEl = document.querySelector('[data-avatar]');
+                if (avatarEl) {
+                    avatarEl.textContent = user.full_name.split(' ').map(function(w){return w[0];}).join('').substring(0,2).toUpperCase();
+                }
+            }
+        });
+        function handleLogout() {
+            DolyAPI.logout().catch(function(){}).finally(function(){
+                DolyAPI.clearSession();
+                window.location.href = '../login.html';
+            });
+        }
+    </script>
+</body>
+</html>

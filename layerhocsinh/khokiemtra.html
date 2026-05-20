@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="vi" class="scroll-smooth overflow-x-hidden">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kho Kiểm Tra & Luyện Tập - DOLY LMS</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="../api/client.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Quicksand:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        'brand-blue': '#0A2FB6', 'brand-cyan': '#00E5FF', 'brand-purple': '#9D00FF', 'brand-yellow': '#FFD700', 'brand-dark': '#0B0F19',
+                        'doly-blue': '#2563EB', 'doly-dark': '#0f172a', 'doly-yellow': '#FBBF24', 'ai-purple': '#8b5cf6', 'chem-green': '#10b981', 'bio-pink': '#ec4899',
+                    },
+                    fontFamily: {
+                        sans: ['Quicksand', 'sans-serif'],
+                        display: ['Montserrat', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        body { background-color: #f8fafc; color: #20356a; transition: background-color 0.4s ease; min-height: 100vh; display: flex; flex-direction: column; }
+        .dark body { background-color: #0f172a; color: #cbd5e1; }
+        
+        .aurora-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100vh; z-index: -1; overflow: hidden; }
+        .orb { position: absolute; border-radius: 50%; filter: blur(120px); opacity: 0.25; animation: floatOrb 25s infinite alternate ease-in-out; }
+        .orb-1 { width: 70vw; height: 70vw; background: #c7d2fe; top: -20%; left: -10%; }
+        .orb-2 { width: 60vw; height: 60vw; background: #e9d5ff; bottom: -20%; right: -10%; }
+        @keyframes floatOrb { 0% { transform: translate(0, 0) scale(1); } 100% { transform: translate(10vw, -10vh) scale(1.1); } }
+
+        .glass-panel { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(25px); border: 1px solid rgba(255, 255, 255, 0.8); }
+        .dark .glass-panel { background: rgba(30, 41, 59, 0.7); border-color: rgba(255, 255, 255, 0.1); }
+
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+
+        .quiz-option { transition: all 0.3s ease; }
+        .quiz-option:hover { border-color: #0A2FB6; background-color: rgba(10, 47, 182, 0.05); }
+        .dark .quiz-option:hover { border-color: #00E5FF; background-color: rgba(0, 229, 255, 0.1); }
+        
+        .quiz-option.selected { border-color: #0A2FB6; background-color: #0A2FB6; color: white; }
+        .dark .quiz-option.selected { border-color: #00E5FF; background-color: #00E5FF; color: #0f172a; }
+        .quiz-option.selected span { background-color: rgba(255,255,255,0.2); color: inherit; border-color: transparent; }
+    </style>
+</head>
+<body class="antialiased selection:bg-brand-blue selection:text-white">
+
+    <div class="aurora-bg"><div class="orb orb-1"></div><div class="orb orb-2"></div></div>
+
+    <div class="fixed top-6 left-0 w-full z-50 px-6 flex justify-center">
+        <header class="w-full max-w-7xl glass-panel !rounded-full px-8 py-3 flex justify-between items-center shadow-sm">
+            <a href="dashboad.html" class="flex items-center gap-3 group shrink-0">
+                <div class="w-10 h-10 flex items-center justify-center transition-transform group-hover:rotate-12 duration-500">
+                    <img src="../logodoly.png" alt="Doly Logo" class="w-full h-full object-contain">
+                </div>
+                <h1 class="text-lg font-display font-black text-[#1e2b4d] dark:text-white hidden sm:block uppercase tracking-tight">DOLY LMS</h1>
+            </a>
+            
+            <nav class="hidden lg:flex flex-1 justify-center gap-6 xl:gap-12 text-[13px] xl:text-[15px] font-bold uppercase tracking-wide text-[#1e2b4d] dark:text-slate-300 mx-4">
+                <a href="dashboad.html" class="opacity-85 hover:opacity-100 transition-opacity whitespace-nowrap">TRANG CHỦ</a>
+                <a href="lophoc.html" class="opacity-85 hover:opacity-100 transition-opacity whitespace-nowrap">LỚP HỌC</a>
+                <a href="hocthuat.html" class="opacity-85 hover:opacity-100 transition-opacity whitespace-nowrap">HỌC TẬP</a>
+                <a href="khokiemtra.html" class="relative after:content-[''] after:absolute after:-bottom-2 after:left-0 after:w-full after:h-[3px] after:bg-[#1e2b4d] dark:after:bg-brand-cyan whitespace-nowrap">KHO KIỂM TRA</a>
+                <a href="diendan.html" class="opacity-85 hover:opacity-100 transition-opacity whitespace-nowrap">DIỄN ĐÀN VÀ CỘNG ĐỒNG</a>
+                <a href="tintuc.html" class="opacity-85 hover:opacity-100 transition-opacity whitespace-nowrap">TIN TỨC</a>
+            </nav>
+            
+            <div class="flex items-center gap-4 shrink-0">
+                <button onclick="toggleTheme()" class="w-9 h-9 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 flex items-center justify-center hover:scale-110 transition shadow-sm border border-transparent dark:border-slate-700">
+                    <i class="fas fa-moon dark:hidden"></i>
+                    <i class="fas fa-sun hidden dark:block text-brand-yellow"></i>
+                </button>
+
+                <button onclick="handleLogout()" class="w-9 h-9 rounded-full bg-red-50 dark:bg-red-900/30 text-red-500 dark:text-red-400 flex items-center justify-center hover:scale-110 transition shadow-sm border border-red-200 dark:border-red-800" title="Dang xuat">
+                    <i class="fas fa-sign-out-alt text-sm"></i>
+                </button>
+
+                <button class="w-10 h-10 rounded-full border-2 border-brand-blue dark:border-brand-cyan overflow-hidden hover:scale-105 transition shadow-sm p-0.5 cursor-pointer">
+                    <div id="header-avatar-text" class="w-full h-full rounded-full bg-gradient-to-br from-brand-blue to-brand-cyan flex items-center justify-center text-white font-display font-black text-sm uppercase">HN</div>
+                </button>
+            </div>
+        </header>
+    </div>
+
+    <main class="flex-1 container mx-auto px-4 md:px-6 pt-36 pb-12 max-w-7xl relative z-10">
+        
+        <div id="dashboardView" class="transition-opacity duration-500">
+            <div class="text-center mb-16" id="header-title-area" data-aos="zoom-in">
+                <div class="inline-flex items-center gap-2 px-4 py-1.5 bg-white/80 dark:bg-slate-800/80 backdrop-blur-md text-slate-600 dark:text-slate-300 rounded-full text-[11px] font-black uppercase tracking-[0.15em] mb-4 border border-white/50 dark:border-slate-700 shadow-sm">
+                    <i class="fas fa-pencil-alt text-brand-blue dark:text-brand-cyan"></i> Ôn Luyện Từng Bài
+                </div>
+                <h1 class="text-4xl md:text-5xl font-display font-black mb-6 leading-tight tracking-tight text-[#1e2b4d] dark:text-white">
+                    Kho Bài Tập Ôn Luyện <br class="hidden md:block">
+                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-blue to-brand-cyan">Chương VII: Sinh Học Cơ Thể Người</span>
+                </h1>
+                <p class="font-semibold text-base max-w-2xl mx-auto leading-relaxed text-slate-500 dark:text-slate-400">
+                    Làm trắc nghiệm riêng rẽ từng bài để củng cố chắc chắn kiến thức ngay sau khi học xong lý thuyết.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                
+                <div class="lg:col-span-8 flex flex-col gap-6" id="quizList">
+                    
+                    <div id="card-bai31" class="bg-white/80 dark:bg-slate-800/80 backdrop-blur-md p-8 rounded-[2rem] border border-white/50 dark:border-slate-700 shadow-sm hover:shadow-xl transition-all group" data-aos="fade-up">
+                        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+                            <div class="flex-1">
+                                <div class="quiz-status flex items-center gap-2 mb-3">
+                                    <span class="bg-slate-100 text-slate-600 px-3 py-1 rounded-md text-[10px] font-black uppercase tracking-widest border border-slate-200">Chưa làm</span>
+                                    <span class="text-xs font-bold text-slate-400 dark:text-slate-500">Bài 31</span>
+                                </div>
+                                <h3 class="text-2xl font-black text-[#1e2b4d] dark:text-white mb-2">Hệ vận động (Xương & Cơ)</h3>
+                                <p class="text-sm font-medium text-slate-500 dark:text-slate-400 leading-relaxed mb-4">Củng cố kiến thức về cấu tạo, chức năng của các loại xương và khớp trong cơ thể.</p>
+                                <div class="flex gap-6 text-xs font-bold text-slate-600 dark:text-slate-300">
+                                    <span class="flex items-center gap-1.5"><i class="far fa-clock text-brand-blue dark:text-brand-cyan"></i> 10 Phút</span>
+                                    <span class="flex items-center gap-1.5"><i class="fas fa-list-ol text-brand-blue dark:text-brand-cyan"></i> 5 Câu</span>
+                                </div>
+                            </div>
+                            <button onclick="startQuiz('bai31')" class="quiz-action-btn px-8 py-3 bg-brand-blue text-white rounded-2xl font-black text-sm uppercase tracking-widest shadow-lg hover:bg-blue-800 transition-all transform hover:scale-105 active:scale-95 shrink-0">Làm bài</button>
+                        </div>
+                    </div>
+
+                    <div id="card-bai32" class="bg-white/80 dark:bg-slate-800/80 backdrop-blur-md p-8 rounded-[2rem] border border-white/50 dark:border-slate-700 shadow-sm hover:shadow-xl transition-all group" data-aos="fade-up" data-aos-delay="100">
+                        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+                            <div class="flex-1">
+                                <div class="quiz-status flex items-center gap-2 mb-3">
+                                    <span class="bg-slate-100 text-slate-600 px-3 py-1 rounded-md text-[10px] font-black uppercase tracking-widest border border-slate-200">Chưa làm</span>
+                                    <span class="text-xs font-bold text-slate-400 dark:text-slate-500">Bài 32</span>
+                                </div>
+                                <h3 class="text-2xl font-black text-[#1e2b4d] dark:text-white mb-2">Cấu tạo cơ quan hô hấp</h3>
+                                <p class="text-sm font-medium text-slate-500 dark:text-slate-400 leading-relaxed mb-4">Kiểm tra kiến thức về các bộ phận của hệ hô hấp và chức năng của chúng.</p>
+                                <div class="flex gap-6 text-xs font-bold text-slate-600 dark:text-slate-300">
+                                    <span class="flex items-center gap-1.5"><i class="far fa-clock text-brand-blue dark:text-brand-cyan"></i> 10 Phút</span>
+                                    <span class="flex items-center gap-1.5"><i class="fas fa-list-ol text-brand-blue dark:text-brand-cyan"></i> 6 Câu</span>
+                                </div>
+                            </div>
+                            <button onclick="startQuiz('bai32')" class="quiz-action-btn px-8 py-3 bg-brand-blue text-white rounded-2xl font-black text-sm uppercase tracking-widest shadow-lg hover:bg-blue-800 transition-all transform hover:scale-105 active:scale-95 shrink-0">Làm bài</button>
+                        </div>
+                    </div>
+
+                    <div id="card-bai33" class="bg-white/80 dark:bg-slate-800/80 backdrop-blur-md p-8 rounded-[2rem] border border-white/50 dark:border-slate-700 shadow-sm hover:shadow-xl transition-all group" data-aos="fade-up" data-aos-delay="200">
+                        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+                            <div class="flex-1">
+                                <div class="quiz-status flex items-center gap-2 mb-3">
+                                    <span class="bg-slate-100 text-slate-600 px-3 py-1 rounded-md text-[10px] font-black uppercase tracking-widest border border-slate-200">Chưa làm</span>
+                                    <span class="text-xs font-bold text-slate-400 dark:text-slate-500">Bài 33</span>
+                                </div>
+                                <h3 class="text-2xl font-black text-[#1e2b4d] dark:text-white mb-2">Cơ chế thở & Tuần hoàn</h3>
+                                <p class="text-sm font-medium text-slate-500 dark:text-slate-400 leading-relaxed mb-4">Hiểu rõ về cách con người hít thở, nhịp tim và các nhóm máu cơ bản.</p>
+                                <div class="flex gap-6 text-xs font-bold text-slate-600 dark:text-slate-300">
+                                    <span class="flex items-center gap-1.5"><i class="far fa-clock text-brand-blue dark:text-brand-cyan"></i> 15 Phút</span>
+                                    <span class="flex items-center gap-1.5"><i class="fas fa-list-ol text-brand-blue dark:text-brand-cyan"></i> 9 Câu</span>
+                                </div>
+                            </div>
+                            <button onclick="startQuiz('bai33')" class="quiz-action-btn px-8 py-3 bg-brand-blue text-white rounded-2xl font-black text-sm uppercase tracking-widest shadow-lg hover:bg-blue-800 transition-all transform hover:scale-105 active:scale-95 shrink-0">Làm bài</button>
+                        </div>
+                    </div>
+
+                    <div class="opacity-50 grayscale pointer-events-none bg-white/40 dark:bg-slate-800/40 p-8 rounded-[2rem] border border-dashed border-slate-300 dark:border-slate-600 text-center mt-4">
+                        <i class="fas fa-lock text-3xl text-slate-400 mb-3"></i>
+                        <p class="font-bold text-slate-500">Bài 34: Vệ sinh hô hấp (Sẽ mở khi học xong lý thuyết)</p>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-4 flex flex-col gap-6" id="rightSidebar" data-aos="fade-left">
+                    
+                    <div class="bg-white/80 dark:bg-slate-800/80 backdrop-blur-md p-6 rounded-[2rem] border border-white/50 dark:border-slate-700 shadow-sm">
+                        <h3 class="text-lg font-black mb-6 flex items-center gap-2 text-[#1e2b4d] dark:text-white"><i class="fas fa-chart-pie text-brand-blue dark:text-brand-cyan"></i> Tiến độ ôn luyện</h3>
+                        <div class="space-y-4">
+                            <div class="flex justify-between items-center p-4 bg-slate-50 dark:bg-slate-900/50 rounded-2xl border border-slate-100 dark:border-slate-800">
+                                <span class="text-sm font-bold text-slate-600 dark:text-slate-300">Đã hoàn thành</span>
+                                <span class="text-lg font-black dark:text-white">0/3 đề</span>
+                            </div>
+                            <div class="flex justify-between items-center p-4 bg-slate-50 dark:bg-slate-900/50 rounded-2xl border border-slate-100 dark:border-slate-800">
+                                <span class="text-sm font-bold text-slate-600 dark:text-slate-300">Tỉ lệ đúng TB</span>
+                                <span class="text-lg font-black text-emerald-500">--%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white/80 dark:bg-slate-800/80 backdrop-blur-md p-6 rounded-[2rem] border border-white/50 dark:border-slate-700 shadow-sm">
+                        <h3 class="text-lg font-black mb-5 flex items-center gap-2 text-[#1e2b4d] dark:text-white"><i class="fas fa-crown text-yellow-500"></i> Bảng Vàng Thành Tích</h3>
+                        <div class="space-y-3">
+                            <div class="flex items-center gap-3 p-3 bg-gradient-to-r from-yellow-50 to-white dark:from-yellow-900/20 dark:to-slate-800 rounded-2xl border border-yellow-200 dark:border-yellow-700/50 shadow-sm relative overflow-hidden">
+                                <div class="absolute -right-4 -top-4 text-yellow-500/20 text-5xl"><i class="fas fa-trophy"></i></div>
+                                <div class="w-8 flex justify-center text-2xl drop-shadow-md z-10">🥇</div>
+                                <img src="https://ui-avatars.com/api/?name=Minh+Anh&background=FFD700&color=000" class="w-10 h-10 rounded-full border-2 border-yellow-400 z-10 shadow-sm">
+                                <div class="flex-1 z-10">
+                                    <p class="text-sm font-black text-yellow-900 dark:text-yellow-400 leading-tight">Minh Anh</p>
+                                    <span class="text-[10px] font-bold text-yellow-700 dark:text-yellow-500">150 bài - 98%</span>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-200 dark:border-slate-700 relative overflow-hidden">
+                                <div class="w-8 flex justify-center text-2xl drop-shadow-md">🥈</div>
+                                <img src="https://ui-avatars.com/api/?name=Gia+Bao&background=cbd5e1&color=000" class="w-10 h-10 rounded-full border-2 border-slate-300 z-10 shadow-sm">
+                                <div class="flex-1 z-10">
+                                    <p class="text-sm font-black text-slate-800 dark:text-white leading-tight">Gia Bảo</p>
+                                    <span class="text-[10px] font-bold text-slate-500">124 bài - 95%</span>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-3 p-3 bg-orange-50 dark:bg-slate-800/50 rounded-2xl border border-orange-200 dark:border-slate-700 relative overflow-hidden">
+                                <div class="w-8 flex justify-center text-2xl drop-shadow-md">🥉</div>
+                                <img src="https://ui-avatars.com/api/?name=Thu+Ha&background=f97316&color=fff" class="w-10 h-10 rounded-full border-2 border-orange-300 z-10 shadow-sm">
+                                <div class="flex-1 z-10">
+                                    <p class="text-sm font-black text-orange-900 dark:text-orange-400 leading-tight">Thu Hà</p>
+                                    <span class="text-[10px] font-bold text-orange-700 dark:text-orange-500">110 bài - 92%</span>
+                                </div>
+                            </div>
+
+                            <div class="flex items-center gap-3 p-3 bg-brand-blue dark:bg-brand-cyan rounded-2xl text-white dark:text-[#1e2b4d] mt-4 shadow-md transform hover:scale-105 transition cursor-pointer">
+                                <div class="w-8 text-center font-black opacity-80">14</div>
+                                <div class="w-10 h-10 rounded-full bg-white text-brand-blue flex items-center justify-center text-xs font-black border-2 border-transparent">HN</div>
+                                <div class="flex-1">
+                                    <p class="text-sm font-black leading-tight">Hoàng Nam (Bạn)</p>
+                                    <span class="text-[10px] font-bold opacity-80">0 bài - 0%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <div id="quizInterface" class="hidden flex-col gap-6 max-w-4xl mx-auto w-full transition-opacity duration-500 opacity-0">
+            <div class="flex items-center justify-between mb-2">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-white/50 backdrop-blur-sm border border-slate-200 dark:border-slate-700 flex items-center justify-center text-brand-blue dark:text-brand-cyan shadow-sm"><i class="fas fa-pencil-alt"></i></div>
+                    <h2 class="text-xl md:text-2xl font-black text-[#1e2b4d] dark:text-white" id="quizHeaderTitle">Bài kiểm tra</h2>
+                </div>
+                <button onclick="quitQuiz()" class="px-4 py-2 rounded-full bg-white/50 backdrop-blur-sm border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:text-red-500 hover:bg-red-50 transition-colors text-xs font-bold flex items-center gap-2 shadow-sm"><i class="fas fa-sign-out-alt"></i> Thoát</button>
+            </div>
+
+            <div class="bg-white/95 dark:bg-slate-800/95 backdrop-blur-xl p-8 md:p-12 rounded-[2.5rem] border border-white dark:border-slate-700 shadow-[0_20px_60px_rgba(0,0,0,0.08)] relative">
+                
+                <div class="flex justify-between items-center mb-8 border-b border-slate-100 dark:border-slate-700 pb-5">
+                    <div class="flex flex-col">
+                        <span class="text-sm font-black text-brand-blue dark:text-brand-cyan uppercase tracking-widest mb-1">
+                            Câu hỏi <span id="currentQ" class="text-xl">1</span>/<span id="totalQ">0</span>
+                        </span>
+                        <div class="w-32 h-1.5 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
+                            <div id="quizProgressBar" class="h-full bg-brand-cyan transition-all duration-300" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <span id="timer" class="font-display font-black text-xl md:text-2xl text-red-500 bg-red-50 dark:bg-red-500/10 px-5 py-2 rounded-full border border-red-100 dark:border-red-500/20 shadow-sm flex items-center">
+                            <i class="far fa-clock mr-2 animate-pulse"></i> <span>--:--</span>
+                        </span>
+                    </div>
+                </div>
+                
+                <div id="questionContent">
+                    <h2 id="qText" class="text-xl md:text-2xl lg:text-3xl font-bold text-[#1e2b4d] dark:text-white leading-relaxed mb-10">Đang tải câu hỏi...</h2>
+                    <div class="grid grid-cols-1 gap-4" id="optionsContainer">
+                        </div>
+                </div>
+
+                <div class="flex justify-between items-center mt-12 pt-6 border-t border-slate-100 dark:border-slate-700">
+                    <button id="prevBtn" onclick="prevQ()" class="px-6 py-3 text-slate-400 dark:text-slate-500 font-black text-sm uppercase tracking-widest hover:text-brand-blue dark:hover:text-brand-cyan transition-colors invisible flex items-center gap-2"><i class="fas fa-arrow-left"></i> Quay lại</button>
+                    <button id="nextBtn" onclick="nextQ()" class="px-12 py-4 bg-[#1e2b4d] dark:bg-brand-cyan dark:text-[#1e2b4d] text-white rounded-full font-black text-sm uppercase tracking-widest shadow-[0_10px_20px_rgba(30,43,77,0.2)] hover:opacity-90 hover:-translate-y-1 transition-all flex items-center gap-2">Câu tiếp theo <i class="fas fa-arrow-right"></i></button>
+                </div>
+            </div>
+        </div>
+
+        <div id="resultArea" class="hidden flex-col items-center max-w-4xl mx-auto w-full transition-opacity duration-500 opacity-0" data-aos="zoom-in">
+            <div class="bg-white/95 dark:bg-slate-800/95 backdrop-blur-xl p-12 rounded-[3rem] border border-white dark:border-slate-700 shadow-2xl w-full flex flex-col items-center text-center">
+                <div class="w-28 h-28 bg-gradient-to-br from-brand-yellow to-orange-500 rounded-full flex items-center justify-center text-white text-6xl mb-6 shadow-[0_0_40px_rgba(255,215,0,0.4)]">
+                    <i class="fas fa-trophy"></i>
+                </div>
+                <h2 class="text-4xl font-black text-[#1e2b4d] dark:text-white mb-2">Hoàn thành bài tập!</h2>
+                <p class="text-lg text-slate-500 dark:text-slate-400 mb-10 font-medium">Bạn đã nỗ lực hết mình. Cùng xem thành quả nhé!</p>
+                
+                <div class="grid grid-cols-2 gap-8 mb-10 w-full max-w-lg">
+                    <div class="p-8 bg-slate-50 dark:bg-slate-900/50 rounded-3xl border border-slate-100 dark:border-slate-700 shadow-inner">
+                        <p class="text-xs font-black text-slate-400 uppercase mb-2 tracking-widest">Số câu đúng</p>
+                        <p class="text-5xl font-display font-black text-emerald-500" id="correctCount">0/0</p>
+                    </div>
+                    <div class="p-8 bg-slate-50 dark:bg-slate-900/50 rounded-3xl border border-slate-100 dark:border-slate-700 shadow-inner">
+                        <p class="text-xs font-black text-slate-400 uppercase mb-2 tracking-widest">Điểm số</p>
+                        <p class="text-5xl font-display font-black text-brand-blue dark:text-brand-cyan" id="finalScore">0.0</p>
+                    </div>
+                </div>
+
+                <div class="mb-10 w-full max-w-lg bg-gradient-to-br from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 p-6 rounded-3xl border border-purple-200 dark:border-purple-800/50 flex flex-col items-center">
+                    <div class="w-12 h-12 bg-ai-purple text-white rounded-full flex items-center justify-center text-xl mb-3 shadow-md"><i class="fas fa-robot"></i></div>
+                    <h3 class="text-lg font-black text-purple-900 dark:text-purple-300 mb-2">Chưa hiểu vì sao sai?</h3>
+                    <p class="text-sm text-purple-700 dark:text-purple-400 mb-5 font-medium">Doly AI có thể phân tích và giải thích chi tiết từng lỗi sai cho bạn.</p>
+                    <button onclick="askAIAboutQuiz()" class="px-8 py-3 bg-white dark:bg-slate-800 text-ai-purple hover:bg-ai-purple hover:text-white font-black rounded-xl shadow-sm hover:shadow-md transition-all border border-purple-100 dark:border-purple-700 flex items-center gap-2"><i class="fas fa-magic"></i> Giải thích đáp án sai</button>
+                </div>
+                
+                <button onclick="closeResult()" class="px-12 py-4 bg-brand-blue text-white rounded-full font-black text-base uppercase tracking-widest shadow-lg hover:bg-blue-800 hover:-translate-y-1 transition-all flex items-center gap-2"><i class="fas fa-undo"></i> Đóng & Quay lại</button>
+            </div>
+        </div>
+
+    </main>
+
+    <footer class="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-t border-slate-200 dark:border-slate-800 py-12 mt-16 z-20 relative w-full">
+        <div class="container mx-auto px-6 relative z-10 max-w-7xl">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12 text-left mb-12">
+                <div class="space-y-6">
+                    <a href="index.html" class="flex items-center gap-2 group">
+                        <div class="w-10 h-10 transition-transform group-hover:rotate-12 duration-500 flex items-center justify-center">
+                            <img src="../logodoly.png" alt="Doly Logo" class="w-full h-full object-contain">
+                        </div>
+                        <span class="text-xl font-display font-black text-brand-dark dark:text-white tracking-tighter uppercase">DOLY LMS</span>
+                    </a>
+                    <p class="text-slate-500 dark:text-slate-400 text-xs leading-relaxed font-medium">Hệ sinh thái giáo dục số thông minh nhất dành cho học sinh KHTN Việt Nam.</p>
+                </div>
+                <div>
+                    <h4 class="text-xs font-black uppercase tracking-[0.2em] mb-6 text-brand-blue dark:text-brand-yellow">Học Tập</h4>
+                    <ul class="space-y-3 text-slate-600 dark:text-slate-400 text-xs font-bold">
+                        <li><a href="#" class="hover:text-brand-blue dark:hover:text-brand-cyan transition-colors">Nội dung học thuật</a></li>
+                        <li><a href="#" class="hover:text-brand-blue dark:hover:text-brand-cyan transition-colors">Lịch học Smart</a></li>
+                        <li><a href="hocthuat.html" class="hover:text-brand-blue dark:hover:text-brand-cyan transition-colors">Thí nghiệm ảo 3D</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-xs font-black uppercase tracking-[0.2em] mb-6 text-brand-blue dark:text-brand-yellow">Kết Nối</h4>
+                    <ul class="space-y-3 text-slate-600 dark:text-slate-400 text-xs font-bold">
+                        <li><a href="diendan.html" class="hover:text-brand-blue dark:hover:text-brand-cyan transition-colors">Cộng đồng hội cá heo</a></li>
+                        <li><a href="#" class="hover:text-brand-blue dark:hover:text-brand-cyan transition-colors">Trung tâm hỗ trợ</a></li>
+                        <li><a href="#" class="hover:text-brand-blue dark:hover:text-brand-cyan transition-colors">Tư vấn phụ huynh</a></li>
+                    </ul>
+                </div>
+                <div class="space-y-6">
+                    <h4 class="text-xs font-black uppercase tracking-[0.2em] mb-6 text-brand-blue dark:text-brand-yellow">Đăng Ký</h4>
+                    <div class="relative">
+                        <input type="email" placeholder="Email của bạn..." class="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3 text-xs font-bold focus:outline-none focus:border-brand-blue transition-all dark:text-white">
+                        <button class="absolute right-1.5 top-1.5 bottom-1.5 bg-brand-blue text-white px-4 rounded-lg shadow-md hover:bg-blue-800 transition-colors"><i class="fas fa-paper-plane text-xs"></i></button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="pt-8 border-t border-slate-200 dark:border-slate-800 flex flex-col md:flex-row justify-between items-center gap-6">
+                <p class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500">&copy; 2026 DOLY LMS - KIẾN TẠO TƯƠNG LAI SỐ</p>
+                <div class="flex justify-center gap-8 text-slate-400 dark:text-slate-500 text-lg">
+                    <a href="#" class="hover:text-brand-blue transition transform hover:-translate-y-1"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#" class="hover:text-red-500 transition transform hover:-translate-y-1"><i class="fab fa-youtube"></i></a>
+                    <a href="#" class="hover:text-brand-dark dark:hover:text-white transition transform hover:-translate-y-1"><i class="fab fa-tiktok"></i></a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <div class="fixed bottom-8 right-8 z-[100]">
+        <button onclick="toggleAIChat()" class="w-16 h-16 bg-white dark:bg-slate-800 border-2 border-slate-100 dark:border-slate-700 rounded-full shadow-[0_15px_30px_rgba(10,47,182,0.2)] flex items-center justify-center hover:scale-110 transition-transform transform hover:-rotate-12 cursor-pointer group relative">
+          <img src="../logodoly.png" alt="Doly Logo" class="w-full h-full object-contain">  
+            <span class="absolute top-0 right-0 w-3 h-3 bg-red-500 border-2 border-white dark:border-slate-800 rounded-full animate-ping"></span>
+            <span class="absolute top-0 right-0 w-3 h-3 bg-red-500 border-2 border-white dark:border-slate-800 rounded-full"></span>
+            <span class="absolute -top-12 right-0 bg-brand-blue text-white text-[10px] font-black uppercase px-4 py-2 rounded-xl opacity-0 group-hover:opacity-100 transition whitespace-nowrap shadow-lg">Hỏi Doly AI</span>
+        </button>
+    </div>
+
+    <div id="ai-chat-panel" class="fixed top-0 right-0 w-full md:w-96 h-full bg-white dark:bg-slate-900 shadow-[-10px_0_30px_rgba(0,0,0,0.1)] z-[110] transform translate-x-full transition-transform duration-300 flex flex-col border-l border-slate-200 dark:border-slate-800">
+        <div class="p-4 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50 dark:bg-slate-800/50">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-brand-cyan rounded-full flex items-center justify-center text-xl shadow-sm border-2 border-white dark:border-slate-700">🐬</div>
+                <div>
+                    <h3 class="font-black text-sm text-brand-dark dark:text-white">Doly Trợ Lý Số</h3>
+                    <p class="text-[10px] text-brand-cyan font-bold"><i class="fas fa-circle text-[8px] mr-1 animate-pulse"></i>Luôn sẵn sàng</p>
+                </div>
+            </div>
+            <button onclick="toggleAIChat()" class="w-8 h-8 flex items-center justify-center text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-full transition"><i class="fas fa-times"></i></button>
+        </div>
+        
+        <div id="chat-history" class="flex-1 p-4 overflow-y-auto space-y-4 bg-white dark:bg-slate-900 relative">
+            <div class="absolute inset-0 opacity-5 pointer-events-none" style="background-image: radial-gradient(#334155 1px, transparent 1px); background-size: 20px 20px;"></div>
+            
+            <div class="flex gap-3 w-5/6 relative z-10 mt-2">
+                <div class="w-8 h-8 rounded-full bg-brand-cyan text-white flex items-center justify-center shrink-0 text-sm shadow-sm">🐬</div>
+                <div class="bg-slate-100 dark:bg-slate-800 p-3 rounded-2xl rounded-tl-none text-sm text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
+                    Chào bạn! Bạn có thể hỏi Doly bất kỳ điều gì, từ kiến thức bài học đến giải thích câu hỏi bạn vừa làm sai nhé!
+                </div>
+            </div>
+        </div>
+
+        <div class="p-4 border-t border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900">
+            <div class="relative">
+                <input type="text" id="chat-input" placeholder="Hỏi Doly điều gì đó..." class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-full pl-5 pr-12 py-3.5 text-sm focus:outline-none focus:border-brand-cyan dark:text-white transition" onkeydown="if(event.key === 'Enter') sendMsg()">
+                <button onclick="sendMsg()" class="absolute right-2 top-1.5 w-9 h-9 bg-brand-cyan text-white rounded-full flex items-center justify-center hover:bg-blue-400 transition shadow-sm"><i class="fas fa-paper-plane text-xs"></i></button>
+            </div>
+            <p class="text-[9px] text-center text-slate-400 mt-2">Doly AI có thể mắc lỗi. Hãy kiểm tra lại thông tin nhé.</p>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script>
+        // ===== Auth =====
+        document.addEventListener('DOMContentLoaded', function() {
+            var user = DolyAPI.loadSession();
+            if (user && user.full_name) {
+                var avatarTxt = document.getElementById('header-avatar-text');
+                if (avatarTxt) {
+                    avatarTxt.textContent = user.full_name.split(' ').map(function(w){return w[0];}).join('').substring(0,2).toUpperCase();
+                }
+            }
+            // Load quizzes from API
+            loadQuizzesFromAPI();
+        });
+
+        AOS.init({ once: true, offset: 40, duration: 600, easing: 'ease-out-cubic' });
+        function toggleTheme() { document.documentElement.classList.toggle('dark'); }
+
+        // ===== Load quizzes from API =====
+        function loadQuizzesFromAPI() {
+            DolyAPI.getQuestionBank()
+                .then(function(questions) {
+                    if (!questions || questions.length === 0) return;
+                    // Group questions by lesson to create quiz cards dynamically
+                    var grouped = {};
+                    questions.forEach(function(q) {
+                        var lessonId = q.lesson_id || 'general';
+                        if (!grouped[lessonId]) {
+                            grouped[lessonId] = {
+                                title: q.lesson_name || ('Bai ' + lessonId),
+                                lessonId: lessonId,
+                                questions: []
+                            };
+                        }
+                        grouped[lessonId].questions.push({
+                            q: q.question_text || q.content,
+                            opts: q.options ? (typeof q.options === 'string' ? JSON.parse(q.options) : q.options) : ['Dap an A', 'Dap an B', 'Dap an C'],
+                            correct: q.correct_answer !== undefined ? q.correct_answer : 0
+                        });
+                    });
+                    
+                    // Add to quizDatabase
+                    Object.keys(grouped).forEach(function(key) {
+                        var g = grouped[key];
+                        if (g.questions.length >= 3) {
+                            var quizId = 'api_' + key;
+                            quizDatabase[quizId] = {
+                                title: g.title,
+                                time: g.questions.length * 120,
+                                questions: g.questions
+                            };
+                            // Add card to UI
+                            var quizList = document.getElementById('quizList');
+                            if (quizList) {
+                                var card = document.createElement('div');
+                                card.id = 'card-' + quizId;
+                                card.className = 'bg-white/80 dark:bg-slate-800/80 backdrop-blur-md p-8 rounded-[2rem] border border-white/50 dark:border-slate-700 shadow-sm hover:shadow-xl transition-all group';
+                                card.setAttribute('data-aos', 'fade-up');
+                                card.innerHTML = '<div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">' +
+                                    '<div class="flex-1">' +
+                                        '<div class="quiz-status flex items-center gap-2 mb-3">' +
+                                            '<span class="bg-slate-100 text-slate-600 px-3 py-1 rounded-md text-[10px] font-black uppercase tracking-widest border border-slate-200">Chua lam</span>' +
+                                            '<span class="text-xs font-bold text-slate-400 dark:text-slate-500">' + DolyAPI.esc(g.title) + '</span>' +
+                                        '</div>' +
+                                        '<h3 class="text-2xl font-black text-[#1e2b4d] dark:text-white mb-2">' + DolyAPI.esc(g.title) + '</h3>' +
+                                        '<p class="text-sm font-medium text-slate-500 dark:text-slate-400 leading-relaxed mb-4">On luyen voi ' + g.questions.length + ' cau hoi tu API.</p>' +
+                                        '<div class="flex gap-6 text-xs font-bold text-slate-600 dark:text-slate-300">' +
+                                            '<span class="flex items-center gap-1.5"><i class="far fa-clock text-brand-blue dark:text-brand-cyan"></i> ' + Math.round(g.questions.length * 2) + ' Phut</span>' +
+                                            '<span class="flex items-center gap-1.5"><i class="fas fa-list-ol text-brand-blue dark:text-brand-cyan"></i> ' + g.questions.length + ' Cau</span>' +
+                                        '</div>' +
+                                    '</div>' +
+                                    '<button onclick="startQuiz(\'' + quizId + '\')" class="quiz-action-btn px-8 py-3 bg-brand-blue text-white rounded-2xl font-black text-sm uppercase tracking-widest shadow-lg hover:bg-blue-800 transition-all transform hover:scale-105 active:scale-95 shrink-0">Lam bai</button>' +
+                                '</div>';
+                                // Insert before the locked lesson
+                                var locked = quizList.querySelector('.opacity-50');
+                                if (locked) {
+                                    quizList.insertBefore(card, locked);
+                                } else {
+                                    quizList.appendChild(card);
+                                }
+                            }
+                        }
+                    });
+                })
+                .catch(function() {
+                    // Fallback: keep static quizDatabase
+                    console.log('Using static quiz data (API unavailable)');
+                });
+        }
+
+        const quizDatabase = {
+            'bai31': {
+                title: "Bài 31: Hệ vận động",
+                time: 600,
+                questions: [
+                    { q: "Xương người to ra nhờ sự phân chia của các tế bào ở:", opts: ["Mô xương xốp", "Màng xương", "Khoang xương", "Sụn bọc đầu xương"], correct: 1 },
+                    { q: "Thành phần hóa học của xương bao gồm:", opts: ["Chất hữu cơ và muối khoáng", "Chất hữu cơ và nước", "Chất vô cơ và nước", "Muối khoáng và sụn"], correct: 0 },
+                    { q: "Chất hữu cơ (cốt giao) trong xương có chức năng gì?", opts: ["Làm xương cứng chắc", "Làm xương dài ra", "Giúp xương có tính đàn hồi và dẻo dai", "Giúp xương to ra"], correct: 2 },
+                    { q: "Khớp xương giữa xương cánh tay và xương bả vai thuộc loại khớp nào?", opts: ["Khớp động", "Khớp bán động", "Khớp bất động", "Khớp sụn"], correct: 0 },
+                    { q: "Hệ vận động bao gồm những thành phần nào?", opts: ["Xương và cơ", "Xương và khớp", "Cơ và khớp", "Tim và mạch máu"], correct: 0 }
+                ]
+            },
+            'bai32': {
+                title: "Bài 32: Cấu tạo cơ quan hô hấp",
+                time: 600,
+                questions: [
+                    { q: "Ở người, enzyme Amylase trong nước bọt giúp biến đổi tinh bột thành đường gì?", opts: ["Glucose", "Maltose", "Saccarozo", "Fructozo"], correct: 1 },
+                    { q: "Cơ quan nào là nơi hấp thụ phần lớn chất dinh dưỡng trong hệ tiêu hóa?", opts: ["Dạ dày", "Ruột non", "Ruột già", "Thực quản"], correct: 1 },
+                    { q: "Dịch mật được sản xuất tại cơ quan nào?", opts: ["Túi mật", "Gan", "Tụy", "Dạ dày"], correct: 1 },
+                    { q: "Quá trình tiêu hóa hóa học bắt đầu diễn ra mạnh nhất ở đâu?", opts: ["Khoang miệng", "Dạ dày", "Ruột non", "Thực quản"], correct: 1 },
+                    { q: "Phần nào của ống tiêu hóa có chức năng hấp thụ lại nước?", opts: ["Dạ dày", "Ruột non", "Ruột già", "Trực tràng"], correct: 2 },
+                    { q: "Dịch vị dạ dày chứa chủ yếu chất nào để tiêu hóa protein?", opts: ["Enzyme Amylase", "Axit HCl và Pepsin", "Dịch mật", "Chất nhầy"], correct: 1 }
+                ]
+            },
+            'bai33': {
+                title: "Bài 33: Cơ chế thở & Tuần hoàn",
+                time: 900,
+                questions: [
+                    { q: "Tim người được chia thành mấy ngăn?", opts: ["2 ngăn", "3 ngăn", "4 ngăn", "5 ngăn"], correct: 2 },
+                    { q: "Mạch máu dẫn máu từ cơ thể trở về tim được gọi là:", opts: ["Động mạch", "Tĩnh mạch", "Mao mạch", "Mạch bạch huyết"], correct: 1 },
+                    { q: "Nhóm máu nào được gọi là 'Nhóm máu chuyên cho'?", opts: ["Nhóm máu A", "Nhóm máu B", "Nhóm máu AB", "Nhóm máu O"], correct: 3 },
+                    { q: "Vòng tuần hoàn nhỏ có chức năng gì?", opts: ["Đưa máu đi nuôi toàn cơ thể", "Đưa máu đến phổi để trao đổi khí", "Đưa máu từ gan về tim", "Đưa máu lên não"], correct: 1 },
+                    { q: "Bạch cầu có chức năng chính là gì?", opts: ["Vận chuyển Oxy", "Đông máu", "Bảo vệ cơ thể khỏi vi khuẩn", "Vận chuyển chất dinh dưỡng"], correct: 2 },
+                    { q: "Ngăn nào của tim có thành cơ dày nhất?", opts: ["Tâm thất phải", "Tâm thất trái", "Tâm nhĩ phải", "Tâm nhĩ trái"], correct: 1 },
+                    { q: "Huyết áp là gì?", opts: ["Áp lực của máu lên thành mạch", "Tốc độ chảy của máu", "Sức hút của tim", "Lượng máu trong cơ thể"], correct: 0 },
+                    { q: "Hồng cầu có chức năng chính là vận chuyển khí:", opts: ["Oxy và Cacbonic", "Nitơ và Oxy", "Oxy và Hidro", "Cacbonic và Heli"], correct: 0 },
+                    { q: "Ăn quá mặn có hại gì cho hệ tuần hoàn?", opts: ["Gây loãng xương", "Dễ gây cao huyết áp", "Gây đau dạ dày", "Gây thiếu máu"], correct: 1 }
+                ]
+            }
+        };
+
+        // BIẾN TRẠNG THÁI QUIZ
+        let activeQuestions = [];
+        let currentQuestionIndex = 0;
+        let userAnswers = [];
+        let timeLeft = 0;
+        let timerInterval;
+        let currentQuizId = null;
+
+        function startQuiz(quizId) {
+            currentQuizId = quizId;
+            const selectedQuiz = quizDatabase[quizId];
+            activeQuestions = selectedQuiz.questions;
+            timeLeft = selectedQuiz.time;
+            
+            userAnswers = new Array(activeQuestions.length).fill(null);
+            currentQuestionIndex = 0;
+
+            // CHUYỂN ĐỔI GIAO DIỆN SANG FULL-WIDTH
+            document.getElementById('dashboardView').classList.add('hidden');
+            
+            const quizUI = document.getElementById('quizInterface');
+            quizUI.classList.remove('hidden');
+            quizUI.classList.add('flex');
+            document.getElementById('quizHeaderTitle').innerText = selectedQuiz.title;
+            
+            setTimeout(() => { quizUI.classList.remove('opacity-0'); }, 50);
+
+            document.getElementById('totalQ').innerText = activeQuestions.length;
+
+            showQuestion(0);
+            startTimer();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function showQuestion(index) {
+            currentQuestionIndex = index;
+            const question = activeQuestions[index];
+            
+            document.getElementById('currentQ').innerText = index + 1;
+            document.getElementById('qText').innerText = question.q;
+            
+            // Cập nhật thanh tiến trình
+            const progress = ((index) / activeQuestions.length) * 100;
+            document.getElementById('quizProgressBar').style.width = `${progress}%`;
+            
+            const container = document.getElementById('optionsContainer');
+            container.innerHTML = '';
+            
+            question.opts.forEach((opt, i) => {
+                const btn = document.createElement('button');
+                btn.className = `quiz-option w-full p-5 md:p-6 rounded-[1.5rem] border-2 border-slate-200 dark:border-slate-700 text-left font-bold transition-all flex items-center gap-5 text-[#1e2b4d] dark:text-slate-200 hover:-translate-y-1 shadow-sm hover:shadow-md`;
+                
+                if (userAnswers[index] === i) btn.classList.add('selected');
+                
+                btn.innerHTML = `<span class="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-700/50 flex items-center justify-center text-base font-black text-slate-500 dark:text-slate-400 shrink-0 border border-slate-200 dark:border-slate-600 shadow-sm">${String.fromCharCode(65 + i)}</span> <span class="flex-1 leading-snug text-base md:text-lg">${opt}</span>`;
+                btn.onclick = () => selectOption(i);
+                container.appendChild(btn);
+            });
+
+            document.getElementById('prevBtn').style.visibility = index === 0 ? 'hidden' : 'visible';
+            
+            const nextBtn = document.getElementById('nextBtn');
+            if (index === activeQuestions.length - 1) {
+                nextBtn.innerHTML = 'Nộp bài <i class="fas fa-paper-plane"></i>';
+                nextBtn.classList.replace('bg-[#1e2b4d]', 'bg-chem-green');
+                nextBtn.classList.replace('dark:bg-brand-cyan', 'dark:bg-emerald-500');
+            } else {
+                nextBtn.innerHTML = 'Câu tiếp theo <i class="fas fa-arrow-right"></i>';
+                nextBtn.classList.replace('bg-chem-green', 'bg-[#1e2b4d]');
+                nextBtn.classList.replace('dark:bg-emerald-500', 'dark:bg-brand-cyan');
+            }
+        }
+
+        function selectOption(optionIndex) {
+            userAnswers[currentQuestionIndex] = optionIndex;
+            showQuestion(currentQuestionIndex);
+        }
+
+        function nextQ() {
+            if (currentQuestionIndex < activeQuestions.length - 1) {
+                showQuestion(currentQuestionIndex + 1);
+            } else {
+                finishQuiz();
+            }
+        }
+
+        function prevQ() {
+            if (currentQuestionIndex > 0) showQuestion(currentQuestionIndex - 1);
+        }
+
+        function startTimer() {
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                const minutes = Math.floor(timeLeft / 60);
+                const seconds = timeLeft % 60;
+                document.getElementById('timer').innerHTML = `<i class="far fa-clock mr-2"></i> <span>${minutes}:${seconds < 10 ? '0' : ''}${seconds}</span>`;
+                if (timeLeft <= 0) finishQuiz();
+            }, 1000);
+        }
+
+        function finishQuiz() {
+            clearInterval(timerInterval);
+            let correctCount = 0;
+            
+            userAnswers.forEach((ans, i) => {
+                if (ans === activeQuestions[i].correct) correctCount++;
+            });
+
+            // Chuyển sang màn hình kết quả
+            const quizUI = document.getElementById('quizInterface');
+            quizUI.classList.add('opacity-0');
+            
+            setTimeout(() => {
+                quizUI.classList.add('hidden');
+                quizUI.classList.remove('flex');
+                
+                const resultArea = document.getElementById('resultArea');
+                resultArea.classList.remove('hidden');
+                resultArea.classList.add('flex');
+                setTimeout(() => { resultArea.classList.remove('opacity-0'); }, 50);
+            }, 500);
+            
+            document.getElementById('correctCount').innerText = correctCount + '/' + activeQuestions.length;
+            const score = ((correctCount / activeQuestions.length) * 10).toFixed(1);
+            document.getElementById('finalScore').innerText = score;
+
+            // CẬP NHẬT UI TRÊN THẺ BÀI HỌC (ĐỔI CHỮ LÀM BÀI THÀNH LÀM LẠI)
+            updateCardUI(currentQuizId, correctCount, activeQuestions.length, score);
+
+            // Gửi kết quả lên server
+            saveQuizResult(correctCount, activeQuestions.length, score);
+
+            if (correctCount / activeQuestions.length >= 0.7) {
+                setTimeout(() => confetti({ particleCount: 200, spread: 90, origin: { y: 0.6 } }), 600);
+            }
+        }
+
+        function saveQuizResult(correct, total, score) {
+            // Map local quiz IDs to proper exam IDs for submission
+            var examId = currentQuizId;
+            var answers = userAnswers.map(function(ans, idx) {
+                return {
+                    question_index: idx,
+                    selected: ans,
+                    correct: activeQuestions[idx].correct
+                };
+            });
+
+            DolyAPI.submitExam(examId, answers)
+                .then(function(result) {
+                    console.log('Quiz result saved:', result);
+                })
+                .catch(function(err) {
+                    // Silent fail - quiz already displayed results locally
+                    console.warn('Could not save quiz result to server:', err.message);
+                });
+        }
+
+        function updateCardUI(quizId, correct, total, score) {
+            const card = document.getElementById(`card-${quizId}`);
+            if(!card) return;
+
+            const btn = card.querySelector('.quiz-action-btn');
+            btn.innerText = 'Làm lại';
+            btn.className = "quiz-action-btn px-8 py-3 bg-white border-2 border-brand-blue text-brand-blue rounded-2xl font-black text-sm uppercase tracking-widest shadow-sm hover:bg-slate-50 transition-all transform hover:scale-105 active:scale-95 shrink-0";
+
+            const statusArea = card.querySelector('.quiz-status');
+            const percent = correct / total;
+            let statusClass = percent >= 0.5 ? "bg-green-100 text-green-700 border-green-200" : "bg-yellow-100 text-yellow-700 border-yellow-200";
+            
+            statusArea.innerHTML = `
+                <span class="${statusClass} px-3 py-1 rounded-md text-[10px] font-black uppercase tracking-widest border">Điểm: ${score}</span>
+                <span class="text-xs font-bold text-slate-400 dark:text-slate-500">${quizDatabase[quizId].title.split(':')[0]}</span>
+            `;
+        }
+
+        function quitQuiz() {
+            if (confirm("Bạn có chắc chắn muốn thoát? Kết quả bài làm hiện tại sẽ không được lưu.")) {
+                closeResult();
+            }
+        }
+
+        function closeResult() {
+            clearInterval(timerInterval);
+            const resArea = document.getElementById('resultArea');
+            const quizUI = document.getElementById('quizInterface');
+            
+            resArea.classList.add('opacity-0');
+            quizUI.classList.add('opacity-0');
+            
+            setTimeout(() => {
+                resArea.classList.add('hidden'); resArea.classList.remove('flex');
+                quizUI.classList.add('hidden'); quizUI.classList.remove('flex');
+                
+                document.getElementById('dashboardView').classList.remove('hidden');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }, 500);
+        }
+
+        // TÍCH HỢP AI CHAT
+        function toggleAIChat() {
+            const panel = document.getElementById('ai-chat-panel');
+            panel.classList.toggle('translate-x-full');
+        }
+
+        function askAIAboutQuiz() {
+            toggleAIChat();
+            const title = quizDatabase[currentQuizId].title;
+            const input = document.getElementById('chat-input');
+            input.value = `Doly ơi, mình vừa làm sai vài câu trong ${title}, hãy giải thích lại giúp mình nhé!`;
+            sendMsg();
+        }
+
+        function sendMsg() {
+            const input = document.getElementById('chat-input');
+            const history = document.getElementById('chat-history');
+            const text = input.value.trim();
+            if(!text) return;
+
+            history.innerHTML += '<div class="flex gap-2 w-5/6 ml-auto justify-end mb-4 relative z-10"><div class="bg-brand-blue text-white p-3 rounded-2xl rounded-tr-none text-sm shadow-sm">' + DolyAPI.esc(text) + '</div></div>';
+            input.value = '';
+            history.scrollTop = history.scrollHeight;
+
+            const loadingId = 'ai-load-' + Date.now();
+            history.innerHTML += '<div id="' + loadingId + '" class="flex gap-3 w-5/6 mb-4 relative z-10"><div class="w-8 h-8 rounded-full bg-brand-cyan text-white flex items-center justify-center shrink-0 text-sm shadow-sm">🐬</div><div class="bg-slate-100 dark:bg-slate-800 p-3 rounded-2xl rounded-tl-none text-sm text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700"><span class="flex gap-1 items-center">Doly đang phân tích bài làm của bạn <i class="fas fa-circle text-[4px] animate-bounce"></i><i class="fas fa-circle text-[4px] animate-bounce" style="animation-delay: 0.1s"></i><i class="fas fa-circle text-[4px] animate-bounce" style="animation-delay: 0.2s"></i></span></div></div>';
+            history.scrollTop = history.scrollHeight;
+
+            DolyAPI.chat(text, { lesson_id: currentQuizId })
+                .then(function(result) {
+                    var loadingEl = document.getElementById(loadingId);
+                    if (loadingEl) {
+                        loadingEl.outerHTML = '<div class="flex gap-3 w-5/6 mb-4 relative z-10"><div class="w-8 h-8 rounded-full bg-brand-cyan text-white flex items-center justify-center shrink-0 text-sm shadow-sm">🐬</div><div class="bg-slate-100 dark:bg-slate-800 p-3 rounded-2xl rounded-tl-none text-sm text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">' + DolyAPI.esc(result.reply) + '</div></div>';
+                    }
+                    history.scrollTop = history.scrollHeight;
+                })
+                .catch(function(err) {
+                    var loadingEl = document.getElementById(loadingId);
+                    if (loadingEl) {
+                        loadingEl.outerHTML = '<div class="flex gap-3 w-5/6 mb-4 relative z-10"><div class="w-8 h-8 rounded-full bg-red-400 text-white flex items-center justify-center shrink-0 text-sm shadow-sm">⚠️</div><div class="bg-red-50 dark:bg-red-900/30 p-3 rounded-2xl rounded-tl-none text-sm text-red-700 dark:text-red-300 border border-red-200 dark:border-red-800">Doly gặp lỗi: ' + DolyAPI.esc(err.message || 'Mất kết nối') + '</div></div>';
+                    }
+                    history.scrollTop = history.scrollHeight;
+                });
+        }
+
+        function handleLogout() {
+            DolyAPI.logout().catch(function(){}).finally(function(){
+                DolyAPI.clearSession();
+                window.location.href = '../login.html';
+            });
+        }
+    </script>
+</body>
+</html>

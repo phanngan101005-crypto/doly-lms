@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="vi" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tổng quan làm việc - DOLY LMS</title>
+    <script src="../api/client.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Đồng bộ font chữ Plus Jakarta Sans với các mức độ đậm cao nhất -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: { 
+                        'brand-blue': '#2563EB',      
+                        'brand-dark-blue': '#1E3A8A', 
+                        'bg-main': '#F8FAFC',
+                    },
+                    fontFamily: { 
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'soft': '0 2px 10px rgba(0, 0, 0, 0.02)',
+                        'hover-soft': '0 10px 25px -3px rgba(37, 99, 235, 0.1)',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { background-color: #F8FAFC; }
+        .custom-scrollbar::-webkit-scrollbar { width: 5px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 10px; }
+        .sidebar-item:hover { background-color: #F1F5F9; color: #2563EB; }
+        .sidebar-item.active { background-color: #EFF6FF; color: #2563EB; }
+        
+        /* Hiệu ứng stroke để làm dày chữ mà không bị nhòe */
+        .text-bold-thick {
+            -webkit-text-stroke: 0.7px #1E3A8A;
+        }
+        .text-sub-thick {
+            -webkit-text-stroke: 0.3px #94A3B8;
+        }
+    </style>
+</head>
+<body class="antialiased font-sans text-slate-800">
+
+    <div class="flex min-h-screen">
+        
+        <!-- Menu bên trái -->
+        <aside class="w-72 bg-white border-r border-slate-200 hidden lg:flex flex-col sticky top-0 h-screen z-40 transition-all">
+            <div class="p-8">
+                <!-- LOGO -->
+                <a href="index.html" class="flex items-center gap-3.5 hover:opacity-80 transition-opacity group">
+                    <div class="w-[42px] h-[42px] flex items-center justify-center shrink-0">
+                        <img src="../logodoly.png" alt="Doly Logo" class="w-full h-full object-contain" onerror="this.src='https://ui-avatars.com/api/?name=D&background=1E3A8A&color=fff'">
+                    </div>
+                    <div class="flex flex-col justify-center">
+                        <div class="text-[21px] font-black text-brand-dark-blue leading-none tracking-[-0.04em] text-bold-thick">
+                            DOLY LMS
+                        </div>
+                        <span class="text-[9px] font-black text-[#94A3B8] uppercase tracking-[0.18em] mt-1.5 text-sub-thick">
+                            TEACHER WORKSPACE
+                        </span>
+                    </div>
+                </a>
+            </div>
+            
+            <nav class="flex-1 py-4 px-5 space-y-2 custom-scrollbar">
+                <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3 px-3">Quản lý chung</p>
+                
+                <!-- MENU LINKS -->
+                <a href="tongquan.html" class="sidebar-item active flex items-center gap-3 px-4 py-4 rounded-2xl transition-all font-[900] text-base shadow-sm shadow-blue-100">
+                    <i class="fa-solid fa-house text-xl w-6 text-center"></i> 
+                    <span>Bảng điều khiển</span>
+                </a>
+                <a href="./lophoccuatoi.html" class="sidebar-item flex items-center gap-3 px-4 py-4 rounded-2xl transition-all font-bold text-base text-slate-500 hover:text-brand-blue">
+                    <i class="fa-solid fa-users text-xl w-6 text-center"></i> 
+                    <span>Lớp học</span>
+                </a>
+                <a href="chamdiem.html" class="sidebar-item flex items-center gap-3 px-4 py-4 rounded-2xl transition-all font-bold text-base text-slate-500 hover:text-brand-blue">
+                    <i class="fa-solid fa-marker text-xl w-6 text-center"></i> 
+                    <span>Chấm và trả điểm</span>
+                </a>
+               
+            </nav>
+
+            <div class="p-6">
+                <!-- Khu vực tài khoản cá nhân -->
+                <div class="relative">
+                    <div onclick="document.getElementById('user-dropdown').classList.toggle('hidden')" class="flex items-center gap-3 p-3 rounded-2xl border border-slate-100 bg-slate-50 hover:bg-slate-100 transition-colors cursor-pointer select-none">
+                        <img id="user-avatar" src="https://ui-avatars.com/api/?name=User&background=1E3A8A&color=fff" class="w-10 h-10 rounded-full">
+                        <div class="flex-1">
+                            <p id="user-name" class="text-sm font-extrabold text-brand-dark-blue">Đang tải...</p>
+                            <p id="user-role" class="text-[11px] text-slate-500 font-bold">Giáo viên</p>
+                        </div>
+                        <i class="fa-solid fa-chevron-up text-[10px] text-slate-400"></i>
+                    </div>
+                    
+                    <div id="user-dropdown" class="hidden absolute bottom-full left-0 w-full mb-2 bg-white border border-slate-200 rounded-2xl shadow-hover-soft z-50 overflow-hidden">
+                        <a href="#" onclick="handleLogout()" class="flex items-center gap-3 px-4 py-3 text-sm font-extrabold text-red-600 hover:bg-red-50 transition-colors">
+                            <i class="fa-solid fa-arrow-right-from-bracket"></i> Đăng xuất
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Nội dung chính -->
+        <main class="flex-1 flex flex-col min-w-0">
+            
+            <header class="h-20 bg-white/80 backdrop-blur-md border-b border-slate-200 flex items-center justify-between px-8 sticky top-0 z-30">
+                <div class="flex items-center gap-4">
+                    <button class="lg:hidden text-slate-500"><i class="fa-solid fa-bars text-xl"></i></button>
+                    <div class="hidden md:flex items-center bg-slate-100 px-5 py-2.5 rounded-full w-[400px] border border-transparent focus-within:border-brand-blue focus-within:bg-white transition-all">
+                        <i class="fa-solid fa-magnifying-glass text-slate-400 text-sm mr-3"></i>
+                        <input type="text" placeholder="Tìm kiếm lớp học, học sinh..." class="bg-transparent border-none outline-none text-sm w-full text-slate-800 placeholder-slate-400 font-bold">
+                    </div>
+                </div>
+                
+                <div class="flex items-center gap-3">
+                   
+                </div>
+            </header>
+
+            <div class="p-8 max-w-[1400px] mx-auto w-full space-y-8">
+                
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                    <div>
+                        <!-- Tiêu đề trang dùng màu xanh đậm và in hoa -->
+                        <h1 class="text-3xl font-extrabold text-brand-dark-blue tracking-tight uppercase">TỔNG QUAN CÔNG VIỆC</h1>
+                        <p class="text-sm text-slate-500 font-bold mt-1">Quản lý lớp học và theo dõi bài tập cần chấm.</p>
+                    </div>
+                    
+                    <div class="flex flex-wrap items-center gap-3">
+                        <a href="taolop.html" class="flex items-center gap-2 px-7 py-3 bg-brand-blue text-white rounded-xl text-sm font-extrabold hover:bg-blue-700 transition-all shadow-lg shadow-blue-200 active:scale-95">
+                            <i class="fa-solid fa-users-viewfinder"></i> Tạo lớp học
+                        </a>
+                    </div>
+                </div>
+
+                <div class="grid lg:grid-cols-3 gap-8">
+                    
+                    <div class="lg:col-span-2 space-y-8">
+                        
+                        <!-- Bài tập đang chờ chấm -->
+                        <div class="bg-white rounded-[2rem] p-8 shadow-soft border border-slate-100">
+                            <div class="flex items-center justify-between mb-8 border-b border-slate-100 pb-5">
+                                <!-- Chuyển sang màu đen xám theo yêu cầu -->
+                                <h2 class="text-xl font-extrabold text-slate-800 flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-full bg-blue-50 text-brand-blue flex items-center justify-center">
+                                        <i class="fa-solid fa-marker"></i>
+                                    </div>
+                                    Bài tập đang chờ chấm
+                                </h2>
+                                <span class="bg-blue-50 text-brand-blue border border-blue-100 text-xs font-black px-3 py-1.5 rounded-full uppercase tracking-wider">2 Bài tập</span>
+                            </div>
+                            
+                            <div class="space-y-5">
+                                <div class="flex flex-col sm:flex-row sm:items-center justify-between p-6 rounded-2xl border border-slate-100 hover:border-blue-200 hover:shadow-soft transition-all gap-5">
+                                    <div class="flex items-center gap-5">
+                                        <div class="w-14 h-14 rounded-2xl bg-blue-50 text-brand-blue flex items-center justify-center flex-shrink-0">
+                                            <i class="fa-solid fa-pen-clip text-2xl"></i>
+                                        </div>
+                                        <div>
+                                            <!-- Giữ nguyên màu xanh đậm cho tên bài tập làm điểm nhấn -->
+                                            <h3 class="font-extrabold text-brand-dark-blue text-lg">Bài tập tự luận: Hệ tuần hoàn</h3>
+                                            <p class="text-sm text-slate-500 mt-1 font-bold">Lớp học: <span class="font-extrabold text-brand-blue">8A2</span> • Đã nộp: 40/42 học sinh</p>
+                                        </div>
+                                    </div>
+                                    <a href="chamdiem.html" class="px-6 py-2.5 bg-blue-50 text-brand-blue border border-blue-100 text-sm font-extrabold rounded-xl hover:bg-brand-blue hover:text-white transition-all whitespace-nowrap text-center">Chấm bài</a>
+                                </div>
+
+                                <div class="flex flex-col sm:flex-row sm:items-center justify-between p-6 rounded-2xl border border-slate-100 hover:border-blue-200 hover:shadow-soft transition-all gap-5">
+                                    <div class="flex items-center gap-5">
+                                        <div class="w-14 h-14 rounded-2xl bg-blue-50 text-brand-blue flex items-center justify-center flex-shrink-0">
+                                            <i class="fa-solid fa-list-check text-2xl"></i>
+                                        </div>
+                                        <div>
+                                            <!-- Giữ nguyên màu xanh đậm cho tên bài tập làm điểm nhấn -->
+                                            <h3 class="font-extrabold text-brand-dark-blue text-lg">Bài kiểm tra trắc nghiệm: Acid và base</h3>
+                                            <p class="text-sm text-slate-500 mt-1 font-bold">Lớp học: <span class="font-extrabold text-brand-blue">9C1</span> • Đã nộp: 38/38 học sinh</p>
+                                        </div>
+                                    </div>
+                                    <a href="chamdiem.html" class="px-6 py-2.5 bg-blue-50 text-brand-blue border border-blue-100 text-sm font-extrabold rounded-xl hover:bg-brand-blue hover:text-white transition-all whitespace-nowrap text-center">Chấm bài</a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Bài tập đang thu (Theo dõi tiến độ nộp bài) -->
+                        <div class="bg-white rounded-[2rem] p-8 shadow-soft border border-slate-100">
+                            <div class="flex items-center justify-between mb-8 border-b border-slate-100 pb-5">
+                                <h2 class="text-xl font-extrabold text-slate-800 flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center">
+                                        <i class="fa-solid fa-spinner"></i>
+                                    </div>
+                                    Bài tập đang diễn ra
+                                </h2>
+                            </div>
+                            
+                            <div class="space-y-5">
+                                <div class="flex flex-col sm:flex-row sm:items-center justify-between p-6 rounded-2xl border border-slate-100 hover:border-indigo-200 hover:shadow-soft transition-all gap-5">
+                                    <div class="flex items-center gap-5">
+                                        <div class="w-14 h-14 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center flex-shrink-0">
+                                            <i class="fa-regular fa-clock text-2xl"></i>
+                                        </div>
+                                        <div>
+                                            <h3 class="font-extrabold text-brand-dark-blue text-lg">Bài tập về nhà: Phản ứng hóa học</h3>
+                                            <p class="text-sm text-slate-500 mt-1 font-bold">Lớp học: <span class="font-extrabold text-indigo-600">8A2</span> • Hạn nộp: 23:59 hôm nay</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex flex-col items-center justify-center bg-slate-50 px-5 py-2 rounded-xl">
+                                        <span class="text-xl font-black text-brand-dark-blue leading-none mb-1">15/42</span>
+                                        <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Đã nộp</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- Cột Phải: Danh sách lớp học -->
+                    <div class="space-y-8">
+                        
+                        <div class="bg-white rounded-[2rem] border border-slate-200 shadow-soft overflow-hidden">
+                            <div class="p-7 border-b border-slate-100 flex items-center justify-between">
+                                <!-- Chuyển sang màu đen xám theo yêu cầu -->
+                                <h2 class="font-extrabold text-slate-800 text-lg">Lớp học của tôi</h2>
+                                <a href="lophoccuatoi.html" class="text-xs font-bold text-brand-blue hover:underline">Tất cả</a>
+                            </div>
+                            
+                            <div class="divide-y divide-slate-100">
+                                
+                                <!-- Lớp học 1 -->
+                                <div class="p-7 hover:bg-slate-50 transition-colors">
+                                    <div class="flex items-center justify-between mb-5">
+                                        <a href="danhsachhocsinh.html" class="flex items-center gap-4 group">
+                                            <!-- Box tên lớp 8A2 vẫn giữ màu xanh đậm làm điểm nhấn -->
+                                            <div class="w-14 h-14 rounded-2xl bg-blue-50 text-brand-dark-blue flex items-center justify-center font-black text-xl group-hover:bg-brand-blue group-hover:text-white transition-all">8A2</div>
+                                            <div>
+                                                <h3 class="font-extrabold text-brand-dark-blue text-base group-hover:text-brand-blue transition-colors">KHTN lớp 8</h3>
+                                                <p class="text-sm text-slate-500 mt-0.5 font-bold">42 học sinh</p>
+                                            </div>
+                                        </a>
+                                    </div>
+                                    <div class="flex items-center justify-between bg-white p-3.5 rounded-2xl border border-slate-200 shadow-sm gap-2">
+                                        <div class="flex items-center gap-2 pl-1 whitespace-nowrap flex-shrink-0">
+                                            <i class="fa-solid fa-key text-slate-400 text-xs"></i>
+                                            <span class="text-sm text-slate-500 font-bold">Mã lớp:</span>
+                                        </div>
+                                        <div class="flex items-center gap-2 flex-shrink-0">
+                                            <span class="text-brand-dark-blue font-[900] text-sm tracking-widest bg-blue-50 border border-blue-100 px-3 py-1.5 rounded-lg">A8X9K2</span>
+                                            <button class="w-9 h-9 flex items-center justify-center rounded-xl bg-slate-50 text-slate-500 hover:text-brand-blue hover:bg-white hover:shadow-sm transition-all" onclick="navigator.clipboard.writeText('A8X9K2')" title="Sao chép mã lớp">
+                                                <i class="fa-regular fa-copy"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Lớp học 2 -->
+                                <div class="p-7 hover:bg-slate-50 transition-colors">
+                                    <div class="flex items-center justify-between mb-5">
+                                        <a href="chitiet-lop-9c1.html" class="flex items-center gap-4 group">
+                                            <!-- Box tên lớp 9C1 vẫn giữ màu xanh đậm làm điểm nhấn -->
+                                            <div class="w-14 h-14 rounded-2xl bg-blue-50 text-brand-dark-blue flex items-center justify-center font-black text-xl group-hover:bg-brand-blue group-hover:text-white transition-all">9C1</div>
+                                            <div>
+                                                <h3 class="font-extrabold text-brand-dark-blue text-base group-hover:text-brand-blue transition-colors">KHTN lớp 9</h3>
+                                                <p class="text-sm text-slate-500 mt-0.5 font-bold">38 học sinh</p>
+                                            </div>
+                                        </a>
+                                    </div>
+                                    <div class="flex items-center justify-between bg-white p-3.5 rounded-2xl border border-slate-200 shadow-sm gap-2">
+                                        <div class="flex items-center gap-2 pl-1 whitespace-nowrap flex-shrink-0">
+                                            <i class="fa-solid fa-key text-slate-400 text-xs"></i>
+                                            <span class="text-sm text-slate-500 font-bold">Mã lớp:</span>
+                                        </div>
+                                        <div class="flex items-center gap-2 flex-shrink-0">
+                                            <span class="text-brand-dark-blue font-[900] text-sm tracking-widest bg-blue-50 border border-blue-100 px-3 py-1.5 rounded-lg">9C1BIO</span>
+                                            <button class="w-9 h-9 flex items-center justify-center rounded-xl bg-slate-50 text-slate-500 hover:text-brand-blue hover:bg-white hover:shadow-sm transition-all" onclick="navigator.clipboard.writeText('9C1BIO')" title="Sao chép mã lớp">
+                                                <i class="fa-regular fa-copy"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('click', function(event) {
+            const dropdown = document.getElementById('user-dropdown');
+            const menuBtn = dropdown?.closest('.relative')?.querySelector('div');
+            if (dropdown && menuBtn && !menuBtn.contains(event.target) && !dropdown.contains(event.target)) {
+                dropdown.classList.add('hidden');
+            }
+        });
+
+        function handleLogout() {
+            DolyAPI.logout().catch(function(){}).then(function(){
+                DolyAPI.clearSession();
+                window.location.href = '../login.html';
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Auth check
+            var session = DolyAPI.loadSession();
+            if (!session) {
+                window.location.href = '../login.html';
+                return;
+            }
+            if (session.role !== 'teacher') {
+                window.location.href = '../login.html';
+                return;
+            }
+
+            // Update user info
+            var user = session.user || {};
+            var nameEl = document.getElementById('user-name');
+            var avatarEl = document.getElementById('user-avatar');
+            if (nameEl) nameEl.textContent = user.full_name || 'Giáo viên';
+            if (avatarEl) avatarEl.src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(user.full_name || 'Teacher') + '&background=1E3A8A&color=fff';
+
+            // Load dashboard data
+            DolyAPI.getClasses().then(function(classes) {
+                var classListHtml = '';
+                if (classes && classes.length > 0) {
+                    classes.forEach(function(cls) {
+                        var name = cls.name || '';
+                        var symbol = cls.symbol || cls.name?.substring(0,3) || 'LOP';
+                        var count = cls.student_count || 0;
+                        var code = cls.class_code || '';
+                        var classId = cls.id || 0;
+                        classListHtml += '<div class="p-7 hover:bg-slate-50 transition-colors">' +
+                            '<div class="flex items-center justify-between mb-5">' +
+                                '<a href="danhsachhocsinh.html?class_id=' + classId + '" class="flex items-center gap-4 group">' +
+                                    '<div class="w-14 h-14 rounded-2xl bg-blue-50 text-brand-dark-blue flex items-center justify-center font-black text-xl group-hover:bg-brand-blue group-hover:text-white transition-all">' + DolyAPI.esc(symbol) + '</div>' +
+                                    '<div>' +
+                                        '<h3 class="font-extrabold text-brand-dark-blue text-base group-hover:text-brand-blue transition-colors">' + DolyAPI.esc(name) + '</h3>' +
+                                        '<p class="text-sm text-slate-500 mt-0.5 font-bold">' + count + ' học sinh</p>' +
+                                    '</div>' +
+                                '</a>' +
+                            '</div>' +
+                            (code ? '<div class="flex items-center justify-between bg-white p-3.5 rounded-2xl border border-slate-200 shadow-sm gap-2">' +
+                                '<div class="flex items-center gap-2 pl-1 whitespace-nowrap flex-shrink-0">' +
+                                    '<i class="fa-solid fa-key text-slate-400 text-xs"></i>' +
+                                    '<span class="text-sm text-slate-500 font-bold">Mã lớp:</span>' +
+                                '</div>' +
+                                '<div class="flex items-center gap-2 flex-shrink-0">' +
+                                    '<span class="text-brand-dark-blue font-[900] text-sm tracking-widest bg-blue-50 border border-blue-100 px-3 py-1.5 rounded-lg">' + DolyAPI.esc(code) + '</span>' +
+                                    '<button class="w-9 h-9 flex items-center justify-center rounded-xl bg-slate-50 text-slate-500 hover:text-brand-blue hover:bg-white hover:shadow-sm transition-all" onclick="navigator.clipboard.writeText(\'' + code + '\')" title="Sao chép mã lớp">' +
+                                        '<i class="fa-regular fa-copy"></i>' +
+                                    '</button>' +
+                                '</div>' +
+                            '</div>' : '') +
+                        '</div>';
+                    });
+                } else {
+                    classListHtml = '<div class="p-7 text-center text-slate-400 font-bold">Chưa có lớp học nào</div>';
+                }
+                var classContainer = document.querySelector('.divide-y.divide-slate-100');
+                if (classContainer) classContainer.innerHTML = classListHtml;
+            }).catch(function(){
+                // Keep hardcoded data as fallback
+            });
+        });
+    </script>
+</body>
+</html>

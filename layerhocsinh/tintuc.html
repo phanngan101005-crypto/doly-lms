@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="vi" class="scroll-smooth overflow-x-hidden">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tin Tức & FAQ - DOLY LMS</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="../api/client.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Quicksand:wght@500;600;700;800&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="./style.css">
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        'brand-blue': '#0A2FB6', 'brand-cyan': '#00E5FF', 'brand-purple': '#9D00FF', 'brand-yellow': '#FFD700', 'brand-dark': '#0B0F19',
+                        'doly-blue': '#2563EB', 'doly-dark': '#0f172a', 'doly-yellow': '#FBBF24', 'ai-purple': '#8b5cf6', 'chem-green': '#10b981', 'bio-pink': '#ec4899',
+                    },
+                    fontFamily: {
+                        sans: ['Quicksand', 'sans-serif'],
+                        display: ['Montserrat', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'soft': '0 10px 40px -10px rgba(0,0,0,0.05)',
+                        'app': '0 20px 60px rgba(0,0,0,0.06)',
+                        'btn': '0 10px 20px rgba(37,99,235,0.15)',
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        body { background-color: #f8fafc; color: #20356a; transition: background-color 0.4s ease; }
+        .dark body { background-color: #0f172a; color: #cbd5e1; }
+        
+        :root {
+            --doly-deep-blue: #20356a; /* Xanh Navy Đậm */
+        }
+        
+        /* Hiệu ứng nền Aurora như Dashboard */
+        .aurora-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100vh; z-index: -1; overflow: hidden; transition: opacity 0.5s; }
+        .dark .aurora-bg { opacity: 0.15; }
+        .orb { position: absolute; border-radius: 50%; filter: blur(120px); opacity: 0.3; animation: floatOrb 25s infinite alternate ease-in-out; }
+        .orb-1 { width: 70vw; height: 70vw; background: #c7d2fe; top: -20%; left: -10%; animation-delay: 0s; }
+        .orb-2 { width: 60vw; height: 60vw; background: #e9d5ff; bottom: -20%; right: -10%; animation-delay: -5s; }
+        @keyframes floatOrb { 0% { transform: translate(0, 0) scale(1) rotate(0deg); } 100% { transform: translate(10vw, -10vh) scale(1.1) rotate(180deg); } }
+
+        .glass-panel { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(25px); border: 1px solid rgba(255, 255, 255, 0.8); }
+        .dark .glass-panel { background: rgba(30, 41, 59, 0.7); border-color: rgba(255, 255, 255, 0.1); }
+
+        /* Đổi màu tiêu đề sang Xanh Navy */
+        h1, h2, h3, h4, 
+        .text-slate-800 { color: var(--doly-deep-blue) !important; }
+        .bg-slate-800 { background-color: var(--doly-deep-blue) !important; }
+
+        /* Accordion Transition */
+        .faq-content { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.3s ease-out; }
+        .faq-content.expanded { grid-template-rows: 1fr; }
+        .faq-inner { overflow: hidden; }
+
+        .hover-lift:hover { transform: translateY(-5px); box-shadow: 0 20px 40px -10px rgba(0,0,0,0.08); }
+        
+        /* Line clamp cho bài báo */
+        .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    </style>
+</head>
+<body class="antialiased font-sans selection:bg-brand-blue selection:text-white bg-slate-50 dark:bg-slate-900 transition-colors relative">
+
+    <div class="aurora-bg"><div class="orb orb-1"></div><div class="orb orb-2"></div></div>
+
+    <div class="overflow-x-hidden relative w-full">
+
+        <div class="fixed top-6 left-0 w-full z-50 px-6 flex justify-center">
+            <header class="w-full max-w-7xl glass-panel !rounded-full px-8 py-3 flex justify-between items-center shadow-sm">
+                <a href="dashboad.html" class="flex items-center gap-3 group">
+                    <div class="w-10 h-10 flex items-center justify-center transition-transform group-hover:rotate-12 duration-500">
+                        <img src="../logodoly.png" alt="Doly Logo" class="w-full h-full object-contain">
+                    </div>
+                    <h1 class="text-lg font-display font-black text-brand-dark dark:text-white hidden sm:block uppercase tracking-tight">DOLY LMS</h1>
+                </a>
+                
+                <nav class="hidden lg:flex flex-1 justify-center gap-6 xl:gap-12 text-[13px] xl:text-[15px] font-bold uppercase tracking-wide text-[#1e2b4d] dark:text-slate-300 mx-4">
+                    <a href="dashboad.html" class="opacity-85 hover:opacity-100 transition-opacity whitespace-nowrap">TRANG CHỦ</a>
+                    <a href="lophoc.html" class="opacity-85 hover:opacity-100 transition-opacity whitespace-nowrap">LỚP HỌC</a>
+                    <a href="hocthuat.html" class="opacity-85 hover:opacity-100 transition-opacity whitespace-nowrap">HỌC TẬP</a>
+                    <a href="khokiemtra.html" class="opacity-85 hover:opacity-100 transition-opacity whitespace-nowrap">KHO KIỂM TRA</a>
+                    <a href="diendan.html" class="opacity-85 hover:opacity-100 transition-opacity whitespace-nowrap">DIỄN ĐÀN VÀ CỘNG ĐỒNG</a>
+                    <a href="tintuc.html" class="relative after:content-[''] after:absolute after:-bottom-2 after:left-0 after:w-full after:h-[3px] after:bg-[#1e2b4d] dark:after:bg-brand-cyan whitespace-nowrap">TIN TỨC</a>
+                </nav>
+                
+                <div class="flex items-center gap-4">
+                    <button onclick="toggleTheme()" class="w-9 h-9 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 flex items-center justify-center hover:scale-110 transition shadow-sm border border-transparent dark:border-slate-700">
+                        <i class="fas fa-moon dark:hidden"></i>
+                        <i class="fas fa-sun hidden dark:block text-brand-yellow"></i>
+                    </button>
+
+                    <button onclick="handleLogout()" class="w-9 h-9 rounded-full bg-red-50 dark:bg-red-900/30 text-red-500 dark:text-red-400 flex items-center justify-center hover:scale-110 transition shadow-sm border border-red-200 dark:border-red-800" title="Dang xuat">
+                        <i class="fas fa-sign-out-alt text-sm"></i>
+                    </button>
+
+                    <button class="w-10 h-10 rounded-full border-2 border-brand-blue dark:border-brand-cyan overflow-hidden hover:scale-105 transition shadow-sm p-0.5 cursor-pointer">
+                        <div class="w-full h-full rounded-full bg-gradient-to-br from-brand-blue to-brand-cyan flex items-center justify-center text-white font-display font-black text-sm uppercase">HN</div>
+                    </button>
+                </div>
+            </header>
+        </div>
+
+        <section class="pt-40 pb-16 relative z-10 bg-transparent overflow-hidden">
+            <div class="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-4xl h-[400px] bg-gradient-to-b from-blue-200/20 to-transparent pointer-events-none rounded-b-full blur-3xl"></div>
+
+            <div class="container mx-auto px-4 max-w-4xl relative z-10 text-center" data-aos="zoom-in">
+                <div class="inline-flex items-center gap-2 px-4 py-1.5 bg-white/80 dark:bg-slate-800/80 backdrop-blur-md text-slate-600 dark:text-slate-300 rounded-full text-[11px] font-black uppercase tracking-[0.15em] mb-4 border border-white/50 dark:border-slate-700 shadow-sm" style="color: var(--doly-deep-blue) !important;">
+                    <i class="fas fa-bullhorn opacity-70"></i> Hỗ Trợ Và Cập Nhật
+                </div>
+                <h1 class="text-4xl md:text-5xl lg:text-6xl font-display font-black mb-6 leading-tight tracking-tight dark:text-white">
+                    Trung tâm <br class="hidden md:block">
+                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-blue to-brand-cyan">Tin tức Và Hỗ trợ</span>
+                </h1>
+                <p class="font-semibold text-base max-w-2xl mx-auto leading-relaxed mb-8 dark:text-slate-300" style="color: var(--doly-deep-blue) !important; opacity: 0.8;">
+                    Nơi cập nhật những tính năng mới nhất và giải đáp mọi thắc mắc của bạn trên hành trình chinh phục KHTN.
+                </p>
+                
+                <div class="max-w-2xl mx-auto relative">
+                    <div class="absolute inset-y-0 left-0 pl-6 flex items-center pointer-events-none">
+                        <i class="fas fa-search text-slate-400 text-lg"></i>
+                    </div>
+                    <input type="text" class="block w-full pl-14 pr-32 py-5 bg-white/80 dark:bg-slate-800/80 backdrop-blur-md border border-white/50 dark:border-slate-700 shadow-xl rounded-full text-sm font-bold text-slate-700 dark:text-white placeholder-slate-400 focus:outline-none focus:border-brand-blue transition-all" placeholder="Tìm kiếm bài báo, câu hỏi, hướng dẫn...">
+                    <button class="absolute right-2 top-2 bottom-2 text-white px-6 rounded-full text-xs font-black uppercase tracking-widest hover:opacity-90 transition-colors shadow-sm" style="background-color: var(--doly-deep-blue) !important;">
+                        Tìm kiếm
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <section class="py-16 bg-white/60 dark:bg-slate-900/60 backdrop-blur-2xl relative z-10 border-t border-b border-white/50 dark:border-slate-800">
+            <div class="container mx-auto px-4 max-w-7xl">
+                
+                <div class="flex justify-between items-end mb-10" data-aos="fade-up">
+                    <div>
+                        <h2 class="text-3xl font-display font-black tracking-tight dark:text-white" style="color: var(--doly-deep-blue);">TIN TỨC GIÁO DỤC</h2>
+                        <p class="text-sm font-medium mt-2 dark:text-slate-300" style="color: var(--doly-deep-blue); opacity: 0.7;">Cập nhật nhanh những sự kiện, tính năng mới.</p>
+                    </div>
+                </div>
+
+                <div class="flex flex-col lg:flex-row gap-8">
+                    
+                    <div class="w-full lg:w-2/3">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="newsContainer">
+                            
+                            <div class="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-3xl border border-white/50 dark:border-slate-700 overflow-hidden shadow-sm hover-lift group cursor-pointer flex flex-col" data-aos="fade-up" data-aos-delay="0">
+                                <div class="h-48 bg-slate-200 relative overflow-hidden">
+                                    <img src="https://images.unsplash.com/photo-1532094349884-543bc11b234d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="News 1" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                                    <div class="absolute top-4 left-4 bg-white/90 dark:bg-slate-800/90 backdrop-blur px-3 py-1 rounded-full text-[10px] font-black tracking-widest uppercase text-brand-blue dark:text-brand-cyan">Bản Cập Nhật</div>
+                                </div>
+                                <div class="p-6 flex flex-col flex-1">
+                                    <p class="text-[11px] font-bold text-slate-400 mb-2">14 Tháng 4, 2026</p>
+                                    <h3 class="text-lg font-black leading-tight mb-3 group-hover:text-brand-blue dark:hover:text-brand-cyan transition-colors dark:text-white" style="color: var(--doly-deep-blue);">Ra mắt tính năng Phòng Lab 3D tương tác thực tế ảo</h3>
+                                    <p class="text-[13px] font-medium text-slate-500 dark:text-slate-400 line-clamp-2 mb-4 flex-1">Trải nghiệm phân tích cấu tạo tim, cấu tạo nguyên tử ngay trên giao diện web xoay 360 độ cực kỳ chân thực mà không cần cài đặt thêm phần mềm.</p>
+                                    <span class="text-xs font-bold flex items-center gap-1 mt-auto dark:text-white" style="color: var(--doly-deep-blue);">Đọc tiếp <i class="fas fa-chevron-right text-[10px]"></i></span>
+                                </div>
+                            </div>
+
+                            <div class="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-3xl border border-white/50 dark:border-slate-700 overflow-hidden shadow-sm hover-lift group cursor-pointer flex flex-col" data-aos="fade-up" data-aos-delay="100">
+                                <div class="h-48 bg-slate-200 relative overflow-hidden">
+                                    <img src="https://images.unsplash.com/photo-1434030216411-0b793f4b4173?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="News 2" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                                    <div class="absolute top-4 left-4 bg-white/90 dark:bg-slate-800/90 backdrop-blur px-3 py-1 rounded-full text-[10px] font-black tracking-widest uppercase text-emerald-600 dark:text-emerald-400">Học Tập</div>
+                                </div>
+                                <div class="p-6 flex flex-col flex-1">
+                                    <p class="text-[11px] font-bold text-slate-400 mb-2">10 Tháng 4, 2026</p>
+                                    <h3 class="text-lg font-black leading-tight mb-3 group-hover:text-brand-blue dark:hover:text-brand-cyan transition-colors dark:text-white" style="color: var(--doly-deep-blue);">Cẩm nang bứt phá điểm KHTN 8 kỳ thi Giữa Học Kỳ II</h3>
+                                    <p class="text-[13px] font-medium text-slate-500 dark:text-slate-400 line-clamp-2 mb-4 flex-1">Đội ngũ giáo viên chuyên môn của DOLY vừa phát hành bộ Mindmap siêu dễ nhớ tóm gọn toàn bộ chương trình Vật Lý và Sinh Học.</p>
+                                    <span class="text-xs font-bold flex items-center gap-1 mt-auto dark:text-white" style="color: var(--doly-deep-blue);">Đọc tiếp <i class="fas fa-chevron-right text-[10px]"></i></span>
+                                </div>
+                            </div>
+
+                            <div class="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-3xl border border-white/50 dark:border-slate-700 overflow-hidden shadow-sm hover-lift group cursor-pointer flex flex-col" data-aos="fade-up" data-aos-delay="0">
+                                <div class="h-48 bg-slate-200 relative overflow-hidden">
+                                    <img src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="News 3" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                                    <div class="absolute top-4 left-4 bg-white/90 dark:bg-slate-800/90 backdrop-blur px-3 py-1 rounded-full text-[10px] font-black tracking-widest uppercase text-yellow-600 dark:text-yellow-400">Sự Kiện</div>
+                                </div>
+                                <div class="p-6 flex flex-col flex-1">
+                                    <p class="text-[11px] font-bold text-slate-400 mb-2">05 Tháng 4, 2026</p>
+                                    <h3 class="text-lg font-black leading-tight mb-3 group-hover:text-brand-blue dark:hover:text-brand-cyan transition-colors dark:text-white" style="color: var(--doly-deep-blue);">Khởi động cuộc thi "Nhà Khoa Học Nhí DOLY 2026"</h3>
+                                    <p class="text-[13px] font-medium text-slate-500 dark:text-slate-400 line-clamp-2 mb-4 flex-1">Hội cá heo KHTN chuẩn bị tinh thần tham gia giải đấu với tổng giải thưởng lên tới 50.000.000đ. Đăng ký ngay hôm nay!</p>
+                                    <span class="text-xs font-bold flex items-center gap-1 mt-auto dark:text-white" style="color: var(--doly-deep-blue);">Đọc tiếp <i class="fas fa-chevron-right text-[10px]"></i></span>
+                                </div>
+                            </div>
+
+                            <div class="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-3xl border border-white/50 dark:border-slate-700 overflow-hidden shadow-sm hover-lift group cursor-pointer flex flex-col" data-aos="fade-up" data-aos-delay="100">
+                                <div class="h-48 bg-slate-200 relative overflow-hidden">
+                                    <img src="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="News 4" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                                    <div class="absolute top-4 left-4 bg-white/90 dark:bg-slate-800/90 backdrop-blur px-3 py-1 rounded-full text-[10px] font-black tracking-widest uppercase text-purple-600 dark:text-purple-400">Mẹo Hay</div>
+                                </div>
+                                <div class="p-6 flex flex-col flex-1">
+                                    <p class="text-[11px] font-bold text-slate-400 mb-2">01 Tháng 4, 2026</p>
+                                    <h3 class="text-lg font-black leading-tight mb-3 group-hover:text-brand-blue dark:hover:text-brand-cyan transition-colors dark:text-white" style="color: var(--doly-deep-blue);">Top 5 phương pháp học Hóa không bị "tẩu hỏa nhập ma"</h3>
+                                    <p class="text-[13px] font-medium text-slate-500 dark:text-slate-400 line-clamp-2 mb-4 flex-1">Ghi nhớ bảng tuần hoàn, các gốc axit và công thức tính Mol chỉ trong 30 phút mỗi ngày nhờ phương pháp Active Recall.</p>
+                                    <span class="text-xs font-bold flex items-center gap-1 mt-auto dark:text-white" style="color: var(--doly-deep-blue);">Đọc tiếp <i class="fas fa-chevron-right text-[10px]"></i></span>
+                                </div>
+                            </div>
+
+                            <div class="hidden-news hidden bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-3xl border border-white/50 dark:border-slate-700 overflow-hidden shadow-sm hover-lift group cursor-pointer flex-col">
+                                <div class="h-48 bg-slate-200 relative overflow-hidden">
+                                    <img src="https://images.unsplash.com/photo-1581092160562-40aa08e78837?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="News 5" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                                    <div class="absolute top-4 left-4 bg-white/90 dark:bg-slate-800/90 backdrop-blur px-3 py-1 rounded-full text-[10px] font-black tracking-widest uppercase text-pink-600 dark:text-pink-400">Học Tập</div>
+                                </div>
+                                <div class="p-6 flex flex-col flex-1">
+                                    <p class="text-[11px] font-bold text-slate-400 mb-2">25 Tháng 3, 2026</p>
+                                    <h3 class="text-lg font-black leading-tight mb-3 group-hover:text-brand-blue dark:hover:text-brand-cyan transition-colors dark:text-white" style="color: var(--doly-deep-blue);">Ra mắt tính năng Tự động tổng hợp lỗi sai cá nhân</h3>
+                                    <p class="text-[13px] font-medium text-slate-500 dark:text-slate-400 line-clamp-2 mb-4 flex-1">Gia sư AI giờ đây sẽ tự động nhóm các câu hỏi bạn làm sai vào một bộ đề riêng để bạn ôn tập lại trước ngày thi.</p>
+                                    <span class="text-xs font-bold flex items-center gap-1 mt-auto dark:text-white" style="color: var(--doly-deep-blue);">Đọc tiếp <i class="fas fa-chevron-right text-[10px]"></i></span>
+                                </div>
+                            </div>
+
+                            <div class="hidden-news hidden bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-3xl border border-white/50 dark:border-slate-700 overflow-hidden shadow-sm hover-lift group cursor-pointer flex-col">
+                                <div class="h-48 bg-slate-200 relative overflow-hidden">
+                                    <img src="https://images.unsplash.com/photo-1524178232363-1fb2b075b655?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="News 6" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                                    <div class="absolute top-4 left-4 bg-white/90 dark:bg-slate-800/90 backdrop-blur px-3 py-1 rounded-full text-[10px] font-black tracking-widest uppercase text-emerald-600 dark:text-emerald-400">Tuyển Sinh</div>
+                                </div>
+                                <div class="p-6 flex flex-col flex-1">
+                                    <p class="text-[11px] font-bold text-slate-400 mb-2">20 Tháng 3, 2026</p>
+                                    <h3 class="text-lg font-black leading-tight mb-3 group-hover:text-brand-blue dark:hover:text-brand-cyan transition-colors dark:text-white" style="color: var(--doly-deep-blue);">Bí kíp chọn khối chuyên KHTN vào cấp 3</h3>
+                                    <p class="text-[13px] font-medium text-slate-500 dark:text-slate-400 line-clamp-2 mb-4 flex-1">Nên chọn chuyên Lý, Hóa hay Sinh? Bài phân tích chuyên sâu về cơ hội và khối lượng kiến thức của từng môn chuyên.</p>
+                                    <span class="text-xs font-bold flex items-center gap-1 mt-auto dark:text-white" style="color: var(--doly-deep-blue);">Đọc tiếp <i class="fas fa-chevron-right text-[10px]"></i></span>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <div class="mt-8 text-center" id="loadMoreWrapper" data-aos="fade-up">
+                            <button id="loadMoreNewsBtn" onclick="loadMoreNews()" class="px-8 py-3 bg-white/80 dark:bg-slate-800/80 backdrop-blur border border-white/50 dark:border-slate-700 hover:bg-white dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold rounded-xl transition-colors inline-flex items-center gap-2 shadow-sm">
+                                Xem thêm tin tức <i class="fas fa-chevron-down"></i>
+                            </button>
+                        </div>
+
+                    </div>
+
+                    <div class="w-full lg:w-1/3 flex flex-col gap-6" data-aos="fade-left" data-aos-delay="200">
+                        
+                        <div class="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-[2rem] p-6 border border-white/50 dark:border-slate-700 shadow-sm">
+                            <h3 class="font-display font-black text-lg mb-6 flex items-center gap-2 dark:text-white" style="color: var(--doly-deep-blue);">
+                                <span class="w-1.5 h-6 bg-brand-blue dark:bg-brand-cyan rounded-full inline-block"></span> Xem Nhiều Nhất
+                            </h3>
+                            
+                            <div id="trending-container" class="flex flex-col gap-5">
+                                <a href="#" class="flex gap-4 group items-center">
+                                    <div class="w-20 h-20 rounded-2xl overflow-hidden shrink-0 bg-slate-200">
+                                        <img src="https://images.unsplash.com/photo-1577415124269-e317c093a1ad?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" alt="Sidebar" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300">
+                                    </div>
+                                    <div class="flex flex-col justify-center">
+                                        <h4 class="font-bold text-[13px] leading-tight group-hover:text-brand-blue dark:hover:text-brand-cyan transition-colors line-clamp-2 dark:text-white" style="color: var(--doly-deep-blue);">Hướng dẫn chi tiết cách vẽ sơ đồ tư duy cho môn Sinh Học</h4>
+                                        <p class="text-[10px] font-bold text-slate-400 mt-2">12,400 lượt xem</p>
+                                    </div>
+                                </a>
+
+                                <a href="#" class="flex gap-4 group items-center">
+                                    <div class="w-20 h-20 rounded-2xl overflow-hidden shrink-0 bg-slate-200">
+                                        <img src="https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" alt="Sidebar" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300">
+                                    </div>
+                                    <div class="flex flex-col justify-center">
+                                        <h4 class="font-bold text-[13px] leading-tight group-hover:text-brand-blue dark:hover:text-brand-cyan transition-colors line-clamp-2 dark:text-white" style="color: var(--doly-deep-blue);">Báo cáo: DOLY LMS giúp tăng 40% điểm phẩy trung bình</h4>
+                                        <p class="text-[10px] font-bold text-slate-400 mt-2">9,200 lượt xem</p>
+                                    </div>
+                                </a>
+
+                                <a href="#" class="flex gap-4 group items-center">
+                                    <div class="w-20 h-20 rounded-2xl overflow-hidden shrink-0 bg-slate-200">
+                                        <img src="https://images.unsplash.com/photo-1427504494785-319ce515cb69?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" alt="Sidebar" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300">
+                                    </div>
+                                    <div class="flex flex-col justify-center">
+                                        <h4 class="font-bold text-[13px] leading-tight group-hover:text-brand-blue dark:hover:text-brand-cyan transition-colors line-clamp-2 dark:text-white" style="color: var(--doly-deep-blue);">Thông báo bảo trì hệ thống máy chủ Gia sư AI (15/4)</h4>
+                                        <p class="text-[10px] font-bold text-slate-400 mt-2">8,150 lượt xem</p>
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
+
+                        <div class="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-[2rem] p-6 border border-white/50 dark:border-slate-700 shadow-sm">
+                            <h3 class="font-display font-black text-lg mb-5 flex items-center gap-2 dark:text-white" style="color: var(--doly-deep-blue);">
+                                <span class="w-1.5 h-6 bg-emerald-500 rounded-full inline-block"></span> Khám Phá Chủ Đề
+                            </h3>
+                            <div class="flex flex-wrap gap-2">
+                                <a href="#" class="px-4 py-2 bg-white/50 dark:bg-slate-700 hover:bg-brand-blue/10 dark:hover:bg-brand-cyan/20 text-slate-600 dark:text-slate-300 hover:text-brand-blue dark:hover:text-brand-cyan rounded-xl text-xs font-bold transition-colors">#KinhNghiemHoc</a>
+                                <a href="#" class="px-4 py-2 bg-white/50 dark:bg-slate-700 hover:bg-brand-blue/10 dark:hover:bg-brand-cyan/20 text-slate-600 dark:text-slate-300 hover:text-brand-blue dark:hover:text-brand-cyan rounded-xl text-xs font-bold transition-colors">#UpdateTinhNang</a>
+                                <a href="#" class="px-4 py-2 bg-white/50 dark:bg-slate-700 hover:bg-brand-blue/10 dark:hover:bg-brand-cyan/20 text-slate-600 dark:text-slate-300 hover:text-brand-blue dark:hover:text-brand-cyan rounded-xl text-xs font-bold transition-colors">#HuongDanSuDung</a>
+                                <a href="#" class="px-4 py-2 bg-white/50 dark:bg-slate-700 hover:bg-brand-blue/10 dark:hover:bg-brand-cyan/20 text-slate-600 dark:text-slate-300 hover:text-brand-blue dark:hover:text-brand-cyan rounded-xl text-xs font-bold transition-colors">#SuKien</a>
+                                <a href="#" class="px-4 py-2 bg-white/50 dark:bg-slate-700 hover:bg-brand-blue/10 dark:hover:bg-brand-cyan/20 text-slate-600 dark:text-slate-300 hover:text-brand-blue dark:hover:text-brand-cyan rounded-xl text-xs font-bold transition-colors">#VatLy8</a>
+                                <a href="#" class="px-4 py-2 bg-white/50 dark:bg-slate-700 hover:bg-brand-blue/10 dark:hover:bg-brand-cyan/20 text-slate-600 dark:text-slate-300 hover:text-brand-blue dark:hover:text-brand-cyan rounded-xl text-xs font-bold transition-colors">#HoaHoc8</a>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <section class="py-20 bg-transparent relative z-10">
+            <div class="container mx-auto px-4 max-w-4xl">
+                <div class="text-center mb-12" data-aos="fade-up">
+                    <h2 class="text-3xl md:text-4xl font-display font-black tracking-tight mb-4 dark:text-white" style="color: var(--doly-deep-blue);">CÂU HỎI THƯỜNG GẶP (FAQ)</h2>
+                    <p class="text-sm font-medium dark:text-slate-300" style="color: var(--doly-deep-blue); opacity: 0.7;">Giải đáp nhanh những vấn đề bạn có thể gặp phải khi sử dụng DOLY LMS.</p>
+                </div>
+
+                <div data-aos="fade-up" data-aos-delay="100">
+                    
+                    <h3 class="font-display font-black text-lg md:text-xl mb-4 mt-8 flex items-center gap-2 dark:text-white" style="color: var(--doly-deep-blue);"><i class="fas fa-book-open text-brand-blue dark:text-brand-cyan"></i> Học Tập & Trải Nghiệm</h3>
+                    <div class="space-y-4 mb-8">
+                        <div class="bg-white/80 dark:bg-slate-800/80 backdrop-blur-md border border-white/50 dark:border-slate-700 rounded-2xl overflow-hidden shadow-sm">
+                            <button class="w-full px-6 py-5 flex justify-between items-center text-left hover:bg-white/90 dark:hover:bg-slate-700/80 transition-colors focus:outline-none" onclick="toggleFAQ('faq1')">
+                                <span class="font-bold text-[15px] dark:text-white" style="color: var(--doly-deep-blue);">DOLY AI Tutor có giải bài tập hộ học sinh không?</span>
+                                <i class="fas fa-minus text-slate-400 transition-transform duration-300" id="icon-faq1"></i>
+                            </button>
+                            <div id="faq1" class="faq-content expanded">
+                                <div class="faq-inner">
+                                    <div class="px-6 pb-6 pt-2 text-[13px] font-medium text-slate-600 dark:text-slate-400 leading-relaxed border-t border-slate-100 dark:border-slate-700 mx-6 mt-2">
+                                        Không. DOLY AI được thiết lập ranh giới (Guardrails) cực kỳ nghiêm ngặt áp dụng theo phương pháp Socratic. Thay vì đưa ra đáp án, AI sẽ đóng vai trò như một người thầy dẫn dắt, đặt ra các câu hỏi gợi mở từng bước để học sinh tự suy luận và tự tìm ra kết quả cuối cùng.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-white/80 dark:bg-slate-800/80 backdrop-blur-md border border-white/50 dark:border-slate-700 rounded-2xl overflow-hidden shadow-sm">
+                            <button class="w-full px-6 py-5 flex justify-between items-center text-left hover:bg-white/90 dark:hover:bg-slate-700/80 transition-colors focus:outline-none" onclick="toggleFAQ('faq2')">
+                                <span class="font-bold text-[15px] dark:text-white" style="color: var(--doly-deep-blue);">Làm sao để tôi xem được "Bản đồ lỗ hổng kiến thức"?</span>
+                                <i class="fas fa-plus text-slate-400 transition-transform duration-300" id="icon-faq2"></i>
+                            </button>
+                            <div id="faq2" class="faq-content">
+                                <div class="faq-inner">
+                                    <div class="px-6 pb-6 pt-2 text-[13px] font-medium text-slate-600 dark:text-slate-400 leading-relaxed border-t border-slate-100 dark:border-slate-700 mx-6 mt-2">
+                                        Khi bạn hoàn thành bất kỳ bài Test đầu vào hoặc bài kiểm tra nào trên DOLY, hệ thống sẽ tự động quét và thiết lập bản đồ. Để xem chi tiết, bạn vào mục <strong>Không Gian Học Tập > Báo cáo cá nhân > Bản đồ năng lực</strong>. Những vùng có màu đỏ hoặc vàng là những phần bạn đang bị hổng.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h3 class="font-display font-black text-lg md:text-xl mb-4 mt-8 flex items-center gap-2 dark:text-white" style="color: var(--doly-deep-blue);"><i class="fas fa-user-circle text-emerald-500"></i> Tài Khoản & Phụ Huynh</h3>
+                    <div class="space-y-4 mb-8">
+                        <div class="bg-white/80 dark:bg-slate-800/80 backdrop-blur-md border border-white/50 dark:border-slate-700 rounded-2xl overflow-hidden shadow-sm">
+                            <button class="w-full px-6 py-5 flex justify-between items-center text-left hover:bg-white/90 dark:hover:bg-slate-700/80 transition-colors focus:outline-none" onclick="toggleFAQ('faq3')">
+                                <span class="font-bold text-[15px] dark:text-white" style="color: var(--doly-deep-blue);">Phụ huynh làm sao để theo dõi sát tiến độ của con?</span>
+                                <i class="fas fa-plus text-slate-400 transition-transform duration-300" id="icon-faq3"></i>
+                            </button>
+                            <div id="faq3" class="faq-content">
+                                <div class="faq-inner">
+                                    <div class="px-6 pb-6 pt-2 text-[13px] font-medium text-slate-600 dark:text-slate-400 leading-relaxed border-t border-slate-100 dark:border-slate-700 mx-6 mt-2">
+                                        Mỗi học sinh sẽ có một mã liên kết riêng. Phụ huynh chỉ cần tạo tài khoản <strong>Cổng Phụ Huynh</strong> và nhập mã liên kết này. Hệ thống sẽ ngay lập tức gửi thông báo đẩy (Push Notification) mỗi khi học sinh làm bài xong, báo cáo điểm số và thời gian học tập thực tế mỗi ngày.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-white/80 dark:bg-slate-800/80 backdrop-blur-md border border-white/50 dark:border-slate-700 rounded-2xl overflow-hidden shadow-sm">
+                            <button class="w-full px-6 py-5 flex justify-between items-center text-left hover:bg-white/90 dark:hover:bg-slate-700/80 transition-colors focus:outline-none" onclick="toggleFAQ('faq4')">
+                                <span class="font-bold text-[15px] dark:text-white" style="color: var(--doly-deep-blue);">Làm thế nào để kích hoạt khóa học sau khi thanh toán?</span>
+                                <i class="fas fa-plus text-slate-400 transition-transform duration-300" id="icon-faq4"></i>
+                            </button>
+                            <div id="faq4" class="faq-content">
+                                <div class="faq-inner">
+                                    <div class="px-6 pb-6 pt-2 text-[13px] font-medium text-slate-600 dark:text-slate-400 leading-relaxed border-t border-slate-100 dark:border-slate-700 mx-6 mt-2">
+                                        Sau khi hoàn tất thanh toán, mã kích hoạt sẽ được gửi về Email của bạn. Đăng nhập vào hệ thống, chọn <strong>Hồ sơ của tôi > Kích hoạt khóa học</strong> và nhập mã code. Các phân hệ học thuật sẽ tự động được mở khóa.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h3 class="font-display font-black text-lg md:text-xl mb-4 mt-8 flex items-center gap-2 dark:text-white" style="color: var(--doly-deep-blue);"><i class="fas fa-tools text-orange-500"></i> Kỹ Thuật & Khắc Phục Sự Cố</h3>
+                    <div class="space-y-4">
+                        <div class="bg-white/80 dark:bg-slate-800/80 backdrop-blur-md border border-white/50 dark:border-slate-700 rounded-2xl overflow-hidden shadow-sm">
+                            <button class="w-full px-6 py-5 flex justify-between items-center text-left hover:bg-white/90 dark:hover:bg-slate-700/80 transition-colors focus:outline-none" onclick="toggleFAQ('faq5')">
+                                <span class="font-bold text-[15px] dark:text-white" style="color: var(--doly-deep-blue);">Phòng Lab 3D có chạy được trên điện thoại hoặc máy tính bảng không?</span>
+                                <i class="fas fa-plus text-slate-400 transition-transform duration-300" id="icon-faq5"></i>
+                            </button>
+                            <div id="faq5" class="faq-content">
+                                <div class="faq-inner">
+                                    <div class="px-6 pb-6 pt-2 text-[13px] font-medium text-slate-600 dark:text-slate-400 leading-relaxed border-t border-slate-100 dark:border-slate-700 mx-6 mt-2">
+                                        Có. Nền tảng DOLY LMS được tối ưu hóa hiển thị (Responsive) cho mọi thiết bị. Phòng Lab 3D sử dụng công nghệ WebGL có thể chạy mượt mà ngay trên trình duyệt của Smartphone và Tablet mà không cần cài đặt app. Tuy nhiên, để có trải nghiệm xoay thả chi tiết nhất, chúng tôi khuyên bạn nên sử dụng màn hình lớn.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-white/80 dark:bg-slate-800/80 backdrop-blur-md border border-white/50 dark:border-slate-700 rounded-2xl overflow-hidden shadow-sm">
+                            <button class="w-full px-6 py-5 flex justify-between items-center text-left hover:bg-white/90 dark:hover:bg-slate-700/80 transition-colors focus:outline-none" onclick="toggleFAQ('faq6')">
+                                <span class="font-bold text-[15px] dark:text-white" style="color: var(--doly-deep-blue);">Tôi không xem được video bài giảng, màn hình bị đen xoay vòng?</span>
+                                <i class="fas fa-plus text-slate-400 transition-transform duration-300" id="icon-faq6"></i>
+                            </button>
+                            <div id="faq6" class="faq-content">
+                                <div class="faq-inner">
+                                    <div class="px-6 pb-6 pt-2 text-[13px] font-medium text-slate-600 dark:text-slate-400 leading-relaxed border-t border-slate-100 dark:border-slate-700 mx-6 mt-2">
+                                        Vấn đề này thường do cache của trình duyệt hoặc kết nối mạng không ổn định. Bạn vui lòng thử tải lại trang bằng tổ hợp phím <strong>Ctrl + F5</strong> (hoặc Cmd + Shift + R trên Mac). Nếu vẫn không được, hãy thử đổi sang mạng Wifi khác hoặc liên hệ bộ phận Kỹ thuật.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <section class="py-16 bg-white/60 dark:bg-slate-900/60 backdrop-blur-2xl relative z-10 border-t border-white/50 dark:border-slate-800">
+            <div class="container mx-auto px-4 max-w-5xl" data-aos="zoom-in">
+                <div class="text-center mb-10">
+                    <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-brand-blue/10 text-brand-blue dark:bg-brand-cyan/20 dark:text-brand-cyan mb-4 text-2xl shadow-sm">
+                        <i class="fas fa-headset"></i>
+                    </div>
+                    <h2 class="text-3xl font-display font-black mb-3 dark:text-white" style="color: var(--doly-deep-blue);">Bạn Cần Hỗ Trợ Thêm?</h2>
+                    <p class="text-slate-500 dark:text-slate-400 font-medium max-w-xl mx-auto">Đội ngũ DOLY LMS luôn sẵn sàng lắng nghe, đồng hành và giải quyết mọi khó khăn của bạn 24/7.</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <a href="tel:19008888" class="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-3xl p-8 border border-white/50 dark:border-slate-700 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all group flex items-center gap-6">
+                        <div class="w-16 h-16 rounded-2xl bg-brand-blue/10 text-brand-blue dark:bg-brand-cyan/20 dark:text-brand-cyan flex items-center justify-center text-3xl group-hover:scale-110 group-hover:bg-brand-blue group-hover:text-white dark:group-hover:bg-brand-cyan dark:group-hover:text-slate-900 transition-all shadow-sm">
+                            <i class="fas fa-phone-volume"></i>
+                        </div>
+                        <div>
+                            <p class="text-xs font-black uppercase tracking-widest text-slate-400 mb-1">Hotline Hỗ Trợ</p>
+                            <h3 class="text-2xl font-black dark:text-white" style="color: var(--doly-deep-blue);">0912345678</h3>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 font-medium mt-1">Từ 8:00 đến 17:00 hằng ngày</p>
+                        </div>
+                    </a>
+
+                    <a href="mailto:support@dolylms.edu.vn" class="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-3xl p-8 border border-white/50 dark:border-slate-700 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all group flex items-center gap-6">
+                        <div class="w-16 h-16 rounded-2xl bg-emerald-50 dark:bg-emerald-900/20 text-emerald-500 dark:text-emerald-400 flex items-center justify-center text-3xl group-hover:scale-110 group-hover:bg-emerald-500 group-hover:text-white transition-all shadow-sm">
+                            <i class="fas fa-envelope-open-text"></i>
+                        </div>
+                        <div>
+                            <p class="text-xs font-black uppercase tracking-widest text-slate-400 mb-1">Gửi Email Cho Doly</p>
+                            <h3 class="text-xl font-black truncate max-w-[200px] dark:text-white" style="color: var(--doly-deep-blue);">support@dolylms.edu.vn</h3>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 font-medium mt-1">Phản hồi trong vòng 24 giờ</p>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <footer class="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-t border-slate-200 dark:border-slate-800 py-12 mt-16 z-20 relative w-full">
+            <div class="container mx-auto px-6 relative z-10 max-w-7xl">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12 text-left mb-12">
+                    <div class="space-y-6">
+                        <a href="index.html" class="flex items-center gap-2 group">
+                            <div class="w-10 h-10 transition-transform group-hover:rotate-12 duration-500 flex items-center justify-center">
+                                <img src="../logodoly.png" alt="Doly Logo" class="w-full h-full object-contain">
+                            </div>
+                            <span class="text-xl font-display font-black text-brand-dark dark:text-white tracking-tighter uppercase">DOLY LMS</span>
+                        </a>
+                        <p class="text-slate-500 dark:text-slate-400 text-xs leading-relaxed font-medium">Hệ sinh thái giáo dục số thông minh nhất dành cho học sinh KHTN Việt Nam.</p>
+                    </div>
+                    <div>
+                        <h4 class="text-xs font-black uppercase tracking-[0.2em] mb-6 text-brand-blue dark:text-brand-yellow">Học Tập</h4>
+                        <ul class="space-y-3 text-slate-600 dark:text-slate-400 text-xs font-bold">
+                            <li><a href="#" class="hover:text-brand-blue dark:hover:text-brand-cyan transition-colors">Nội dung học thuật</a></li>
+                            <li><a href="#" class="hover:text-brand-blue dark:hover:text-brand-cyan transition-colors">Lịch học Smart</a></li>
+                            <li><a href="hocthuat.html" class="hover:text-brand-blue dark:hover:text-brand-cyan transition-colors">Thí nghiệm ảo 3D</a></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 class="text-xs font-black uppercase tracking-[0.2em] mb-6 text-brand-blue dark:text-brand-yellow">Kết Nối</h4>
+                        <ul class="space-y-3 text-slate-600 dark:text-slate-400 text-xs font-bold">
+                            <li><a href="diendan.html" class="hover:text-brand-blue dark:hover:text-brand-cyan transition-colors">Cộng đồng hội cá heo</a></li>
+                            <li><a href="#" class="hover:text-brand-blue dark:hover:text-brand-cyan transition-colors">Trung tâm hỗ trợ</a></li>
+                            <li><a href="#" class="hover:text-brand-blue dark:hover:text-brand-cyan transition-colors">Tư vấn phụ huynh</a></li>
+                        </ul>
+                    </div>
+                    <div class="space-y-6">
+                        <h4 class="text-xs font-black uppercase tracking-[0.2em] mb-6 text-brand-blue dark:text-brand-yellow">Đăng Ký</h4>
+                        <div class="relative">
+                            <input type="email" placeholder="Email của bạn..." class="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3 text-xs font-bold focus:outline-none focus:border-brand-blue transition-all dark:text-white">
+                            <button class="absolute right-1.5 top-1.5 bottom-1.5 bg-brand-blue text-white px-4 rounded-lg shadow-md hover:bg-blue-800 transition-colors"><i class="fas fa-paper-plane text-xs"></i></button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="pt-8 border-t border-slate-200 dark:border-slate-800 flex flex-col md:flex-row justify-between items-center gap-6">
+                    <p class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500">&copy; 2026 DOLY LMS - KIẾN TẠO TƯƠNG LAI SỐ</p>
+                    <div class="flex justify-center gap-8 text-slate-400 dark:text-slate-500 text-lg">
+                        <a href="#" class="hover:text-brand-blue transition transform hover:-translate-y-1"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="hover:text-red-500 transition transform hover:-translate-y-1"><i class="fab fa-youtube"></i></a>
+                        <a href="#" class="hover:text-brand-dark dark:hover:text-white transition transform hover:-translate-y-1"><i class="fab fa-tiktok"></i></a>
+                    </div>
+                </div>
+            </div>
+        </footer>
+
+</div>
+
+<!-- ===== Modal xem chi tiết bài báo ===== -->
+<div id="news-detail-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[60] flex items-center justify-center hidden p-4" onclick="if(event.target===this)closeNewsDetail()">
+    <div class="bg-white dark:bg-slate-800 rounded-[2rem] w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl border border-white/50 dark:border-slate-700 relative transform scale-100 transition-all">
+        <button onclick="closeNewsDetail()" class="absolute top-4 right-4 z-10 w-10 h-10 rounded-full bg-white/90 dark:bg-slate-700/90 backdrop-blur flex items-center justify-center text-slate-500 hover:text-red-500 shadow-sm hover:scale-110 transition-all">
+            <i class="fa-solid fa-xmark text-xl"></i>
+        </button>
+        
+        <div id="news-detail-cover" class="w-full h-56 md:h-72 bg-slate-200 overflow-hidden rounded-t-[2rem]">
+            <img id="news-detail-img" src="" alt="" class="w-full h-full object-cover">
+        </div>
+        
+        <div class="p-6 md:p-8">
+            <div class="flex items-center gap-3 mb-4">
+                <span id="news-detail-category" class="px-3 py-1 bg-blue-50 dark:bg-blue-900/30 text-brand-blue dark:text-brand-cyan rounded-full text-[10px] font-black tracking-widest uppercase"></span>
+                <span id="news-detail-date" class="text-[11px] font-bold text-slate-400"></span>
+            </div>
+            <h2 id="news-detail-title" class="text-2xl md:text-3xl font-display font-black leading-tight mb-4 dark:text-white" style="color: var(--doly-deep-blue);"></h2>
+            <p id="news-detail-author" class="text-xs font-bold text-slate-400 mb-6"></p>
+            <div id="news-detail-content" class="text-[15px] font-medium text-slate-600 dark:text-slate-300 leading-relaxed whitespace-pre-wrap"></div>
+        </div>
+    </div>
+</div>
+
+
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script>
+        // ===== Auth =====
+        document.addEventListener('DOMContentLoaded', function() {
+            var user = DolyAPI.loadSession();
+            if (user && user.full_name) {
+                var avatarBtn = document.querySelector('.w-10.h-10.rounded-full.border-2 .w-full');
+                if (avatarBtn) {
+                    avatarBtn.textContent = user.full_name.split(' ').map(function(w){return w[0];}).join('').substring(0,2).toUpperCase();
+                }
+            }
+        });
+
+        try { AOS.init({ once: true, offset: 40, duration: 600, easing: 'ease-out-cubic' }); } catch(e) {}
+
+        var newsData = [];
+
+        function toggleTheme() { document.documentElement.classList.toggle('dark'); }
+
+        // ===== News & FAQ API =====
+        document.addEventListener('DOMContentLoaded', function() {
+            loadNews();
+            loadFAQ();
+        });
+
+        function loadNews() {
+            var container = document.getElementById('newsContainer');
+            if (!container) return;
+            DolyAPI.showLoading('#newsContainer');
+            
+            DolyAPI.getNews()
+                .then(function(news) {
+                    container.innerHTML = '';
+                    if (!news || news.length === 0) {
+                        container.innerHTML = '<div class="col-span-full text-center py-12 text-slate-500 font-bold">Chua co tin tuc nao.</div>';
+                        return;
+                    }
+                    newsData = news;
+                    news.forEach(function(item, idx) {
+                        var isHidden = idx >= 4 ? 'hidden-news hidden' : '';
+                        var category = DolyAPI.esc(item.category || 'Tin Tuc');
+                        var catColor = 'text-brand-blue dark:text-brand-cyan';
+                        var dateStr = item.created_at ? new Date(item.created_at.replace(' ', 'T')).toLocaleDateString('vi-VN', {day:'numeric', month:'long', year:'numeric'}) : '';
+                        var imgUrl = item.thumbnail_url || item.image_url || 'https://images.unsplash.com/photo-1532094349884-543bc11b234d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80';
+                        
+                        container.innerHTML += '<div class="' + isHidden + ' bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-3xl border border-white/50 dark:border-slate-700 overflow-hidden shadow-sm hover-lift group cursor-pointer flex flex-col" onclick="openNewsDetail(' + idx + ')" data-aos="fade-up" data-aos-delay="' + (idx % 2 * 100) + '">' +
+                            '<div class="h-48 bg-slate-200 relative overflow-hidden">' +
+                                '<img src="' + imgUrl + '" alt="News" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">' +
+                                '<div class="absolute top-4 left-4 bg-white/90 dark:bg-slate-800/90 backdrop-blur px-3 py-1 rounded-full text-[10px] font-black tracking-widest uppercase ' + catColor + '">' + category + '</div>' +
+                            '</div>' +
+                            '<div class="p-6 flex flex-col flex-1">' +
+                                '<p class="text-[11px] font-bold text-slate-400 mb-2">' + dateStr + '</p>' +
+                                '<h3 class="text-lg font-black leading-tight mb-3 group-hover:text-brand-blue dark:hover:text-brand-cyan transition-colors dark:text-white" style="color: var(--doly-deep-blue);">' + DolyAPI.esc(item.title) + '</h3>' +
+                                '<p class="text-[13px] font-medium text-slate-500 dark:text-slate-400 line-clamp-2 mb-4 flex-1">' + DolyAPI.esc(item.excerpt || item.content || '') + '</p>' +
+                                '<span class="text-xs font-bold flex items-center gap-1 mt-auto dark:text-white" style="color: var(--doly-deep-blue);">Doc tiep <i class="fas fa-chevron-right text-[10px]"></i></span>' +
+                            '</div>' +
+                        '</div>';
+                    });
+                    
+                    // Show/hide load more button
+                    var loadMore = document.getElementById('loadMoreWrapper');
+                    if (loadMore) {
+                        if (news.length <= 4) {
+                            loadMore.style.display = 'none';
+                        } else {
+                            loadMore.style.display = 'block';
+                        }
+                    }
+                    
+                    // Populate sidebar trending
+                    loadTrendingSidebar(news);
+                })
+                .catch(function(err) {
+                    DolyAPI.showError('#newsContainer', 'Khong the tai tin tuc.');
+                });
+        }
+
+        function loadTrendingSidebar(news) {
+            var container = document.getElementById('trending-container');
+            if (!container) return;
+            var sorted = news.slice().sort(function(a, b) { return (b.view_count || 0) - (a.view_count || 0); });
+            var top = sorted.slice(0, 3);
+            var html = '';
+            top.forEach(function(item, idx) {
+                var img = item.thumbnail_url || item.image_url || 'https://images.unsplash.com/photo-1577415124269-e317c093a1ad?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80';
+                var title = DolyAPI.esc(item.title || '');
+                var views = (item.view_count || 0).toLocaleString();
+                var newsIdx = news.indexOf(item);
+                html += '<a href="javascript:void(0)" onclick="openNewsDetail(' + newsIdx + ')" class="flex gap-4 group items-center">' +
+                    '<div class="w-20 h-20 rounded-2xl overflow-hidden shrink-0 bg-slate-200">' +
+                        '<img src="' + img + '" alt="Sidebar" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300">' +
+                    '</div>' +
+                    '<div class="flex flex-col justify-center">' +
+                        '<h4 class="font-bold text-[13px] leading-tight group-hover:text-brand-blue dark:hover:text-brand-cyan transition-colors line-clamp-2 dark:text-white" style="color: var(--doly-deep-blue);">' + title + '</h4>' +
+                        '<p class="text-[10px] font-bold text-slate-400 mt-2">' + views + ' luot xem</p>' +
+                    '</div>' +
+                '</a>';
+            });
+            if (html) container.innerHTML = html;
+        }
+
+        function loadFAQ() {
+            DolyAPI.getFAQ()
+                .then(function(faqs) {
+                    if (!faqs || faqs.length === 0) return;
+                    // Append FAQ items dynamically
+                    var container = document.querySelector('[data-aos="fade-up"] .space-y-4');
+                    if (!container) return;
+                    // We keep existing static FAQ as base
+                })
+                .catch(function() { /* ignore */ });
+        }
+
+        // JS: Tải thêm tin tức (legacy support)
+        function openNewsDetail(idx) {
+            var item = newsData[idx];
+            if (!item) return;
+            document.getElementById('news-detail-img').src = item.thumbnail_url || item.image_url || 'https://images.unsplash.com/photo-1532094349884-543bc11b234d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80';
+            document.getElementById('news-detail-category').textContent = item.category || 'Tin Tuc';
+            document.getElementById('news-detail-date').textContent = item.created_at ? new Date(item.created_at.replace(' ', 'T')).toLocaleDateString('vi-VN', {day:'numeric', month:'long', year:'numeric'}) : '';
+            document.getElementById('news-detail-title').textContent = item.title || '';
+            document.getElementById('news-detail-author').textContent = item.author_name ? 'Tac gia: ' + item.author_name : '';
+            document.getElementById('news-detail-content').textContent = item.content || '';
+            document.getElementById('news-detail-modal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeNewsDetail() {
+            document.getElementById('news-detail-modal').classList.add('hidden');
+            document.body.style.overflow = '';
+        }
+
+        function loadMoreNews() {
+            const hiddenNewsItems = document.querySelectorAll('.hidden-news');
+            hiddenNewsItems.forEach(item => {
+                item.classList.remove('hidden');
+                item.classList.add('flex'); // Bật lại flex layout cho card
+            });
+            
+            // Ẩn nút xem thêm
+            const loadMoreWrapper = document.getElementById('loadMoreWrapper');
+            if(loadMoreWrapper) {
+                loadMoreWrapper.style.display = 'none';
+            }
+        }
+
+        // JS: Ẩn/Hiện FAQ (Accordion Logic)
+        function toggleFAQ(id) {
+            const el = document.getElementById(id);
+            const icon = document.getElementById('icon-' + id);
+            
+            if (el.classList.contains('expanded')) {
+                el.classList.remove('expanded');
+                icon.classList.remove('fa-minus');
+                icon.classList.add('fa-plus');
+            } else {
+                el.classList.add('expanded');
+                icon.classList.remove('fa-plus');
+                icon.classList.add('fa-minus');
+            }
+        }
+
+        function handleLogout() {
+            DolyAPI.logout().catch(function(){}).finally(function(){
+                DolyAPI.clearSession();
+                window.location.href = '../login.html';
+            });
+        }
+    </script>
+</body>
+</html>

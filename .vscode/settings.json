@@ -1,0 +1,16 @@
+{
+    "liveServer.settings.root": "/",
+    "liveServer.settings.port": 5500,
+    "liveServer.settings.host": "localhost",
+    "liveServer.settings.AdvanceCustomBrowserCmdLine": "",
+    "liveServer.settings.NoBrowser": false,
+    "liveServer.settings.ignoreFiles": [],
+    "liveServer.settings.useWebExt": false,
+    "debug.defaultLaunchConfiguration": {
+        "type": "chrome",
+        "request": "launch",
+        "name": "Mở DOLY LMS (XAMPP)",
+        "url": "http://localhost/doly%20(1)/login.html",
+        "webRoot": "${workspaceFolder}"
+    }
+}

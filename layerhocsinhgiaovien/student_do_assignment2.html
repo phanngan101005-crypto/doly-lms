@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="vi" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Làm bài Trắc nghiệm - DOLY LMS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="../api/client.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: { 
+                        'brand-blue': '#2563EB',      
+                        'brand-dark-blue': '#1E3A8A', 
+                        'bg-main': '#F8FAFC',
+                    },
+                    fontFamily: { 
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'soft': '0 2px 10px rgba(0, 0, 0, 0.02)',
+                        'hover-soft': '0 10px 25px -3px rgba(37, 99, 235, 0.1)',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { background-color: #F8FAFC; }
+        .custom-scrollbar::-webkit-scrollbar { width: 5px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 10px; }
+        .sidebar-item:hover { background-color: #F1F5F9; color: #2563EB; }
+        .sidebar-item.active { background-color: #EFF6FF; color: #2563EB; }
+        .text-bold-thick { -webkit-text-stroke: 0.7px #1E3A8A; }
+        .text-sub-thick { -webkit-text-stroke: 0.3px #94A3B8; }
+    </style>
+</head>
+<body class="antialiased font-sans text-slate-800 relative">
+
+    <div class="flex min-h-screen">
+        
+        <!-- Sidebar -->
+        <aside class="w-72 bg-white border-r border-slate-200 hidden lg:flex flex-col sticky top-0 h-screen z-40 transition-all">
+            <div class="p-8">
+                <a href="student_dashboard.html" class="flex items-center gap-3.5 hover:opacity-80 transition-opacity group">
+                    <div class="w-[42px] h-[42px] flex items-center justify-center shrink-0">
+                        <img src="../logodoly.png" alt="Doly Logo" class="w-full h-full object-contain" onerror="this.src='https://ui-avatars.com/api/?name=D&background=1E3A8A&color=fff'">
+                    </div>
+                    <div class="flex flex-col justify-center">
+                        <div class="text-[21px] font-black text-brand-dark-blue leading-none tracking-[-0.04em] text-bold-thick">DOLY LMS</div>
+                        <span class="text-[9px] font-black text-[#94A3B8] uppercase tracking-[0.18em] mt-1.5 text-sub-thick">STUDENT WORKSPACE</span>
+                    </div>
+                </a>
+            </div>
+            
+            <nav class="flex-1 py-4 px-5 space-y-2 custom-scrollbar">
+                <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3 px-3">Học tập</p>
+                
+                <a href="student_dashboard.html" class="sidebar-item flex items-center gap-3 px-4 py-4 rounded-2xl transition-all font-bold text-base text-slate-500 hover:text-brand-blue">
+                    <i class="fa-solid fa-house text-xl w-6 text-center"></i> <span>Bảng điều khiển</span>
+                </a>
+                <a href="student_classes.html" class="sidebar-item active flex items-center gap-3 px-4 py-4 rounded-2xl transition-all font-[900] text-base shadow-sm shadow-blue-100">
+                    <i class="fa-solid fa-user-group text-xl w-6 text-center"></i> <span>Lớp học của tôi</span>
+                </a>
+                <a href="student_results.html" class="sidebar-item flex items-center gap-3 px-4 py-4 rounded-2xl transition-all font-bold text-base text-slate-500 hover:text-brand-blue">
+                    <i class="fa-solid fa-ranking-star text-xl w-6 text-center"></i> <span>Kết quả học tập</span>
+                </a>
+            </nav>
+
+            <div class="p-6">
+                <div class="relative">
+                    <div onclick="document.getElementById('user-dropdown').classList.toggle('hidden')" class="flex items-center gap-3 p-3 rounded-2xl border border-slate-100 bg-slate-50 hover:bg-slate-100 transition-colors cursor-pointer select-none">
+                        <img id="user-avatar" src="https://ui-avatars.com/api/?name=User&background=EFF6FF&color=2563EB" class="w-10 h-10 rounded-full">
+                        <div class="flex-1">
+                            <p id="user-name" class="text-sm font-extrabold text-brand-dark-blue">Đang tải...</p>
+                            <p id="user-role" class="text-[11px] text-slate-500 font-bold">Học sinh</p>
+                        </div>
+                        <i class="fa-solid fa-chevron-up text-[10px] text-slate-400"></i>
+                    </div>
+                    
+                    <div id="user-dropdown" class="hidden absolute bottom-full left-0 w-full mb-2 bg-white border border-slate-200 rounded-2xl shadow-hover-soft z-50 overflow-hidden">
+                        <a onclick="handleLogout()" class="flex items-center gap-3 px-4 py-3 text-sm font-extrabold text-red-600 hover:bg-red-50 transition-colors" style="cursor:pointer">
+                            <i class="fa-solid fa-arrow-right-from-bracket"></i> Đăng xuất
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 flex flex-col min-w-0">
+            <header class="h-20 bg-white/80 backdrop-blur-md border-b border-slate-200 flex items-center justify-between px-8 sticky top-0 z-30">
+                <div class="flex items-center gap-4">
+                    <button class="lg:hidden text-slate-500"><i class="fa-solid fa-bars text-xl"></i></button>
+                    <!-- Breadcrumbs -->
+                    <div class="hidden md:flex items-center gap-2 text-sm font-bold text-slate-500">
+                        <a href="student_classes.html" class="hover:text-brand-blue transition-colors">Lớp học</a>
+                        <i class="fa-solid fa-chevron-right text-[10px] text-slate-300"></i>
+                        <a href="student_class_detail.html" class="hover:text-brand-blue transition-colors">8A2</a>
+                        <i class="fa-solid fa-chevron-right text-[10px] text-slate-300"></i>
+                        <span class="text-brand-dark-blue font-extrabold">Làm bài tập</span>
+                    </div>
+                </div>
+            </header>
+
+            <div class="p-8 max-w-[1300px] mx-auto w-full space-y-6">
+                
+                <div class="flex items-center gap-4 mb-6">
+                    <a href="student_class_detail.html" class="w-11 h-11 rounded-full bg-white border border-slate-200 flex items-center justify-center text-slate-500 hover:text-brand-blue hover:shadow-soft hover:border-blue-200 transition-all shrink-0">
+                        <i class="fa-solid fa-arrow-left"></i>
+                    </a>
+                    <h1 class="text-3xl font-extrabold text-brand-dark-blue uppercase tracking-wide [word-spacing:3px]">CHI TIẾT BÀI TẬP</h1>
+                </div>
+
+                <div class="grid grid-cols-1 xl:grid-cols-3 gap-8">
+                    
+                    <!-- CỘT TRÁI: Nội dung và Yêu cầu -->
+                    <div class="xl:col-span-2 space-y-6">
+                        
+                        <div class="bg-white rounded-3xl p-8 border border-slate-200 shadow-soft">
+                            <div class="flex items-start justify-between gap-5 border-b border-slate-100 pb-6 mb-6">
+                                <div class="flex items-center gap-5">
+                                    <div class="w-16 h-16 rounded-2xl bg-blue-50 text-brand-blue flex items-center justify-center text-2xl shrink-0 border border-blue-100 shadow-sm">
+                                        <i class="fa-brands fa-google text-xl"></i>
+                                    </div>
+                                    <div>
+                                        <h2 class="text-2xl font-extrabold text-slate-800 mb-2 leading-tight">Trắc nghiệm: Phản ứng hóa học</h2>
+                                        <div class="flex items-center gap-3 text-[13px] font-bold text-slate-500">
+                                            <span class="flex items-center gap-1.5"><i class="fa-solid fa-chalkboard-user text-slate-400"></i> GV: Nguyễn An</span>
+                                            <span class="w-1 h-1 rounded-full bg-slate-300"></span>
+                                            <span class="flex items-center gap-1.5 text-brand-blue"><i class="fa-solid fa-star"></i> Thang điểm: 10</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Hướng dẫn -->
+                            <div>
+                                <h3 class="text-[15px] font-extrabold text-slate-800 mb-3 flex items-center gap-2">
+                                    <i class="fa-solid fa-list-check text-brand-blue"></i> Yêu cầu của giáo viên
+                                </h3>
+                                <div class="text-[15px] leading-relaxed text-slate-600 bg-slate-50 p-5 rounded-2xl border border-slate-100">
+                                    <p class="mb-2">Các em hoàn thành bài test 15 phút về phản ứng hóa học thông qua link Google Form bên cạnh.</p>
+                                    <p class="text-red-500 font-bold mt-3"><i class="fa-solid fa-triangle-exclamation"></i> Nhớ điền đúng Mã Học Sinh để hệ thống ghi nhận điểm nhé!</p>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- CỘT PHẢI: Trạng thái & Không gian làm bài -->
+                    <div class="space-y-6">
+                        
+                        <!-- Box Làm bài & Nộp bài -->
+                        <div class="bg-white rounded-3xl p-7 border border-slate-200 shadow-soft sticky top-28">
+                            <div class="flex items-center justify-between mb-5">
+                                <h3 class="text-lg font-extrabold text-slate-800">Không gian làm bài</h3>
+                                <span class="bg-slate-100 text-slate-500 text-[11px] font-bold px-2.5 py-1 rounded-md uppercase tracking-wide" id="status-badge">Chưa nộp</span>
+                            </div>
+
+                            <div class="flex items-center gap-2 mb-6 text-sm font-bold text-red-500 bg-red-50 p-3 rounded-xl border border-red-100">
+                                <i class="fa-regular fa-clock text-lg"></i>
+                                <span>Đến hạn: 17:00 Ngày mai</span>
+                            </div>
+
+                            <!-- VÙNG LÀM BÀI: GOOGLE FORM -->
+                            <div class="space-y-4">
+                                <div class="bg-blue-50/50 border border-blue-100 rounded-2xl p-6 text-center">
+                                    <div class="w-16 h-16 rounded-full bg-white text-brand-blue shadow-sm flex items-center justify-center mx-auto mb-4 text-3xl">
+                                        <i class="fa-brands fa-google"></i>
+                                    </div>
+                                    <h4 class="font-bold text-brand-dark-blue text-[15px] mb-2">Bài tập Trắc nghiệm</h4>
+                                    <p class="text-sm font-medium text-slate-500 mb-5">Bài tập này được thực hiện trên Google Forms. Vui lòng ấn nút bên dưới để mở form làm bài.</p>
+                                    
+                                    <a href="#" target="_blank" onclick="simulateGgFormSubmit()" class="inline-flex items-center justify-center gap-2 w-full py-3.5 bg-white border-2 border-brand-blue text-brand-blue rounded-xl text-[15px] font-black tracking-wide hover:bg-blue-50 transition-all">
+                                        Mở Google Form <i class="fa-solid fa-arrow-up-right-from-square text-sm"></i>
+                                    </a>
+                                </div>
+                                <div class="flex items-start gap-2 bg-amber-50 border border-amber-100 p-3 rounded-xl">
+                                    <i class="fa-solid fa-circle-info text-amber-500 mt-0.5"></i>
+                                    <p class="text-[12px] font-bold text-amber-700">Điểm số sẽ tự động được cập nhật sau khi bạn ấn "Gửi" trên Google Form.</p>
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Script tương tác -->
+    <script>
+        // ===== Auth Check =====
+        document.addEventListener('DOMContentLoaded', function() {
+            var user = DolyAPI.loadSession();
+            if (!user) {
+                window.location.href = '../login.html';
+                return;
+            }
+            document.getElementById('user-avatar').src = user.avatar || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(user.full_name || 'User') + '&background=EFF6FF&color=2563EB';
+            document.getElementById('user-name').textContent = user.full_name || 'Học sinh';
+        });
+
+        function handleLogout() {
+            DolyAPI.logout().catch(function(){}).then(function(){
+                DolyAPI.clearSession();
+                window.location.href = '../login.html';
+            });
+        }
+
+        // Hàm lấy query parameter
+        function getQueryParam(name) {
+            var params = new URLSearchParams(window.location.search);
+            return params.get(name);
+        }
+
+        // GỬI TRẠNG THÁI NỘP BÀI QUA API (GOOGLE FORM)
+        function simulateGgFormSubmit() {
+            var assignmentId = getQueryParam('assignment_id') || 0;
+
+            // Thông báo user đã làm xong Google Form
+            DolyAPI.submitAssignment(assignmentId, { type: 'google_form', status: 'submitted' }).then(function() {
+                var badge = document.getElementById('status-badge');
+                badge.classList.replace('bg-slate-100', 'bg-emerald-100');
+                badge.classList.replace('text-slate-500', 'text-emerald-700');
+                badge.textContent = 'ĐÃ NỘP';
+                alert('Cảm ơn bạn! Trạng thái bài tập đã được cập nhật.');
+            }).catch(function(err) {
+                alert(err.message || 'Cập nhật trạng thái thất bại, nhưng bài làm của bạn vẫn được lưu trên Google Form.');
+                var badge = document.getElementById('status-badge');
+                badge.classList.replace('bg-slate-100', 'bg-emerald-100');
+                badge.classList.replace('text-slate-500', 'text-emerald-700');
+                badge.textContent = 'ĐÃ NỘP';
+            });
+        }
+    </script>
+</body>
+</html>

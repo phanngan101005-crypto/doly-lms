@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="vi" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Giao bài tập - DOLY LMS</title>
+    <script src="../api/client.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: { 
+                        'brand-blue': '#2563EB',      
+                        'brand-dark-blue': '#1E3A8A', 
+                        'bg-main': '#F8FAFC',
+                    },
+                    fontFamily: { 
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'soft': '0 2px 10px rgba(0, 0, 0, 0.02)',
+                        'hover-soft': '0 10px 25px -3px rgba(37, 99, 235, 0.1)',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { background-color: #F8FAFC; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 10px; }
+        .sidebar-item:hover { background-color: #F1F5F9; color: #2563EB; }
+        .sidebar-item.active { background-color: #EFF6FF; color: #2563EB; }
+        
+        /* Đồng bộ stroke logo */
+        .text-bold-thick {
+            -webkit-text-stroke: 0.7px #1E3A8A;
+        }
+        .text-sub-thick {
+            -webkit-text-stroke: 0.3px #94A3B8;
+        }
+
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* Animation cho form transition */
+        .fade-in { animation: fadeIn 0.3s ease-in-out; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="antialiased font-sans text-slate-800">
+
+    <div class="flex min-h-screen">
+        
+        <!-- Menu bên trái -->
+        <aside class="w-72 bg-white border-r border-slate-200 hidden lg:flex flex-col sticky top-0 h-screen z-50 transition-all">
+            <div class="p-8">
+                <!-- LOGO Đồng bộ -->
+                <a href="tongquan.html" class="flex items-center gap-3.5 hover:opacity-80 transition-opacity group">
+                    <div class="w-[42px] h-[42px] flex items-center justify-center shrink-0">
+                        <img src="../logodoly.png" alt="Doly Logo" class="w-full h-full object-contain" onerror="this.src='https://ui-avatars.com/api/?name=D&background=1E3A8A&color=fff'">
+                    </div>
+                    <div class="flex flex-col justify-center">
+                        <div class="text-[21px] font-black text-brand-dark-blue leading-none tracking-[-0.04em] text-bold-thick">
+                            DOLY LMS
+                        </div>
+                        <span class="text-[9px] font-black text-[#94A3B8] uppercase tracking-[0.18em] mt-1.5 text-sub-thick">
+                            TEACHER WORKSPACE
+                        </span>
+                    </div>
+                </a>
+            </div>
+            
+            <nav class="flex-1 py-4 px-5 space-y-2 custom-scrollbar">
+                <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3 px-3">Quản lý chung</p>
+                <a href="tongquan.html" class="sidebar-item flex items-center gap-3 px-4 py-4 rounded-2xl transition-all font-bold text-base text-slate-500 hover:text-brand-blue">
+                    <i class="fa-solid fa-house text-xl w-6 text-center"></i> 
+                    <span>Bảng điều khiển</span>
+                </a>
+                <a href="lophoccuatoi.html" class="sidebar-item active flex items-center gap-3 px-4 py-4 rounded-2xl transition-all font-[900] text-base shadow-sm shadow-blue-100">
+                    <i class="fa-solid fa-users text-xl w-6 text-center"></i> 
+                    <span>Lớp học</span>
+                </a>
+                <a href="chamdiem.html" class="sidebar-item flex items-center gap-3 px-4 py-4 rounded-2xl transition-all font-bold text-base text-slate-500 hover:text-brand-blue">
+                    <i class="fa-solid fa-marker text-xl w-6 text-center"></i> 
+                    <span>Chấm và trả điểm</span>
+                </a>
+                
+            </nav>
+
+            <div class="p-6">
+                <div class="relative">
+                    <div onclick="document.getElementById('user-dropdown').classList.toggle('hidden')" class="flex items-center gap-3 p-3 rounded-2xl border border-slate-100 bg-slate-50 hover:bg-slate-100 transition-colors cursor-pointer select-none">
+                        <img id="user-avatar" src="https://ui-avatars.com/api/?name=User&background=1E3A8A&color=fff" class="w-10 h-10 rounded-full">
+                        <div class="flex-1">
+                            <p id="user-name" class="text-sm font-extrabold text-brand-dark-blue">Đang tải...</p>
+                            <p id="user-role" class="text-[11px] text-slate-500 font-bold">Giáo viên</p>
+                        </div>
+                        <i class="fa-solid fa-chevron-up text-[10px] text-slate-400"></i>
+                    </div>
+                    
+                    <div id="user-dropdown" class="hidden absolute bottom-full left-0 w-full mb-2 bg-white border border-slate-200 rounded-2xl shadow-hover-soft z-50 overflow-hidden">
+                        <a href="#" onclick="handleLogout()" class="flex items-center gap-3 px-4 py-3 text-sm font-extrabold text-red-600 hover:bg-red-50 transition-colors">
+                            <i class="fa-solid fa-arrow-right-from-bracket"></i> Đăng xuất
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Nội dung chính -->
+        <main class="flex-1 flex flex-col min-w-0">
+            <header class="h-20 bg-white border-b border-slate-200 flex items-center justify-between px-8 sticky top-0 z-40">
+                <div class="flex items-center gap-4">
+                    <button class="lg:hidden text-slate-500"><i class="fa-solid fa-bars text-xl"></i></button>
+                    
+                    <!-- Breadcrumbs -->
+                    <div class="hidden md:flex items-center gap-2 text-sm font-bold text-slate-500">
+                        <a href="lophoccuatoi.html" class="hover:text-brand-blue transition-colors">Lớp học</a>
+                        <i class="fa-solid fa-chevron-right text-[10px] text-slate-300"></i>
+                        <a href="molop.html" class="hover:text-brand-blue transition-colors">KHTN lớp 8 (8A2)</a>
+                        <i class="fa-solid fa-chevron-right text-[10px] text-slate-300"></i>
+                        <span class="text-brand-dark-blue font-extrabold">Giao bài tập</span>
+                    </div>
+                </div>
+                
+                <div class="flex items-center gap-3">
+                    
+                </div>
+            </header>
+
+            <!-- Main Container -->
+            <div class="p-8 max-w-[1300px] mx-auto w-full space-y-6">
+                
+                <!-- Thanh Header Giao Bài -->
+                <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-6">
+                    <div class="flex items-center gap-5">
+                        <a href="molop.html" class="w-[52px] h-[52px] flex items-center justify-center rounded-xl bg-slate-50 border border-slate-200 text-slate-500 hover:text-brand-blue hover:bg-white hover:shadow-sm transition-all shrink-0">
+                            <i class="fa-solid fa-arrow-left text-lg"></i>
+                        </a>
+                        <div>
+                            <h1 class="text-[28px] font-bold text-brand-dark-blue uppercase mb-2 leading-none">GIAO BÀI TẬP MỚI</h1>
+                            <div class="flex flex-wrap items-center gap-3 text-[15px] font-medium text-slate-600">
+                                <div class="flex items-center gap-1.5">
+                                    <i class="fa-solid fa-users text-slate-400"></i>
+                                    <span>Lớp: <span class="font-bold text-slate-800">8A2</span></span>
+                                </div>
+                                <span class="text-slate-300">|</span>
+                                <div class="flex items-center gap-1.5">
+                                    <i class="fa-solid fa-book-open text-slate-400"></i>
+                                    <span>Môn: <span class="font-bold text-slate-800">Khoa học tự nhiên</span></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-3">
+                        <button class="px-5 py-2.5 bg-white border border-slate-200 text-brand-dark-blue rounded-xl text-sm font-bold hover:bg-slate-50 transition-all flex items-center gap-2 shadow-sm">
+                            <i class="fa-solid fa-floppy-disk"></i> Lưu nháp
+                        </button>
+                        <button id="btn-submit-assignment" onclick="submitAssignment()" class="px-5 py-2.5 bg-[#2563EB] text-white rounded-xl text-sm font-bold hover:bg-blue-700 transition-all flex items-center gap-2 shadow-sm">
+                            <i class="fa-solid fa-paper-plane"></i> Giao bài
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Form Giao Bài -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    
+                    <!-- CỘT TRÁI: NỘI DUNG CHÍNH -->
+                    <div class="lg:col-span-2 space-y-6">
+                        
+                        <!-- Block Cố Định: Tên & Loại bài tập -->
+                        <div class="bg-white rounded-2xl p-7 border border-slate-200 shadow-sm space-y-6 z-10 relative">
+                            <div>
+                                <label class="block text-[15px] font-bold text-slate-700 mb-2">Tên bài tập <span class="text-red-500">*</span></label>
+                                <input type="text" placeholder="Nhập tên bài tập..." class="w-full px-4 py-3.5 border border-slate-200 rounded-xl text-sm font-medium text-slate-800 placeholder-slate-400 focus:outline-none focus:border-brand-blue focus:ring-1 focus:ring-brand-blue transition-all bg-slate-50 focus:bg-white">
+                            </div>
+
+                            <div>
+                                <label class="block text-[15px] font-bold text-slate-700 mb-2">Loại bài tập</label>
+                                <div class="grid grid-cols-2 gap-4">
+                                    <label class="cursor-pointer">
+                                        <input type="radio" name="assignment_type" value="tu-luan" class="peer sr-only" onchange="switchAssignmentType('tu-luan')" checked>
+                                        <div class="text-center px-4 py-4 rounded-xl border border-slate-200 text-slate-600 font-bold text-sm peer-checked:border-brand-blue peer-checked:bg-blue-50 peer-checked:text-brand-blue transition-all hover:bg-slate-50">
+                                            <i class="fa-solid fa-pen-clip mb-2 text-xl block"></i>
+                                            Tự luận
+                                        </div>
+                                    </label>
+                                    <label class="cursor-pointer">
+                                        <input type="radio" name="assignment_type" value="trac-nghiem" class="peer sr-only" onchange="switchAssignmentType('trac-nghiem')">
+                                        <div class="text-center px-4 py-4 rounded-xl border border-slate-200 text-slate-600 font-bold text-sm peer-checked:border-brand-blue peer-checked:bg-blue-50 peer-checked:text-brand-blue transition-all hover:bg-slate-50">
+                                            <i class="fa-brands fa-google text-xl block mb-2 text-brand-blue"></i>
+                                            Trắc nghiệm (GG Form)
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- VÙNG ĐỘNG DỰA THEO LOẠI BÀI TẬP -->
+
+                        <!-- 1. GIAO DIỆN TỰ LUẬN -->
+                        <div id="form-tu-luan" class="assignment-section space-y-6 fade-in block">
+                            <div class="bg-white rounded-2xl p-7 border border-slate-200 shadow-sm">
+                                <div class="flex items-center justify-between mb-2">
+                                    <label class="block text-[15px] font-bold text-slate-700">Hướng dẫn làm bài</label>
+                                    <div class="flex items-center gap-1 text-slate-400">
+                                        <button class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-100 hover:text-brand-blue transition-colors"><i class="fa-solid fa-bold text-sm"></i></button>
+                                        <button class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-100 hover:text-brand-blue transition-colors"><i class="fa-solid fa-italic text-sm"></i></button>
+                                        <button class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-100 hover:text-brand-blue transition-colors"><i class="fa-solid fa-list-ul text-sm"></i></button>
+                                        <button class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-100 hover:text-brand-blue transition-colors"><i class="fa-solid fa-link text-sm"></i></button>
+                                    </div>
+                                </div>
+                                <textarea rows="6" placeholder="Ghi chú các yêu cầu, dặn dò học sinh khi làm bài..." class="w-full px-4 py-3.5 border border-slate-200 rounded-xl text-sm font-medium text-slate-800 placeholder-slate-400 focus:outline-none focus:border-brand-blue focus:ring-1 focus:ring-brand-blue transition-all bg-slate-50 focus:bg-white resize-none"></textarea>
+                            </div>
+
+                            <div class="bg-white rounded-2xl p-7 border border-slate-200 shadow-sm space-y-4">
+                                <label class="block text-[15px] font-bold text-slate-700">Tài liệu đính kèm (File Word, PDF, Ảnh...)</label>
+                                <div class="border-2 border-dashed border-slate-300 rounded-xl p-10 flex flex-col items-center justify-center bg-slate-50/50 hover:bg-blue-50/30 hover:border-brand-blue transition-all cursor-pointer group">
+                                    <div class="w-16 h-16 rounded-full bg-white border border-slate-200 flex items-center justify-center text-slate-400 group-hover:text-brand-blue group-hover:border-brand-blue transition-colors shadow-sm mb-4">
+                                        <i class="fa-solid fa-cloud-arrow-up text-2xl"></i>
+                                    </div>
+                                    <p class="text-[15px] font-bold text-slate-700">Kéo thả file vào đây hoặc <span class="text-brand-blue">Tải lên từ máy tính</span></p>
+                                    <p class="text-sm font-medium text-slate-400 mt-1.5">Hỗ trợ định dạng: .pdf, .docx, .jpg, .png (Tối đa 10MB)</p>
+                                </div>
+                                <div class="pt-2 flex flex-wrap items-center gap-3">
+                                    <span class="text-[15px] text-slate-500 font-bold mr-1">Hoặc:</span>
+                                   
+                                    <button class="px-5 py-2.5 bg-white border border-slate-200 text-slate-600 text-sm font-bold rounded-xl hover:bg-slate-50 transition-colors flex items-center gap-2">
+                                        <i class="fa-brands fa-youtube text-red-500"></i> Link Youtube
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 2. GIAO DIỆN TRẮC NGHIỆM (GOOGLE FORM) -->
+                        <div id="form-trac-nghiem" class="assignment-section space-y-6 fade-in hidden">
+                            <div class="bg-white rounded-2xl p-7 border border-slate-200 shadow-sm space-y-6">
+                                <div class="flex items-center justify-between border-b border-slate-100 pb-4">
+                                    <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                                        <i class="fa-brands fa-google text-brand-blue"></i> Bài tập Trắc nghiệm (Tự động chấm điểm)
+                                    </h2>
+                                </div>
+
+                                <div class="space-y-4">
+                                    <p class="text-[15px] text-slate-600 font-medium">Hệ thống hỗ trợ tích hợp trực tiếp với <span class="font-bold text-brand-blue">Google Forms</span>. Học sinh sẽ làm bài trên Form, hệ thống sẽ lấy điểm tự động đổ về bảng điểm của lớp giúp bạn tiết kiệm thời gian.</p>
+                                    
+                                    <div class="flex flex-wrap items-center gap-3">
+                                        <button class="px-5 py-3 bg-white border-2 border-emerald-500 text-emerald-600 font-bold rounded-xl hover:bg-emerald-50 transition-colors flex items-center gap-2 shadow-sm">
+                                            <i class="fa-solid fa-file-lines text-lg"></i> Tạo Google Form mới
+                                        </button>
+                                        <button class="px-5 py-3 bg-white border border-slate-200 text-slate-600 font-bold rounded-xl hover:bg-slate-50 transition-colors flex items-center gap-2 shadow-sm">
+                                            <i class="fa-solid fa-video text-red-500 text-lg"></i> Xem video hướng dẫn
+                                        </button>
+                                    </div>
+
+                                    <div class="pt-4">
+                                        <label class="block text-[15px] font-bold text-slate-700 mb-2">Dán liên kết (Link) Google Form vào đây <span class="text-red-500">*</span></label>
+                                        <div class="relative">
+                                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                                <i class="fa-solid fa-link text-slate-400"></i>
+                                            </div>
+                                            <input type="url" placeholder="Ví dụ: https://docs.google.com/forms/d/e/..." class="w-full pl-11 pr-4 py-3.5 border border-slate-200 rounded-xl text-sm font-medium text-slate-800 placeholder-slate-400 focus:outline-none focus:border-brand-blue focus:ring-1 focus:ring-brand-blue transition-all bg-slate-50 focus:bg-white">
+                                        </div>
+                                    </div>
+
+                                    <div class="bg-blue-50 border border-blue-100 rounded-xl p-5 flex gap-4 items-start mt-2">
+                                        <i class="fa-solid fa-circle-info text-brand-blue text-xl mt-0.5 shrink-0"></i>
+                                        <div>
+                                            <h4 class="font-bold text-brand-dark-blue mb-1">Lưu ý để điểm tự đồng bộ:</h4>
+                                            <ul class="list-disc pl-4 text-sm text-brand-dark-blue/80 space-y-1 font-medium">
+                                                <li>Google Form phải bật cài đặt <strong>"Đặt làm bài kiểm tra" (Make this a quiz)</strong>.</li>
+                                                <li>Form <strong>BẮT BUỘC</strong> phải có một trường hỏi yêu cầu học sinh nhập <strong>Mã Học Sinh</strong> hoặc <strong>Email</strong> để hệ thống ghép nối điểm với đúng người.</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- CỘT PHẢI: CÀI ĐẶT CHUNG -->
+                    <div class="space-y-6">
+                        
+                        <div class="bg-white rounded-2xl p-7 border border-slate-200 shadow-sm space-y-6">
+                            <h2 class="text-lg font-bold text-brand-dark-blue flex items-center gap-2 border-b border-slate-100 pb-4">
+                                <i class="fa-solid fa-sliders"></i> Cài đặt bài tập
+                            </h2>
+
+                            <!-- Giao cho -->
+                            <div class="space-y-2">
+                                <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide">Giao cho</label>
+                                <div class="bg-slate-50 border border-slate-200 rounded-xl p-3.5 flex items-center justify-between">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-7 h-7 rounded-lg bg-brand-blue text-white flex items-center justify-center text-xs font-bold">8A2</div>
+                                        <span class="text-[15px] font-bold text-slate-700">Lớp 8A2</span>
+                                    </div>
+                                    <i class="fa-solid fa-check text-emerald-500"></i>
+                                </div>
+                                
+                                <select class="w-full px-4 py-3 border border-slate-200 rounded-xl text-sm font-bold text-slate-700 outline-none focus:border-brand-blue bg-white cursor-pointer hover:bg-slate-50 transition-colors">
+                                    <option>Tất cả học sinh (42)</option>
+                                    <option>Chọn học sinh cụ thể...</option>
+                                </select>
+                            </div>
+
+                            <!-- Hạn nộp -->
+                            <div class="space-y-2 pt-2">
+                                <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide">Hạn nộp</label>
+                                <input type="datetime-local" class="w-full px-4 py-3 border border-slate-200 rounded-xl text-sm font-bold text-slate-700 outline-none focus:border-brand-blue focus:ring-1 focus:ring-brand-blue transition-all bg-white hover:bg-slate-50">
+                                
+                                <div class="mt-4 flex items-center gap-2.5">
+                                    <input type="checkbox" id="late-submit" class="w-4 h-4 text-brand-blue rounded border-slate-300 focus:ring-brand-blue cursor-pointer">
+                                    <label for="late-submit" class="text-sm font-bold text-slate-600 cursor-pointer">Cho phép nộp muộn</label>
+                                </div>
+                            </div>
+
+                            <!-- Thang điểm -->
+                            <div class="space-y-2 pt-2">
+                                <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide">Thang điểm</label>
+                                <select class="w-full px-4 py-3 border border-slate-200 rounded-xl text-sm font-bold text-slate-700 outline-none focus:border-brand-blue bg-white cursor-pointer hover:bg-slate-50 transition-colors">
+                                    <option>Hệ số 1 (Thang điểm 10)</option>
+                                    <option>Hệ số 2 (Thang điểm 10)</option>
+                                    <option>Thang điểm 100</option>
+                                    <option>Không chấm điểm</option>
+                                </select>
+                            </div>
+
+                            <!-- Phân loại môn học -->
+                            <div class="space-y-2 pt-2">
+                                <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide">Chủ đề</label>
+                                <select class="w-full px-4 py-3 border border-slate-200 rounded-xl text-sm font-bold text-slate-700 outline-none focus:border-brand-blue bg-white cursor-pointer hover:bg-slate-50 transition-colors">
+                                    <option>-- Không có chủ đề --</option>
+                                    <option>Chương 1: Trao đổi chất</option>
+                                    <option>Chương 2: Cảm ứng ở sinh vật</option>
+                                    <option>+ Tạo chủ đề mới</option>
+                                </select>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <script>
+        function handleLogout() {
+            DolyAPI.logout().catch(function(){}).then(function(){
+                DolyAPI.clearSession();
+                window.location.href = '../login.html';
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            var session = DolyAPI.loadSession();
+            if (!session || session.role !== 'teacher') {
+                window.location.href = '../login.html';
+                return;
+            }
+            var user = session.user || {};
+            var nameEl = document.getElementById('user-name');
+            var avatarEl = document.getElementById('user-avatar');
+            if (nameEl) nameEl.textContent = user.full_name || 'Giáo viên';
+            if (avatarEl) avatarEl.src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(user.full_name || 'Teacher') + '&background=1E3A8A&color=fff';
+
+            // Load class info from URL
+            var params = new URLSearchParams(window.location.search);
+            var classId = params.get('class_id');
+            if (classId) {
+                DolyAPI.getClasses().then(function(classes) {
+                    if (classes) {
+                        var cls = classes.find(function(c) { return c.id == classId; });
+                        if (cls) {
+                            var nameEls = document.querySelectorAll('.text-brand-dark-blue.font-extrabold');
+                            nameEls.forEach(function(el) {
+                                if (el.textContent.indexOf('GIAO') >= 0) return;
+                            });
+                        }
+                    }
+                }).catch(function(){});
+            }
+        });
+
+        function submitAssignment() {
+            var title = document.querySelector('input[placeholder="Nhập tên bài tập..."]').value.trim();
+            if (!title) { alert('Vui lòng nhập tên bài tập'); return; }
+
+            var typeEl = document.querySelector('input[name="assignment_type"]:checked');
+            var type = typeEl ? typeEl.value : 'tu-luan';
+
+            var desc = document.querySelector('textarea').value.trim();
+            var deadline = document.querySelector('input[type="datetime-local"]').value;
+            var subject = document.querySelector('select option:checked').textContent;
+
+            var data = {
+                title: title,
+                type: type === 'trac-nghiem' ? 'quiz' : 'essay',
+                description: desc,
+                due_date: deadline || null,
+                subject: subject
+            };
+
+            var params = new URLSearchParams(window.location.search);
+            var classId = params.get('class_id');
+            if (classId) data.class_id = parseInt(classId);
+
+            var btn = document.getElementById('btn-submit-assignment');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Đang giao...';
+
+            DolyAPI.createAssignment(data).then(function() {
+                alert('Giao bài thành công!');
+                if (classId) {
+                    window.location.href = 'danhsachhocsinh.html?class_id=' + classId;
+                } else {
+                    window.location.href = 'tongquan.html';
+                }
+            }).catch(function(err) {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Giao bài';
+                alert(err.message || 'Giao bài thất bại!');
+            });
+        }
+
+        document.addEventListener('click', function(event) {
+            const dropdown = document.getElementById('user-dropdown');
+            const menuBtn = dropdown?.closest('.relative')?.querySelector('div');
+            if (dropdown && menuBtn && !menuBtn.contains(event.target) && !dropdown.contains(event.target)) {
+                dropdown.classList.add('hidden');
+            }
+        });
+
+        // Hàm chuyển đổi giao diện khi chọn Loại bài tập
+        function switchAssignmentType(type) {
+            // Ẩn tất cả các form
+            const sections = document.querySelectorAll('.assignment-section');
+            sections.forEach(section => {
+                section.classList.add('hidden');
+                section.classList.remove('block');
+            });
+
+            // Hiện form được chọn
+            const targetSection = document.getElementById('form-' + type);
+            if (targetSection) {
+                targetSection.classList.remove('hidden');
+                targetSection.classList.add('block');
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="vi" class="scroll-smooth overflow-x-hidden">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diễn Đàn & Cộng Đồng - DOLY LMS</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="../api/client.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Quicksand:wght@500;600;700;800&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="./style.css">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'doly-blue': '#2563EB', 
+                        'doly-dark': '#0f172a',
+                        'doly-yellow': '#FBBF24', 
+                        'ai-purple': '#8b5cf6',
+                        'chem-green': '#10b981', 
+                        'bio-pink': '#ec4899', 
+                        'brand-blue': '#0A2FB6', 
+                        'brand-yellow': '#FFD700',
+                    },
+                    fontFamily: {
+                        sans: ['Quicksand', 'sans-serif'],
+                        display: ['Montserrat', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'soft': '0 10px 40px -10px rgba(0,0,0,0.05)',
+                        'app': '0 20px 60px rgba(0,0,0,0.06)',
+                        'btn': '0 10px 20px rgba(37,99,235,0.15)',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="antialiased font-sans selection:bg-slate-200 selection:text-slate-900 bg-slate-50 relative">
+
+    <div class="overflow-x-hidden relative w-full">
+
+        <header class="fixed top-6 left-0 w-full z-50 px-4 flex justify-center">
+            <div class="w-full max-w-7xl glass !rounded-full px-6 py-3 flex justify-between items-center transition-all shadow-lg border border-white/50">
+                
+                <a href="index.html" class="flex items-center gap-3 group shrink-0 w-[220px]">
+                    <div class="transition-transform group-hover:rotate-12 duration-500 flex items-center justify-center">
+                        <img src="../logodoly.png" alt="Doly Logo" class="w-12 h-12 object-contain">
+                    </div>
+                    <h1 class="text-xl font-display font-black tracking-tighter text-slate-800 hidden sm:block uppercase whitespace-nowrap">DOLY LMS</h1>
+                </a>
+                    
+                <nav class="hidden lg:flex flex-1 justify-center items-center gap-8 xl:gap-12">
+                    <a href="index.html" class="text-sm font-extrabold text-slate-500 hover:text-slate-800 relative py-1 transition-all group whitespace-nowrap">
+                        TRANG CHỦ
+                        <span class="absolute bottom-0 left-0 w-0 h-[3px] bg-slate-800 rounded-full transition-all duration-300 group-hover:w-full"></span>
+                    </a>
+                    
+                    <a href="hesinhthai.html" class="text-sm font-extrabold text-slate-500 hover:text-slate-800 relative py-1 transition-all group whitespace-nowrap">
+                        HỆ SINH THÁI HỌC TẬP
+                        <span class="absolute bottom-0 left-0 w-0 h-[3px] bg-slate-800 rounded-full transition-all duration-300 group-hover:w-full"></span>
+                    </a>
+                    
+                    <a href="diendan.html" class="text-sm font-extrabold relative py-1 transition-all whitespace-nowrap" style="color: #20356a;">
+                        DIỄN ĐÀN VÀ CỘNG ĐỒNG
+                        <span class="absolute bottom-0 left-0 w-full h-[3px] rounded-full" style="background-color: #20356a;"></span>
+                    </a>
+                    
+                    <a href="tintucfaq.html" class="text-sm font-extrabold text-slate-500 hover:text-slate-800 relative py-1 transition-all group whitespace-nowrap">
+                        TIN TỨC VÀ CÂU HỎI 
+                        <span class="absolute bottom-0 left-0 w-0 h-[3px] bg-slate-800 rounded-full transition-all duration-300 group-hover:w-full"></span>
+                    </a>
+                </nav>
+                
+                <div class="flex items-center justify-end shrink-0 w-[220px]">
+                    <button onclick="window.location.href='../login.html'" class="btn-shine px-6 py-2.5 text-white text-[12px] font-black rounded-full shadow-lg transform hover:-translate-y-0.5 uppercase tracking-widest border border-white/20 transition-all whitespace-nowrap" style="background-color: #20356a;">
+                        ĐĂNG KÝ / ĐĂNG NHẬP
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <section class="pt-40 pb-12 relative z-10 bg-slate-50 overflow-hidden">
+            <div class="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-4xl h-[400px] bg-gradient-to-b from-blue-200/40 to-transparent pointer-events-none rounded-b-full blur-3xl"></div>
+
+            <div class="container mx-auto px-4 max-w-4xl relative z-10 text-center" data-aos="zoom-in">
+                <div class="inline-flex items-center gap-2 px-4 py-1.5 bg-white text-slate-600 rounded-full text-[11px] font-black uppercase tracking-[0.15em] mb-4 border border-slate-200 shadow-sm">
+                    <i class="fas fa-users text-doly-blue"></i> Hội Cá Heo KHTN
+                </div>
+                <h1 class="text-4xl md:text-5xl font-display font-black mb-6 leading-tight tracking-tight">
+                    Hỏi Đáp Nhanh. <br class="hidden md:block">
+                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-cyan-500">Hiểu Sâu Cùng Bạn Bè.</span>
+                </h1>
+                
+                <div class="max-w-2xl mx-auto relative mt-8">
+                    <div class="absolute inset-y-0 left-0 pl-6 flex items-center pointer-events-none">
+                        <i class="fas fa-search text-slate-400 text-lg"></i>
+                    </div>
+                    <input type="text" class="block w-full pl-14 pr-32 py-5 bg-white border-2 border-white shadow-xl rounded-full text-sm font-bold text-slate-700 placeholder-slate-400 focus:outline-none focus:border-blue-300 transition-all" placeholder="Tìm kiếm câu hỏi, bài tập, từ khóa...">
+                    <button class="absolute right-2 top-2 bottom-2 bg-slate-800 text-white px-6 rounded-full text-xs font-black uppercase tracking-widest hover:bg-slate-700 transition-colors shadow-sm" style="background-color: var(--doly-deep-blue) !important;">
+                        Hỏi Bài
+                    </button>
+                </div>
+
+                <div class="flex flex-wrap justify-center gap-3 mt-8">
+                    <span class="text-xs font-bold text-slate-500 pt-1">Thịnh hành:</span>
+                    <a href="#" class="px-3 py-1 bg-white border border-slate-200 rounded-lg text-[11px] font-bold text-slate-600 hover:border-blue-300 hover:text-blue-600 transition-colors">#HoaHoc8</a>
+                    <a href="#" class="px-3 py-1 bg-white border border-slate-200 rounded-lg text-[11px] font-bold text-slate-600 hover:border-blue-300 hover:text-blue-600 transition-colors">#GiaiPhauTim</a>
+                    <a href="#" class="px-3 py-1 bg-white border border-slate-200 rounded-lg text-[11px] font-bold text-slate-600 hover:border-blue-300 hover:text-blue-600 transition-colors">#OxiHoaKhu</a>
+                    <a href="#" class="px-3 py-1 bg-white border border-slate-200 rounded-lg text-[11px] font-bold text-slate-600 hover:border-blue-300 hover:text-blue-600 transition-colors">#KHTN9</a>
+                </div>
+            </div>
+        </section>
+
+        <section class="pb-32 pt-8 relative z-10 bg-slate-50">
+            <div class="container mx-auto px-4 max-w-7xl flex flex-col lg:flex-row gap-8">
+                
+                <div class="w-full lg:w-2/3 flex flex-col gap-6" data-aos="fade-up" id="forum-post-container">
+                    
+                    <div class="flex overflow-x-auto custom-scroll pb-2 gap-3" id="forum-topic-filters">
+                        <button data-topic="0" class="topic-filter-btn px-5 py-2.5 bg-[#20356a] text-white rounded-xl text-xs font-black uppercase tracking-wider shrink-0 shadow-md">Tất cả</button>
+                    </div>
+
+                    <div class="flex justify-between items-center bg-white p-2 rounded-2xl border border-slate-200 shadow-sm">
+                        <div class="flex gap-1" id="forum-sort-btns">
+                            <button data-sort="newest" class="sort-filter-btn px-4 py-2 bg-slate-100 text-slate-800 rounded-xl text-xs font-bold transition-colors">Mới nhất</button>
+                            <button data-sort="popular" class="sort-filter-btn px-4 py-2 text-slate-500 hover:bg-slate-50 rounded-xl text-xs font-bold transition-colors">Nhiều lượt thích</button>
+                            <button data-sort="unanswered" class="sort-filter-btn px-4 py-2 text-slate-500 hover:bg-slate-50 rounded-xl text-xs font-bold transition-colors">Chưa trả lời</button>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-5 rounded-[1.5rem] border border-slate-200 shadow-sm hover:shadow-md transition-shadow flex gap-4 lg:gap-6">
+                        <div class="flex flex-col items-center gap-1 shrink-0 w-12">
+                            <button class="w-8 h-8 rounded-full hover:bg-slate-100 text-slate-400 flex items-center justify-center transition-colors"><i class="fas fa-caret-up text-xl"></i></button>
+                            <span class="font-black text-slate-700 text-sm">24</span>
+                            <button class="w-8 h-8 rounded-full hover:bg-slate-100 text-slate-400 flex items-center justify-center transition-colors"><i class="fas fa-caret-down text-xl"></i></button>
+                        </div>
+                        
+                        <div class="flex-1 w-full overflow-hidden">
+                            <div class="flex justify-between items-start mb-2">
+                                <div class="flex items-center gap-2">
+                                    <img src="https://ui-avatars.com/api/?name=Huyen+Trang&background=e2e8f0&color=1e3a8a&font-weight=bold" alt="User" class="w-6 h-6 rounded-full">
+                                    <span class="text-xs font-bold text-slate-700">Huyền Trang</span>
+                                    <span class="text-[10px] font-bold text-slate-400">• 2 giờ trước</span>
+                                </div>
+                                <span class="bg-emerald-100 text-emerald-700 border border-emerald-200 text-[9px] font-black uppercase px-2 py-1 rounded flex items-center gap-1 shrink-0"><i class="fas fa-check"></i> Đã giải quyết</span>
+                            </div>
+                            
+                            <h3 class="text-base md:text-lg font-black text-slate-800 leading-tight mb-2 hover:text-blue-600 cursor-pointer transition-colors" style="color: var(--doly-deep-blue);">
+                                Cân bằng phương trình hóa học FeS2 + O2 -> Fe2O3 + SO2
+                            </h3>
+                            <p class="text-xs text-slate-500 font-medium mb-4">
+                                Chào mọi người, câu này em cân bằng mãi mà hệ số nó cứ bị lẻ, đặc biệt là chỗ Oxi. Ai có mẹo chẵn lẻ hay phương pháp thăng bằng electron chỉ em với ạ!
+                            </p>
+                            
+                            <div class="flex justify-between items-center border-t border-slate-100 pt-3 pb-3">
+                                <div class="flex gap-2">
+                                    <span class="text-[10px] font-bold text-emerald-600 bg-emerald-50 border border-emerald-100 px-2 py-1 rounded">Hóa Học 8</span>
+                                    <span class="text-[10px] font-bold text-slate-500 bg-slate-50 border border-slate-200 px-2 py-1 rounded">Phương trình</span>
+                                </div>
+                                <div class="flex gap-4 text-slate-400 text-xs font-bold">
+                                    <span class="flex items-center gap-1.5 hover:text-blue-500 cursor-pointer transition-colors"><i class="fas fa-comment-dots"></i> 5</span>
+                                    <span class="flex items-center gap-1.5"><i class="fas fa-eye"></i> 128</span>
+                                </div>
+                            </div>
+
+                            <div class="mt-2 bg-slate-50 rounded-xl p-4 border border-slate-100">
+                                <div class="flex justify-between items-start mb-3">
+                                    <div class="flex items-center gap-2">
+                                        <img src="https://ui-avatars.com/api/?name=Minh+Anh&background=1e3a8a&color=fff&font-weight=bold" alt="User" class="w-6 h-6 rounded-full border border-white shadow-sm">
+                                        <div>
+                                            <p class="text-xs font-black text-slate-800 flex items-center gap-1" style="color: var(--doly-deep-blue);">Minh Anh <i class="fas fa-medal text-yellow-500" title="Hiệp Sĩ Tri Thức"></i></p>
+                                            <p class="text-[9px] font-bold text-slate-400">1 giờ trước</p>
+                                        </div>
+                                    </div>
+                                    <span class="text-[10px] font-bold text-emerald-600 bg-emerald-100/50 border border-emerald-200 px-2 py-1 rounded-md flex items-center gap-1"><i class="fas fa-check-circle"></i> Câu trả lời hay nhất</span>
+                                </div>
+                                <p class="text-xs text-slate-700 font-medium leading-relaxed mb-3">
+                                    Bài này bạn dùng phương pháp thăng bằng electron nhé. Xem FeS2 là 1 cụm có số oxi hóa 0.<br><br>
+                                    <span class="bg-white px-2 py-1 rounded border border-slate-200 font-mono text-[11px] inline-block mb-1">FeS2 -> Fe+3 + 2S+4 + 11e</span> (Nhân chéo 4)<br>
+                                    <span class="bg-white px-2 py-1 rounded border border-slate-200 font-mono text-[11px] inline-block mb-2">O2 + 4e -> 2O-2</span> (Nhân chéo 11)<br><br>
+                                    => Phương trình chuẩn là: <b>4FeS2 + 11O2 -> 2Fe2O3 + 8SO2</b>. Bạn đếm thử lại số Oxi 2 vế xem bằng 22 chưa nhé!
+                                </p>
+                                <div class="flex gap-4 text-slate-500 text-[11px] font-bold">
+                                    <button class="flex items-center gap-1.5 hover:text-blue-600 transition-colors"><i class="fas fa-thumbs-up"></i> 12</button>
+                                    <button class="flex items-center gap-1.5 hover:text-blue-600 transition-colors"><i class="fas fa-reply"></i> Trả lời</button>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-3 text-center">
+                                <button class="text-[11px] font-bold text-blue-500 hover:text-blue-700 transition-colors inline-flex items-center gap-1">
+                                    Xem thêm 4 câu trả lời khác <i class="fas fa-chevron-down text-[9px]"></i>
+                                </button>
+                            </div>
+                            </div>
+                    </div>
+
+                    <div class="bg-white p-5 rounded-[1.5rem] border border-slate-200 shadow-sm hover:shadow-md transition-shadow flex gap-4 lg:gap-6">
+                        <div class="flex flex-col items-center gap-1 shrink-0 w-12">
+                            <button class="w-8 h-8 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center transition-colors"><i class="fas fa-caret-up text-xl"></i></button>
+                            <span class="font-black text-blue-600 text-sm">15</span>
+                            <button class="w-8 h-8 rounded-full hover:bg-slate-100 text-slate-400 flex items-center justify-center transition-colors"><i class="fas fa-caret-down text-xl"></i></button>
+                        </div>
+                        
+                        <div class="flex-1 w-full overflow-hidden">
+                            <div class="flex justify-between items-start mb-2">
+                                <div class="flex items-center gap-2">
+                                    <img src="https://ui-avatars.com/api/?name=Quoc+Bao&background=e2e8f0&color=1e3a8a&font-weight=bold" alt="User" class="w-6 h-6 rounded-full">
+                                    <span class="text-xs font-bold text-slate-700">Quốc Bảo</span>
+                                    <span class="text-[10px] font-bold text-slate-400">• 5 giờ trước</span>
+                                </div>
+                            </div>
+                            
+                            <h3 class="text-base md:text-lg font-black text-slate-800 leading-tight mb-2 hover:text-blue-600 cursor-pointer transition-colors" style="color: var(--doly-deep-blue);">
+                                Xin tài liệu ôn thi Giữa kì 1 KHTN lớp 9 (Phần Quang Học)
+                            </h3>
+                            <p class="text-xs text-slate-500 font-medium mb-4 line-clamp-2">
+                                Tuần sau mình thi rồi mà phần Thấu kính hội tụ, phân kỳ mình vẫn hơi mơ hồ cách vẽ ảnh. Ai có sơ đồ tư duy hay file tóm tắt lý thuyết cho mình xin với nha. Thanks!
+                            </p>
+                            
+                            <div class="flex justify-between items-center border-t border-slate-100 pt-3">
+                                <div class="flex gap-2">
+                                    <span class="text-[10px] font-bold text-purple-600 bg-purple-50 border border-purple-100 px-2 py-1 rounded">Vật Lý 9</span>
+                                    <span class="text-[10px] font-bold text-slate-500 bg-slate-50 border border-slate-200 px-2 py-1 rounded">Tài liệu</span>
+                                </div>
+                                <div class="flex gap-4 text-slate-400 text-xs font-bold">
+                                    <span class="flex items-center gap-1.5 hover:text-blue-500 cursor-pointer transition-colors"><i class="fas fa-comment-dots"></i> 12</span>
+                                    <span class="flex items-center gap-1.5"><i class="fas fa-eye"></i> 340</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-5 rounded-[1.5rem] border border-slate-200 shadow-sm hover:shadow-md transition-shadow flex gap-4 lg:gap-6">
+                        <div class="flex flex-col items-center gap-1 shrink-0 w-12">
+                            <button class="w-8 h-8 rounded-full hover:bg-slate-100 text-slate-400 flex items-center justify-center transition-colors"><i class="fas fa-caret-up text-xl"></i></button>
+                            <span class="font-black text-slate-700 text-sm">8</span>
+                            <button class="w-8 h-8 rounded-full hover:bg-slate-100 text-slate-400 flex items-center justify-center transition-colors"><i class="fas fa-caret-down text-xl"></i></button>
+                        </div>
+                        
+                        <div class="flex-1 w-full overflow-hidden">
+                            <div class="flex justify-between items-start mb-2">
+                                <div class="flex items-center gap-2">
+                                    <img src="https://ui-avatars.com/api/?name=Ngoc+Mai&background=e2e8f0&color=1e3a8a&font-weight=bold" alt="User" class="w-6 h-6 rounded-full">
+                                    <span class="text-xs font-bold text-slate-700">Ngọc Mai</span>
+                                    <span class="text-[10px] font-bold text-slate-400">• Hôm qua</span>
+                                </div>
+                            </div>
+                            
+                            <h3 class="text-base md:text-lg font-black text-slate-800 leading-tight mb-2 hover:text-blue-600 cursor-pointer transition-colors" style="color: var(--doly-deep-blue);">
+                                Sự khác biệt giữa ADN và ARN là gì? Dễ nhớ nhất
+                            </h3>
+                            <p class="text-xs text-slate-500 font-medium mb-4 line-clamp-2">
+                                Cô giáo hỏi câu này mà em cứ bị nhầm lẫn giữa cấu trúc mạch đơn/kép và các loại Nu. Mọi người có cách nào nhớ nhanh được không ạ?
+                            </p>
+                            
+                            <div class="flex justify-between items-center border-t border-slate-100 pt-3">
+                                <div class="flex gap-2">
+                                    <span class="text-[10px] font-bold text-pink-600 bg-pink-50 border border-pink-100 px-2 py-1 rounded">Sinh Học 9</span>
+                                </div>
+                                <div class="flex gap-4 text-slate-400 text-xs font-bold">
+                                    <span class="flex items-center gap-1.5 text-blue-500 cursor-pointer transition-colors"><i class="fas fa-comment-dots"></i> 3</span>
+                                    <span class="flex items-center gap-1.5"><i class="fas fa-eye"></i> 89</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button id="forum-load-more" class="w-full py-3 bg-slate-100 text-slate-500 font-bold text-xs rounded-xl hover:bg-slate-200 transition-colors uppercase tracking-widest mt-2">
+                        Tải thêm câu hỏi
+                    </button>
+
+                </div>
+
+                <div class="w-full lg:w-1/3 flex flex-col gap-6 lg:mt-[76px]" data-aos="fade-left" data-aos-delay="100">
+                    
+                    <div class="bg-[#20356a] rounded-[1.5rem] p-6 text-white shadow-lg relative overflow-hidden">
+                        <div class="absolute -right-6 -top-6 text-7xl text-white/10 rotate-12 pointer-events-none"><i class="fas fa-question-circle"></i></div>
+                        <h3 class="text-lg font-display font-black mb-2 relative z-10" style="color: white !important;">Bạn có câu hỏi ?</h3>
+                        <p class="text-xs text-blue-100 font-medium mb-5 relative z-10">Cộng đồng 50k+ thành viên và Gia sư AI luôn sẵn sàng hỗ trợ bạn 24/7.</p>
+                        <button onclick="toggleModal('postModal')" class="w-full py-3 bg-white text-slate-800 font-black text-xs uppercase tracking-widest rounded-xl hover:shadow-lg transform hover:-translate-y-0.5 transition-all shadow-sm relative z-10" style="color: var(--doly-deep-blue);">
+                            + Tạo bài đăng mới
+                        </button>
+                    </div>
+
+                    <div class="bg-white rounded-[1.5rem] p-6 border border-slate-200 shadow-sm">
+                        <div class="flex items-center gap-2 mb-5">
+                            <i class="fas fa-medal text-yellow-500 text-lg"></i>
+                            <h3 class="text-sm font-display font-black uppercase tracking-widest text-slate-800" style="color: var(--doly-deep-blue);">Hiệp Sĩ Tri Thức</h3>
+                        </div>
+                        <p class="text-[11px] text-slate-500 font-medium mb-4">Top thành viên giải đáp nhiều nhất tuần qua.</p>
+                        
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between p-2 rounded-xl bg-yellow-50 border border-yellow-100">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-6 h-6 rounded-full bg-yellow-400 text-white flex items-center justify-center text-[10px] font-black shrink-0">1</div>
+                                    <div class="flex items-center gap-2">
+                                        <img src="https://ui-avatars.com/api/?name=Minh+Anh&background=1e3a8a&color=fff&font-weight=bold" alt="User" class="w-8 h-8 rounded-full">
+                                        <div>
+                                            <p class="text-xs font-black text-slate-800 leading-none mb-1">Minh Anh</p>
+                                            <p class="text-[9px] font-bold text-slate-500">Chuyên Hóa</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <span class="text-[10px] font-black text-yellow-600 bg-yellow-100 px-2 py-0.5 rounded">152 Đáp án</span>
+                            </div>
+
+                            <div class="flex items-center justify-between p-2">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-6 h-6 rounded-full bg-slate-200 text-slate-500 flex items-center justify-center text-[10px] font-black shrink-0">2</div>
+                                    <div class="flex items-center gap-2">
+                                        <img src="https://ui-avatars.com/api/?name=Hoang+Nam&background=e2e8f0&color=1e3a8a&font-weight=bold" alt="User" class="w-8 h-8 rounded-full">
+                                        <div>
+                                            <p class="text-xs font-black text-slate-800 leading-none mb-1">Hoàng Nam</p>
+                                            <p class="text-[9px] font-bold text-slate-500">Toán Lý</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <span class="text-[10px] font-black text-slate-500">98 Đáp án</span>
+                            </div>
+
+                            <div class="flex items-center justify-between p-2">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-6 h-6 rounded-full bg-orange-100 text-orange-400 flex items-center justify-center text-[10px] font-black shrink-0">3</div>
+                                    <div class="flex items-center gap-2">
+                                        <img src="https://ui-avatars.com/api/?name=Gia+Bao&background=e2e8f0&color=1e3a8a&font-weight=bold" alt="User" class="w-8 h-8 rounded-full">
+                                        <div>
+                                            <p class="text-xs font-black text-slate-800 leading-none mb-1">Gia Bảo</p>
+                                            <p class="text-[9px] font-bold text-slate-500">Sinh Học</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <span class="text-[10px] font-black text-slate-500">76 Đáp án</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-[1.5rem] p-6 border border-slate-200 shadow-sm">
+                        <div class="flex items-center gap-2 mb-4">
+                            <i class="fas fa-shield-alt text-emerald-500 text-lg"></i>
+                            <h3 class="text-sm font-display font-black uppercase tracking-widest text-slate-800" style="color: var(--doly-deep-blue);">Quy Tắc Cộng Đồng</h3>
+                        </div>
+                        <ul class="text-[11px] font-medium text-slate-500 space-y-3">
+                            <li class="flex items-start gap-2"><i class="fas fa-check text-emerald-500 mt-0.5"></i> Tìm kiếm trước khi đặt câu hỏi để tránh trùng lặp.</li>
+                            <li class="flex items-start gap-2"><i class="fas fa-check text-emerald-500 mt-0.5"></i> Đặt tiêu đề rõ ràng, nêu rõ môn học và lớp.</li>
+                            <li class="flex items-start gap-2"><i class="fas fa-check text-emerald-500 mt-0.5"></i> Tôn trọng, lịch sự và giữ gìn sự trong sáng của Tiếng Việt.</li>
+                        </ul>
+                    </div>
+
+                </div>
+
+            </div>
+        </section>
+
+        <footer class="bg-slate-900 text-white pt-20 pb-16 relative z-20 w-full overflow-hidden -mt-8 rounded-t-[4rem] shadow-[0_-15px_40px_rgba(15,23,42,0.15)]">
+            <div class="absolute top-0 left-1/4 w-96 h-96 bg-[#0A2FB6]/30 rounded-full blur-[120px]"></div>
+            
+            <div class="container mx-auto px-6 relative z-10 text-center max-w-7xl">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-16 text-left mb-24">
+                    <div class="space-y-8">
+                        <a href="index.html" class="flex items-center gap-2 group">
+                            <div class="w-12 h-12 transition-transform group-hover:rotate-12 duration-500 flex items-center justify-center">
+                                <img src="../logodoly.png" alt="Doly Logo" class="w-full h-full object-contain">
+                            </div>
+                            <span class="text-2xl font-display font-black text-white tracking-tighter uppercase">DOLY LMS</span>
+                        </a>
+                        <p class="text-slate-400 text-sm leading-relaxed font-medium">Hệ sinh thái giáo dục số thông minh nhất dành cho học sinh KHTN Việt Nam.</p>
+                    </div>
+                    <div>
+                        <h4 class="text-sm font-black uppercase tracking-[0.2em] mb-10 text-[#FFD700]">Học Tập</h4>
+                        <ul class="space-y-5 text-slate-400 text-sm font-bold">
+                            <li><a href="#" class="hover:text-[#0A2FB6] transition-colors">Nội dung học thuật</a></li>
+                            <li><a href="#" class="hover:text-[#0A2FB6] transition-colors">Lịch học Smart</a></li>
+                            <li><a href="hocthuat.html" class="hover:text-[#0A2FB6] transition-colors">Thí nghiệm ảo 3D</a></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 class="text-sm font-black uppercase tracking-[0.2em] mb-10 text-[#FFD700]">Kết Nối</h4>
+                        <ul class="space-y-5 text-slate-400 text-sm font-bold">
+                            <li><a href="diendan.html" class="hover:text-[#0A2FB6] transition-colors">Cộng đồng hội cá heo</a></li>
+                            <li><a href="#" class="hover:text-[#0A2FB6] transition-colors">Trung tâm hỗ trợ</a></li>
+                            <li><a href="#" class="hover:text-[#0A2FB6] transition-colors">Tư vấn phụ huynh</a></li>
+                        </ul>
+                    </div>
+                    <div class="space-y-8">
+                        <h4 class="text-sm font-black uppercase tracking-[0.2em] mb-10 text-[#FFD700]">Đăng Ký</h4>
+                        <div class="relative">
+                            <input type="email" placeholder="Email của bạn..." class="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold focus:outline-none focus:border-[#0A2FB6] transition-all">
+                            <button class="absolute right-2 top-2 bottom-2 bg-[#0A2FB6] text-white px-5 rounded-xl shadow-[0_0_20px_rgba(10,47,182,0.4)] hover:bg-blue-700 transition-colors"><i class="fas fa-paper-plane"></i></button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="pt-12 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-10">
+                    <p class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">&copy; 2026 DOLY LMS - KIẾN TẠO TƯƠNG LAI SỐ</p>
+                    <div class="flex justify-center gap-12 text-slate-300 text-2xl">
+                        <a href="#" class="hover:text-[#0A2FB6] transition transform hover:-translate-y-2"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="hover:text-red-500 transition transform hover:-translate-y-2"><i class="fab fa-youtube"></i></a>
+                        <a href="#" class="hover:text-white transition transform hover:-translate-y-2"><i class="fab fa-tiktok"></i></a>
+                    </div>
+                </div>
+            </div>
+        </footer>
+
+    </div> 
+
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script>
+        AOS.init({ once: true, offset: 40, duration: 600, easing: 'ease-out-cubic' });
+
+        // ========== Diễn đàn: Tải dữ liệu từ API ==========
+        (function() {
+            var currentTopic = 0;
+            var currentSort = 'newest';
+            var posts = [];
+            var topics = [];
+
+            function renderPosts() {
+                var container = document.getElementById('forum-post-container');
+                if (!container) return;
+
+                // Loc va sap xep
+                var filtered = posts.slice();
+                if (currentTopic > 0) {
+                    filtered = filtered.filter(function(p) { return p.topic_id == currentTopic; });
+                }
+                if (currentSort === 'popular') {
+                    filtered.sort(function(a, b) { return (b.upvotes - b.downvotes) - (a.upvotes - a.downvotes); });
+                } else if (currentSort === 'unanswered') {
+                    filtered = filtered.filter(function(p) { return p.comment_count == 0; });
+                }
+
+                if (filtered.length === 0) {
+                    container.innerHTML = '<div class="flex flex-col gap-6" data-aos="fade-up"><div class="text-center py-16"><div class="text-6xl mb-4">📭</div><p class="text-slate-500 font-bold">Chua co bai viet nao.</p></div></div>';
+                    return;
+                }
+
+                var html = '<div class="flex flex-col gap-6" data-aos="fade-up">';
+                html += renderFilterBar();
+                html += renderSortBar();
+
+                filtered.forEach(function(post) {
+                    html += renderPostCard(post);
+                });
+
+                html += '<button onclick="alert(\'Xem them bai viet tu API...\')" class="w-full py-3 bg-slate-100 text-slate-500 font-bold text-xs rounded-xl hover:bg-slate-200 transition-colors uppercase tracking-widest mt-2">Tai them cau hoi</button>';
+                html += '</div>';
+                container.innerHTML = html;
+            }
+
+            function renderFilterBar() {
+                var html = '<div class="flex overflow-x-auto custom-scroll pb-2 gap-3">';
+                html += '<button data-topic="0" class="topic-filter-btn px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider shrink-0 shadow-md ' + (currentTopic === 0 ? 'bg-[#20356a] text-white' : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-100') + '">Tat ca</button>';
+                topics.forEach(function(t) {
+                    var active = currentTopic == t.id ? 'bg-[#20356a] text-white' : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-100';
+                    html += '<button data-topic="' + t.id + '" class="topic-filter-btn px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider shrink-0 transition-colors ' + active + '">' + DolyAPI.esc(t.name) + '</button>';
+                });
+                html += '</div>';
+                return html;
+            }
+
+            function renderSortBar() {
+                var sorts = [
+                    { key: 'newest', label: 'Moi nhat' },
+                    { key: 'popular', label: 'Nhieu luot thich' },
+                    { key: 'unanswered', label: 'Chua tra loi' },
+                ];
+                var html = '<div class="flex justify-between items-center bg-white p-2 rounded-2xl border border-slate-200 shadow-sm"><div class="flex gap-1">';
+                sorts.forEach(function(s) {
+                    var active = currentSort === s.key ? 'bg-slate-100 text-slate-800' : 'text-slate-500 hover:bg-slate-50';
+                    html += '<button data-sort="' + s.key + '" class="sort-filter-btn px-4 py-2 rounded-xl text-xs font-bold transition-colors ' + active + '">' + s.label + '</button>';
+                });
+                html += '</div></div>';
+                return html;
+            }
+
+            function renderPostCard(post) {
+                var netVotes = (post.upvotes || 0) - (post.downvotes || 0);
+                var avatar = post.avatar_url || ('https://ui-avatars.com/api/?name=' + encodeURIComponent(post.author_name || 'U') + '&background=e2e8f0&color=1e3a8a&font-weight=bold');
+                var topicBadge = post.topic_name ? '<span class="text-[10px] font-bold text-emerald-600 bg-emerald-50 border border-emerald-100 px-2 py-1 rounded">' + DolyAPI.esc(post.topic_name) + '</span>' : '';
+                var resolvedBadge = post.is_resolved ? '<span class="bg-emerald-100 text-emerald-700 border border-emerald-200 text-[9px] font-black uppercase px-2 py-1 rounded flex items-center gap-1 shrink-0"><i class="fas fa-check"></i> Da giai quyet</span>' : '';
+
+                return '<div class="bg-white p-5 rounded-[1.5rem] border border-slate-200 shadow-sm hover:shadow-md transition-shadow flex gap-4 lg:gap-6">' +
+                    '<div class="flex flex-col items-center gap-1 shrink-0 w-12">' +
+                        '<button onclick="DolyAPI.votePost(' + post.id + ', \'up\').then(function(){ location.reload(); }).catch(alert)" class="w-8 h-8 rounded-full hover:bg-slate-100 text-slate-400 flex items-center justify-center transition-colors"><i class="fas fa-caret-up text-xl"></i></button>' +
+                        '<span class="font-black text-slate-700 text-sm">' + netVotes + '</span>' +
+                        '<button onclick="DolyAPI.votePost(' + post.id + ', \'down\').then(function(){ location.reload(); }).catch(alert)" class="w-8 h-8 rounded-full hover:bg-slate-100 text-slate-400 flex items-center justify-center transition-colors"><i class="fas fa-caret-down text-xl"></i></button>' +
+                    '</div>' +
+                    '<div class="flex-1 w-full overflow-hidden">' +
+                        '<div class="flex justify-between items-start mb-2">' +
+                            '<div class="flex items-center gap-2">' +
+                                '<img src="' + avatar + '" alt="User" class="w-6 h-6 rounded-full">' +
+                                '<span class="text-xs font-bold text-slate-700">' + DolyAPI.esc(post.author_name) + '</span>' +
+                                '<span class="text-[10px] font-bold text-slate-400"> &bull; ' + DolyAPI.timeAgo(post.created_at) + '</span>' +
+                            '</div>' +
+                            resolvedBadge +
+                        '</div>' +
+                        '<h3 class="text-base md:text-lg font-black text-slate-800 leading-tight mb-2 hover:text-blue-600 cursor-pointer transition-colors">' + DolyAPI.esc(post.title) + '</h3>' +
+                        '<p class="text-xs text-slate-500 font-medium mb-4 line-clamp-2">' + DolyAPI.esc(post.content && post.content.length > 150 ? post.content.slice(0, 150) + '...' : post.content) + '</p>' +
+                        '<div class="flex justify-between items-center border-t border-slate-100 pt-3">' +
+                            '<div class="flex gap-2">' + topicBadge + '</div>' +
+                            '<div class="flex gap-4 text-slate-400 text-xs font-bold">' +
+                                '<span class="flex items-center gap-1.5"><i class="fas fa-comment-dots"></i> ' + (post.comment_count || 0) + '</span>' +
+                                '<span class="flex items-center gap-1.5"><i class="fas fa-eye"></i> ' + (post.view_count || 0) + '</span>' +
+                            '</div>' +
+                        '</div>' +
+                    '</div>' +
+                '</div>';
+            }
+
+            function init() {
+                DolyAPI.showLoading('#forum-post-container');
+
+                DolyAPI.getForumPosts().then(function(data) {
+                    posts = data.posts || [];
+                    topics = data.topics || [];
+                    renderPosts();
+                }).catch(function(err) {
+                    DolyAPI.showError('#forum-post-container', err.message);
+                });
+
+                // Event delegation for filter/sort clicks
+                document.addEventListener('click', function(e) {
+                    var btn = e.target.closest('.topic-filter-btn');
+                    if (btn) {
+                        currentTopic = parseInt(btn.getAttribute('data-topic'));
+                        renderPosts();
+                        return;
+                    }
+                    var sortBtn = e.target.closest('.sort-filter-btn');
+                    if (sortBtn) {
+                        currentSort = sortBtn.getAttribute('data-sort');
+                        renderPosts();
+                    }
+                });
+            }
+
+            if (typeof DolyAPI !== 'undefined') {
+                init();
+            } else {
+                document.addEventListener('DOMContentLoaded', init);
+            }
+        })();
+    </script>
+</body>
+</html>
