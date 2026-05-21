@@ -1,0 +1,6 @@
+RewriteEngine On
+
+# Trỏ truy cập vào thư mục "trang chủ"
+# Sử dụng dấu nháy để Apache hiểu đây là một cụm từ
+RewriteRule ^$ "trang chủ"/index.php [L,QSA]
+RewriteRule ^((?!trang chủ/).*)$ "trang chủ"/$1 [L,QSA]
